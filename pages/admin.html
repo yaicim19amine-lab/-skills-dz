@@ -37,6 +37,7 @@
           <li><a href="#" class="nav-item" data-page="formations"><i data-lucide="book-open"></i><span>Formations</span></a></li>
           <li><a href="#" class="nav-item" data-page="live"><i data-lucide="radio"></i><span>Sessions Live</span></a></li>
           <li><a href="#" class="nav-item" data-page="finance"><i data-lucide="wallet"></i><span>Finances</span></a></li>
+          <li><a href="#" class="nav-item" data-page="journal"><i data-lucide="lightbulb"></i><span>Journal d'idées</span></a></li>
           <li><a href="#" class="nav-item" data-page="settings"><i data-lucide="settings"></i><span>Paramètres</span></a></li>
         </ul>
       </nav>
@@ -283,6 +284,34 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+
+        <!-- ═══ JOURNAL D'IDÉES ═══ -->
+        <section class="admin-page" id="page-admin-journal">
+          <div class="page-header">
+            <h2 class="page-title">Journal d'idées</h2>
+            <p class="page-subtitle">Insights et analyses par domaine — mise à jour chaque heure</p>
+            <div class="page-actions">
+              <button class="btn btn--primary" id="addIdeaBtn"><i data-lucide="plus-circle"></i> Nouvelle idée</button>
+            </div>
+          </div>
+
+          <div class="journal-filters">
+            <button class="journal-filter active" data-cat="all">Tous</button>
+            <button class="journal-filter" data-cat="marketing">Marketing Digital</button>
+            <button class="journal-filter" data-cat="dev">Dev Web</button>
+            <button class="journal-filter" data-cat="ai">Intelligence Artificielle</button>
+            <button class="journal-filter" data-cat="business">Business</button>
+          </div>
+
+          <div class="journal-timer" id="journalTimer">
+            <i data-lucide="clock"></i>
+            <span>Prochaine mise à jour dans <strong id="journalCountdown">--:--</strong></span>
+          </div>
+
+          <div class="journal-grid" id="journalGrid">
+            <p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">Chargement des insights...</p>
           </div>
         </section>
 
