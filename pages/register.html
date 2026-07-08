@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Inscription — Skills DZ</title>
+  <meta name="theme-color" content="#0B1331"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/auth.css"/>
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Left Panel -->
+    <div class="auth-panel auth-panel--left">
+      <div class="auth-panel__content">
+        <a href="../index.html" class="auth-logo">
+          <img src="../assets/img/logo.jpeg" alt="Skills DZ" class="auth-logo__img"/>
+          <span class="auth-logo__text">Skills<span>DZ</span></span>
+        </a>
+
+        <!-- Panda Mascot -->
+        <div class="panda-mascot">
+          <div class="panda-glow"></div>
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pandaGrad2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1E5BFF"/>
+                <stop offset="100%" stop-color="#00C4FF"/>
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="38" r="24" fill="#0B1331"/>
+            <circle cx="140" cy="38" r="24" fill="#0B1331"/>
+            <ellipse cx="100" cy="88" rx="65" ry="58" fill="white"/>
+            <ellipse cx="74" cy="82" rx="20" ry="18" fill="#0B1331" transform="rotate(-5 74 82)"/>
+            <ellipse cx="126" cy="82" rx="20" ry="18" fill="#0B1331" transform="rotate(5 126 82)"/>
+            <circle cx="74" cy="80" r="8" fill="white"/>
+            <circle cx="126" cy="80" r="8" fill="white"/>
+            <circle cx="76" cy="79" r="4.5" fill="#0B1331"/>
+            <circle cx="128" cy="79" r="4.5" fill="#0B1331"/>
+            <circle cx="77.5" cy="77.5" r="1.8" fill="white"/>
+            <circle cx="129.5" cy="77.5" r="1.8" fill="white"/>
+            <ellipse cx="100" cy="96" rx="5" ry="3.5" fill="#0B1331"/>
+            <path d="M95 101 Q100 108 105 101" fill="none" stroke="#0B1331" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="58" cy="96" r="7" fill="#ff6b9d" opacity="0.2"/>
+            <circle cx="142" cy="96" r="7" fill="#ff6b9d" opacity="0.2"/>
+            <path d="M75 128 C60 145 55 165 75 178 C95 191 130 180 125 160 C120 140 140 135 145 145" fill="none" stroke="url(#pandaGrad2)" stroke-width="18" stroke-linecap="round"/>
+            <ellipse cx="100" cy="155" rx="42" ry="28" fill="white"/>
+          </svg>
+          <div class="panda-speech">Bienvenue ! 🎉</div>
+        </div>
+
+        <h1 class="auth-panel__title">Rejoignez<br/>Skills DZ !</h1>
+        <p class="auth-panel__desc">Créez votre compte et commencez à apprendre. Gagnez des points, montez de niveau et interagissez avec nos agents IA.</p>
+
+        <div class="auth-benefits">
+          <div class="auth-benefit">
+            <div class="auth-benefit__icon">🎯</div>
+            <div>
+              <h4>100 XP offerts</h4>
+              <p>Inscrivez-vous et recevez 100 points pour commencer.</p>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <div class="auth-benefit__icon">🤖</div>
+            <div>
+              <h4>Agent IA gratuit</h4>
+              <p>Un coach IA personnel pour vous accompagner.</p>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <div class="auth-benefit__icon">🎮</div>
+            <div>
+              <h4>Mini-jeux exclusifs</h4>
+              <p>Apprenez en jouant et gagnez des points.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="auth-panel auth-panel--right">
+      <div class="auth-form-wrapper">
+        <div class="auth-form__badge">
+          <i data-lucide="sparkles"></i>
+          +100 XP à l'inscription
+        </div>
+        <h2 class="auth-form__title">Inscription gratuite</h2>
+        <p class="auth-form__subtitle">Créez votre compte en quelques secondes.</p>
+
+        <!-- Google Auth -->
+        <div class="auth-google-section">
+          <button type="button" class="btn--google" id="googleRegisterBtn" onclick="handleGoogleRegister()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            <span class="google-text">S'inscrire avec Google</span>
+            <div class="google-loader"></div>
+          </button>
+          <div class="auth-alt-divider"><span>ou</span></div>
+        </div>
+
+        <form class="auth-form" id="registerForm">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="firstName">Prénom</label>
+              <div class="input-wrapper">
+                <i data-lucide="user"></i>
+                <input type="text" id="firstName" name="firstName" placeholder="Amira" required/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="lastName">Nom</label>
+              <div class="input-wrapper">
+                <i data-lucide="user"></i>
+                <input type="text" id="lastName" name="lastName" placeholder="Maouche" required/>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-wrapper">
+              <i data-lucide="mail"></i>
+              <input type="email" id="email" name="email" placeholder="votre@email.com" required/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Téléphone</label>
+            <div class="input-wrapper">
+              <i data-lucide="phone"></i>
+              <input type="tel" id="phone" name="phone" placeholder="0555 123 456" required/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <div class="input-wrapper">
+              <i data-lucide="lock"></i>
+              <input type="password" id="password" name="password" placeholder="8 caractères minimum" required minlength="8"/>
+              <button type="button" class="toggle-password" onclick="togglePassword(this)">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="formation">Formation souhaitée</label>
+            <div class="input-wrapper">
+              <i data-lucide="book-open"></i>
+              <select id="formation" name="formation" required>
+                <option value="">Choisir une formation</option>
+                <option value="marketing-digital">Marketing Digital & Meta Ads</option>
+                <option value="dev-web">Développement Web Full Stack</option>
+                <option value="ia">Intelligence Artificielle</option>
+                <option value="design">Design Graphique</option>
+                <option value="business-intelligence">Business Intelligence</option>
+                <option value="gestion-projet">Gestion de Projet</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="referralCode">Code de parrainage (optionnel)</label>
+            <div class="input-wrapper">
+              <i data-lucide="gift"></i>
+              <input type="text" id="referralCode" name="referralCode" placeholder="ABCD1234"/>
+            </div>
+          </div>
+
+          <label class="checkbox-label">
+            <input type="checkbox" name="terms" required/>
+            <span>J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a></span>
+          </label>
+
+          <button type="submit" class="btn btn--accent btn--block btn--lg">
+            <i data-lucide="rocket"></i>
+            Créer mon compte
+          </button>
+        </form>
+
+        <div class="auth-trust">
+          <i data-lucide="shield-check"></i>
+          <span>Inscription gratuite. Sans engagement. Données protégées.</span>
+        </div>
+
+        <p class="auth-form__footer" style="margin-top:20px;">
+          Déjà un compte ? <a href="login.html">Se connecter</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="../config.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    lucide.createIcons();
+
+    // If already logged in, redirect to dashboard
+    if (Auth.isLoggedIn()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Panda speech rotation
+    const speeches = ["Bienvenue ! 🎉", "Rejoins-nous ! 🐼", "100 XP offerts ! 🎯", "C'est gratuit ! ✨", "On t'attend ! 🚀"];
+    let speechIdx = 0;
+    setInterval(() => {
+      const bubble = document.querySelector('.panda-speech');
+      if (bubble) {
+        bubble.style.opacity = '0';
+        bubble.style.transform = 'translateY(6px)';
+        setTimeout(() => {
+          speechIdx = (speechIdx + 1) % speeches.length;
+          bubble.textContent = speeches[speechIdx];
+          bubble.style.opacity = '1';
+          bubble.style.transform = 'translateY(0)';
+        }, 250);
+      }
+    }, 3500);
+
+    function togglePassword(btn) {
+      const input = btn.previousElementSibling;
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    // Google Real OAuth
+    function handleGoogleRegister() {
+      const btn = document.getElementById('googleRegisterBtn');
+      btn.querySelector('.google-text').textContent = 'Ouverture Google...';
+      btn.disabled = true;
+
+      try {
+        google.accounts.id.initialize({
+          client_id: window.GOOGLE_CLIENT_ID || '',
+          callback: handleGoogleCredential,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+        google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            google.accounts.id.prompt();
+          }
+        });
+      } catch (e) {
+        btn.querySelector('.google-text').textContent = "S'inscrire avec Google";
+        btn.disabled = false;
+        if (!window.GOOGLE_CLIENT_ID) {
+          alert('Google OAuth non configuré.\n\nPour activer :\n1. Allez sur console.cloud.google.com\n2. Créez un projet OAuth\n3. Ajoutez GOOGLE_CLIENT_ID dans les variables Vercel');
+        } else {
+          alert('Erreur Google: ' + e.message);
+        }
+      }
+    }
+
+    async function handleGoogleCredential(response) {
+      const btn = document.getElementById('googleRegisterBtn');
+      btn.querySelector('.google-text').textContent = 'Inscription...';
+      try {
+        const data = await api.googleAuth({ credential: response.credential });
+        api.setToken(data.token);
+        Auth.setUser(data.user);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        alert('Erreur: ' + err.message);
+        btn.querySelector('.google-text').textContent = "S'inscrire avec Google";
+        btn.disabled = false;
+      }
+    }
+
+    // Email/Password Register
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      const referralCode = document.getElementById('referralCode').value;
+
+      if (!firstName || !lastName || !email || !phone || !password) {
+        alert('Veuillez remplir tous les champs obligatoires');
+        return;
+      }
+
+      const submitBtn = this.querySelector('button[type="submit"]');
+      submitBtn.innerHTML = '<span>Création en cours...</span>';
+      submitBtn.disabled = true;
+
+      try {
+        await Auth.signup({ firstName, lastName, email, phone, password, referralCode });
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        alert('Erreur: ' + err.message);
+        submitBtn.innerHTML = '<i data-lucide="rocket"></i> Créer mon compte';
+        submitBtn.disabled = false;
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 /* ========================================
    SKILLS DZ — Landing Page Styles
+   Brand: Deep Navy #0B1331 | Royal Blue #1E5BFF | Cyan Blue #00C4FF
    ======================================== */
 
 /* Reset */
@@ -17,7 +18,7 @@ html {
 body {
   font-family: 'Inter', sans-serif;
   line-height: 1.6;
-  color: #1a1a2e;
+  color: #0B1331;
   background: #ffffff;
 }
 
@@ -26,8 +27,8 @@ body {
   position: absolute;
   top: -40px;
   left: 0;
-  background: #e94560;
-  color: white;
+  background: #00C4FF;
+  color: #0B1331;
   padding: 8px 16px;
   z-index: 100;
   transition: top 0.2s ease;
@@ -62,23 +63,23 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #e94560;
+  color: #00C4FF;
   margin-bottom: 8px;
 }
-.kicker--light { color: #e94560; }
+.kicker--light { color: #00C4FF; }
 
 /* Section */
 .section {
   padding: 80px 0;
 }
 .section--white { background: #ffffff; }
-.section--gray { background: #f8fafc; }
-.section--dark { background: #1a1a2e; color: white; }
-.section--accent { background: #e94560; color: white; }
+.section--gray { background: #F3F5F9; }
+.section--dark { background: #0B1331; color: white; }
+.section--accent { background: linear-gradient(135deg, #0B1331 0%, #1E5BFF 50%, #00C4FF 100%); color: white; }
 
 .section-title {
   margin-bottom: 16px;
-  color: #1a1a2e;
+  color: #0B1331;
 }
 .section-title--light { color: white; }
 
@@ -120,10 +121,11 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   font-family: 'Poppins', sans-serif;
   font-size: 24px;
   font-weight: 800;
-  color: #1a1a2e;
+  color: #0B1331;
 }
-.logo__accent { color: #e94560; }
+.logo__accent { color: #1E5BFF; }
 .logo--light { color: white; }
+.logo--light .logo__accent { color: #00C4FF; }
 
 .nav {
   display: flex;
@@ -135,7 +137,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   font-weight: 500;
   transition: color 0.2s ease;
 }
-.nav__link:hover { color: #e94560; }
+.nav__link:hover { color: #1E5BFF; }
 
 .head-actions {
   display: flex;
@@ -154,8 +156,8 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   transition: all 0.2s ease;
 }
 .lang-pill:hover {
-  background: #f1f5f9;
-  color: #1a1a2e;
+  background: #F3F5F9;
+  color: #0B1331;
 }
 
 .hamburger {
@@ -163,7 +165,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   background: none;
   border: none;
   cursor: pointer;
-  color: #1a1a2e;
+  color: #0B1331;
 }
 
 /* ========================================
@@ -186,33 +188,33 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
 .btn svg { width: 18px; height: 18px; }
 
 .btn--accent {
-  background: #e94560;
+  background: #1E5BFF;
   color: white;
-  border-color: #e94560;
+  border-color: #1E5BFF;
 }
 .btn--accent:hover {
-  background: #d63851;
+  background: #1648cc;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(233,69,96,0.4);
+  box-shadow: 0 4px 12px rgba(30,91,255,0.4);
 }
 
 .btn--outline {
   background: transparent;
-  color: #1a1a2e;
-  border-color: #1a1a2e;
+  color: #0B1331;
+  border-color: #0B1331;
 }
 .btn--outline:hover {
-  background: #1a1a2e;
+  background: #0B1331;
   color: white;
 }
 
 .btn--white {
   background: white;
-  color: #e94560;
+  color: #0B1331;
   border-color: white;
 }
 .btn--white:hover {
-  background: #f8fafc;
+  background: #F3F5F9;
   transform: translateY(-2px);
 }
 
@@ -233,7 +235,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
 .hero {
   position: relative;
   padding: 140px 0 80px;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, #0B1331 0%, #1E5BFF 100%);
   color: white;
   overflow: hidden;
 }
@@ -244,8 +246,8 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: radial-gradient(circle at 20% 50%, rgba(233,69,96,0.1) 0%, transparent 50%),
-                     radial-gradient(circle at 80% 20%, rgba(233,69,96,0.08) 0%, transparent 50%);
+  background-image: radial-gradient(circle at 20% 50%, rgba(0,196,255,0.15) 0%, transparent 50%),
+                     radial-gradient(circle at 80% 20%, rgba(0,196,255,0.1) 0%, transparent 50%);
 }
 
 .hero__inner {
@@ -286,7 +288,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   font-size: 14px;
   color: rgba(255,255,255,0.7);
 }
-.trust-badge svg { width: 16px; height: 16px; color: #e94560; }
+.trust-badge svg { width: 16px; height: 16px; color: #00C4FF; }
 
 /* Hero Visual */
 .hero__visual {
@@ -308,7 +310,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   font-weight: 600;
   animation: float 6s ease-in-out infinite;
 }
-.hero__card svg { width: 24px; height: 24px; color: #e94560; }
+.hero__card svg { width: 24px; height: 24px; color: #00C4FF; }
 
 .hero__card--1 { top: 10%; left: 10%; animation-delay: 0s; }
 .hero__card--2 { top: 30%; right: 5%; animation-delay: 1s; }
@@ -324,7 +326,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
    STATS STRIP
    ======================================== */
 .stats-strip {
-  background: #e94560;
+  background: linear-gradient(135deg, #1E5BFF 0%, #00C4FF 100%);
   padding: 32px 0;
 }
 
@@ -374,8 +376,8 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   top: 16px;
   right: 16px;
   padding: 4px 12px;
-  background: #e94560;
-  color: white;
+  background: #00C4FF;
+  color: #0B1331;
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
@@ -390,11 +392,11 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fef2f2;
+  background: #1E5BFF10;
   border-radius: 16px;
   margin-bottom: 20px;
 }
-.formation-card__icon svg { width: 28px; height: 28px; color: #e94560; }
+.formation-card__icon svg { width: 28px; height: 28px; color: #1E5BFF; }
 
 .formation-card__title {
   font-size: 20px;
@@ -431,7 +433,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   font-family: 'Poppins', sans-serif;
   font-size: 28px;
   font-weight: 800;
-  color: #1a1a2e;
+  color: #0B1331;
 }
 
 /* ========================================
@@ -461,11 +463,11 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0fdf4;
+  background: #00C4FF15;
   border-radius: 16px;
   margin-bottom: 20px;
 }
-.benefit-card__icon svg { width: 28px; height: 28px; color: #10b981; }
+.benefit-card__icon svg { width: 28px; height: 28px; color: #00C4FF; }
 
 .benefit-card__title {
   font-size: 18px;
@@ -518,7 +520,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #e94560;
+  background: linear-gradient(135deg, #1E5BFF, #00C4FF);
   color: white;
   display: flex;
   align-items: center;
@@ -595,11 +597,11 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
 .form--dark input:focus,
 .form--dark select:focus {
   outline: none;
-  border-color: #e94560;
+  border-color: #00C4FF;
 }
 
 .form--dark select option {
-  background: #1a1a2e;
+  background: #0B1331;
   color: white;
 }
 
@@ -664,7 +666,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
 .faq summary::after {
   content: '+';
   font-size: 20px;
-  color: #e94560;
+  color: #1E5BFF;
   transition: transform 0.2s ease;
 }
 .faq details[open] summary::after {
@@ -698,7 +700,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
    FOOTER
    ======================================== */
 .footer {
-  background: #0f0f1a;
+  background: #0B1331;
   color: white;
   padding: 64px 0 24px;
 }
@@ -733,7 +735,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   transition: all 0.2s ease;
 }
 .socials a:hover {
-  background: #e94560;
+  background: #1E5BFF;
   transform: translateY(-2px);
 }
 .socials svg { width: 18px; height: 18px; }
@@ -761,7 +763,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   gap: 8px;
   transition: color 0.2s ease;
 }
-.footer__links a:hover { color: #e94560; }
+.footer__links a:hover { color: #00C4FF; }
 .footer__links svg { width: 16px; height: 16px; }
 
 .footer__copy {
@@ -813,7 +815,7 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
 }
 .sticky-mobile b {
   font-size: 14px;
-  color: #1a1a2e;
+  color: #0B1331;
 }
 .sticky-mobile span {
   font-size: 12px;
@@ -892,5 +894,173 @@ h3 { font-size: clamp(18px, 3vw, 24px); }
   .btn--lg {
     padding: 14px 24px;
     font-size: 14px;
+  }
+}
+
+/* ========================================
+   LOGO IMAGE
+   ======================================== */
+.logo__img {
+  height: 40px;
+  width: auto;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.hero__logo {
+  height: 80px;
+  width: auto;
+  margin-bottom: 24px;
+  display: block;
+}
+
+/* ========================================
+   FORMATIONS SLOTS BAR
+   ======================================== */
+.formation-card__slots {
+  margin-bottom: 16px;
+}
+
+.slots-bar {
+  height: 6px;
+  background: #F3F5F9;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.slots-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1E5BFF, #00C4FF);
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+.slots-bar--full {
+  background: #fff3e0;
+}
+
+.slots-fill--full {
+  background: linear-gradient(90deg, #ffb547, #ff8c00);
+}
+
+.slots-text {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.slots-text--full {
+  color: #ffb547;
+  font-weight: 600;
+}
+
+.formation-card__badge--full {
+  background: #ffb547;
+  color: #0B1331;
+}
+
+/* ========================================
+   PARRAINAGE SECTION
+   ======================================== */
+.parrainage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 48px;
+}
+
+.parrainage-step {
+  text-align: center;
+  position: relative;
+}
+
+.parrainage-step__number {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: #00C4FF;
+  color: #0B1331;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.parrainage-step__icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 24px auto 20px;
+}
+
+.parrainage-step__icon svg {
+  width: 36px;
+  height: 36px;
+  color: #00C4FF;
+}
+
+.parrainage-step__title {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: white;
+}
+
+.parrainage-step__desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.7;
+}
+
+.parrainage-benefits {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+  padding: 24px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.parrainage-benefit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.parrainage-benefit svg {
+  width: 20px;
+  height: 20px;
+  color: #00C4FF;
+}
+
+.parrainage-cta {
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .parrainage-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .parrainage-benefits {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
   }
 }

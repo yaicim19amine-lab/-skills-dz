@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dashboard — Skills DZ</title>
+  <meta name="theme-color" content="#0B1331"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/dashboard.css"/>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-logo">
+        <img src="../assets/img/logo.jpeg" alt="Skills DZ" class="sb-logo__img"/>
+        <div>
+          <div class="sb-name">Skills<span>DZ</span></div>
+          <span class="sb-badge">Espace Apprenant</span>
+        </div>
+      </div>
+
+      <nav class="sb-nav">
+        <div class="nav-section">
+          <div class="nav-label">Menu</div>
+          <a class="nav-item active" data-page="dashboard" href="#">
+            <i data-lucide="layout-dashboard"></i>
+            Dashboard
+          </a>
+          <a class="nav-item" data-page="formations" href="#">
+            <i data-lucide="book-open"></i>
+            Mes formations
+            <span class="nav-badge">3</span>
+          </a>
+          <a class="nav-item" data-page="videos" href="#">
+            <i data-lucide="video"></i>
+            Vidéos
+          </a>
+          <a class="nav-item" data-page="jeux" href="#">
+            <i data-lucide="gamepad-2"></i>
+            Mini-jeux
+            <span class="nav-badge nav-badge--new">Nouveau</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Social</div>
+          <a class="nav-item" data-page="agents" href="#">
+            <i data-lucide="bot"></i>
+            Agents IA
+            <span class="nav-dot"></span>
+          </a>
+          <a class="nav-item" data-page="parrainage" href="#">
+            <i data-lucide="users"></i>
+            Parrainage
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Boutique</div>
+          <a class="nav-item" data-page="boutique" href="#">
+            <i data-lucide="shopping-bag"></i>
+            Boutique XP
+          </a>
+          <a class="nav-item" data-page="paiements" href="#">
+            <i data-lucide="credit-card"></i>
+            Paiements
+          </a>
+          <a class="nav-item" data-page="live" href="#">
+            <i data-lucide="radio"></i>
+            Live
+            <span class="nav-badge nav-badge--new">Live</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Compte</div>
+          <a class="nav-item" data-page="profil" href="#">
+            <i data-lucide="user"></i>
+            Mon profil
+          </a>
+          <a class="nav-item" data-page="recompenses" href="#">
+            <i data-lucide="trophy"></i>
+            Récompenses
+          </a>
+          <a class="nav-item" href="#" onclick="localStorage.clear();window.location.href='../index.html'">
+            <i data-lucide="log-out"></i>
+            Déconnexion
+          </a>
+        </div>
+      </nav>
+
+      <div class="sb-user">
+        <div class="sb-user__avatar" id="userAvatar">KB</div>
+        <div class="sb-user__info">
+          <div class="sb-user__name" id="userName">Karim B.</div>
+          <div class="sb-user__level">
+            <span class="sb-user__level-badge" id="userLevelBadge">Nv. 1</span>
+            <span class="sb-user__xp" id="userXp">0 XP</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header" id="mobileHeader">
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i data-lucide="menu"></i>
+      </button>
+      <div class="mobile-logo">
+        <img src="../assets/img/logo.jpeg" alt="Skills DZ"/>
+        <span>Skills<span>DZ</span></span>
+      </div>
+      <button class="mobile-notif-btn" id="notifBtn">
+        <i data-lucide="bell"></i>
+        <span class="notif-dot"></span>
+      </button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main" id="mainContent">
+
+      <!-- ========== PAGE: DASHBOARD ========== -->
+      <section class="page page--active" id="page-dashboard">
+        <!-- Header -->
+        <header class="main-header">
+          <div class="main-header__left">
+            <div class="header-panda">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="dashPandaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#1E5BFF"/>
+                    <stop offset="100%" stop-color="#00C4FF"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="60" cy="38" r="24" fill="#0B1331"/>
+                <circle cx="140" cy="38" r="24" fill="#0B1331"/>
+                <ellipse cx="100" cy="88" rx="65" ry="58" fill="white"/>
+                <ellipse cx="74" cy="82" rx="20" ry="18" fill="#0B1331" transform="rotate(-5 74 82)"/>
+                <ellipse cx="126" cy="82" rx="20" ry="18" fill="#0B1331" transform="rotate(5 126 82)"/>
+                <circle cx="74" cy="80" r="8" fill="white"/>
+                <circle cx="126" cy="80" r="8" fill="white"/>
+                <circle cx="76" cy="79" r="4.5" fill="#0B1331"/>
+                <circle cx="128" cy="79" r="4.5" fill="#0B1331"/>
+                <circle cx="77.5" cy="77.5" r="1.8" fill="white"/>
+                <circle cx="129.5" cy="77.5" r="1.8" fill="white"/>
+                <ellipse cx="100" cy="96" rx="5" ry="3.5" fill="#0B1331"/>
+                <path d="M95 101 Q100 108 105 101" fill="none" stroke="#0B1331" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="58" cy="96" r="7" fill="#ff6b9d" opacity="0.2"/>
+                <circle cx="142" cy="96" r="7" fill="#ff6b9d" opacity="0.2"/>
+                <path d="M75 128 C60 145 55 165 75 178 C95 191 130 180 125 160 C120 140 140 135 145 145" fill="none" stroke="url(#dashPandaGrad)" stroke-width="18" stroke-linecap="round"/>
+                <ellipse cx="100" cy="155" rx="42" ry="28" fill="white"/>
+              </svg>
+            </div>
+            <div>
+              <h1 class="main-header__title">Bonjour, <span id="welcomeName">Karim</span> !</h1>
+              <p class="main-header__sub" id="welcomeSub">Continuez votre apprentissage. Vous êtes à <strong id="xpToNext">120 XP</strong> du prochain niveau.</p>
+            </div>
+          </div>
+          <div class="main-header__actions">
+            <button class="btn btn--ghost" id="notifBtn2">
+              <i data-lucide="bell"></i>
+              <span class="notif-dot"></span>
+            </button>
+            <a class="btn btn--accent" data-page="agents" href="#">
+              <i data-lucide="bot"></i>
+              Agent IA
+            </a>
+          </div>
+        </header>
+
+        <!-- Level Progress -->
+        <div class="level-progress-card">
+          <div class="level-progress__left">
+            <div class="level-progress__circle">
+              <svg viewBox="0 0 100 100">
+                <defs>
+                  <linearGradient id="levelGradient" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#1E5BFF"/>
+                    <stop offset="100%" stop-color="#00C4FF"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="45" class="level-progress__bg"/>
+                <circle cx="50" cy="50" r="45" class="level-progress__ring" id="levelRing"/>
+              </svg>
+              <span class="level-progress__num" id="levelNum">1</span>
+            </div>
+            <div class="level-progress__info">
+              <div class="level-progress__title">Niveau <span id="levelTitle">Débutant</span></div>
+              <div class="level-progress__xp"><span id="currentXp">0</span> / <span id="nextLevelXp">500</span> XP</div>
+              <div class="level-progress__bar">
+                <div class="level-progress__bar-fill" id="xpBar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="level-progress__right">
+            <div class="level-progress__streak">
+              <i data-lucide="flame"></i>
+              <span id="streakCount">0</span>
+            </div>
+            <div class="level-progress__label">jours de série</div>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-card__icon" style="background:rgba(30,91,255,.1)"><i data-lucide="book-open"></i></div>
+            <div class="kpi-card__value" id="coursesCompleted">0</div>
+            <div class="kpi-card__label">Cours suivis</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__icon" style="background:rgba(0,196,255,.1)"><i data-lucide="video"></i></div>
+            <div class="kpi-card__value" id="videosWatched">0</div>
+            <div class="kpi-card__label">Vidéos vues</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__icon" style="background:rgba(0,214,143,.1)"><i data-lucide="gamepad-2"></i></div>
+            <div class="kpi-card__value" id="gamesPlayed">0</div>
+            <div class="kpi-card__label">Jeux joués</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__icon" style="background:rgba(124,58,237,.1)"><i data-lucide="trophy"></i></div>
+            <div class="kpi-card__value" id="badgesCount">0</div>
+            <div class="kpi-card__label">Badges</div>
+          </div>
+        </div>
+
+        <!-- 2-col Grid -->
+        <div class="dashboard-grid">
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Actions rapides</h3>
+              <span class="card__subtitle">Gagnez des XP</span>
+            </div>
+            <div class="quick-actions">
+              <button class="quick-action" data-action="course">
+                <div class="quick-action__icon" style="background:linear-gradient(135deg,#1E5BFF,#00C4FF)"><i data-lucide="book-open"></i></div>
+                <span>Suivre un cours</span>
+                <span class="quick-action__xp">+50 XP</span>
+              </button>
+              <button class="quick-action" data-action="video">
+                <div class="quick-action__icon" style="background:linear-gradient(135deg,#7c3aed,#a855f7)"><i data-lucide="video"></i></div>
+                <span>Regarder une vidéo</span>
+                <span class="quick-action__xp">+30 XP</span>
+              </button>
+              <button class="quick-action" data-action="game">
+                <div class="quick-action__icon" style="background:linear-gradient(135deg,#00d68f,#00b377)"><i data-lucide="gamepad-2"></i></div>
+                <span>Jouer à un jeu</span>
+                <span class="quick-action__xp">+100 XP</span>
+              </button>
+              <button class="quick-action" data-action="form">
+                <div class="quick-action__icon" style="background:linear-gradient(135deg,#ffb547,#ff8c00)"><i data-lucide="file-text"></i></div>
+                <span>Remplir un formulaire</span>
+                <span class="quick-action__xp">+20 XP</span>
+              </button>
+              <button class="quick-action" data-action="ai">
+                <div class="quick-action__icon" style="background:linear-gradient(135deg,#ff4d6d,#cc0033)"><i data-lucide="bot"></i></div>
+                <span>Parler à un Agent IA</span>
+                <span class="quick-action__xp">+15 XP</span>
+              </button>
+              <button class="quick-action" data-action="referral">
+                <div class="quick-action__icon" style="background:linear-gradient(135deg,#0B1331,#1E5BFF)"><i data-lucide="users"></i></div>
+                <span>Parrainer un ami</span>
+                <span class="quick-action__xp">+200 XP</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Badges -->
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Mes Badges</h3>
+              <span class="card__subtitle" id="badgesProgress">0 / 10</span>
+            </div>
+            <div class="badges-grid" id="badgesGrid">
+              <div class="badge-item badge-item--locked" data-badge="newcomer"><div class="badge-item__icon">🌟</div><div class="badge-item__name">Nouveau</div></div>
+              <div class="badge-item badge-item--locked" data-badge="streak-3"><div class="badge-item__icon">🔥</div><div class="badge-item__name">3 jours</div></div>
+              <div class="badge-item badge-item--locked" data-badge="streak-7"><div class="badge-item__icon">⚡</div><div class="badge-item__name">7 jours</div></div>
+              <div class="badge-item badge-item--locked" data-badge="streak-30"><div class="badge-item__icon">🏅</div><div class="badge-item__name">30 jours</div></div>
+              <div class="badge-item badge-item--locked" data-badge="streak-100"><div class="badge-item__icon">💎</div><div class="badge-item__name">Centurion</div></div>
+              <div class="badge-item badge-item--locked" data-badge="first-course"><div class="badge-item__icon">📚</div><div class="badge-item__name">1er cours</div></div>
+              <div class="badge-item badge-item--locked" data-badge="course-5"><div class="badge-item__icon">🎓</div><div class="badge-item__name">5 cours</div></div>
+              <div class="badge-item badge-item--locked" data-badge="course-all"><div class="badge-item__icon">🌈</div><div class="badge-item__name">Polyvalent</div></div>
+              <div class="badge-item badge-item--locked" data-badge="first-video"><div class="badge-item__icon">🎬</div><div class="badge-item__name">1ère vidéo</div></div>
+              <div class="badge-item badge-item--locked" data-badge="video-25"><div class="badge-item__icon">🍿</div><div class="badge-item__name">Cinéphile</div></div>
+              <div class="badge-item badge-item--locked" data-badge="first-game"><div class="badge-item__icon">🎮</div><div class="badge-item__name">1er jeu</div></div>
+              <div class="badge-item badge-item--locked" data-badge="game-10"><div class="badge-item__icon">🕹️</div><div class="badge-item__name">Gamer</div></div>
+              <div class="badge-item badge-item--locked" data-badge="quiz-master"><div class="badge-item__icon">🧠</div><div class="badge-item__name">Quiz Master</div></div>
+              <div class="badge-item badge-item--locked" data-badge="ai-friend"><div class="badge-item__icon">🤖</div><div class="badge-item__name">Ami IA</div></div>
+              <div class="badge-item badge-item--locked" data-badge="ai-50"><div class="badge-item__icon">🧠</div><div class="badge-item__name">IA Expert</div></div>
+              <div class="badge-item badge-item--locked" data-badge="referral"><div class="badge-item__icon">🤝</div><div class="badge-item__name">Parrain</div></div>
+              <div class="badge-item badge-item--locked" data-badge="referral-5"><div class="badge-item__icon">🏆</div><div class="badge-item__name">Super Parrain</div></div>
+              <div class="badge-item badge-item--locked" data-badge="level-5"><div class="badge-item__icon">⭐</div><div class="badge-item__name">Nv. 5</div></div>
+              <div class="badge-item badge-item--locked" data-badge="level-10"><div class="badge-item__icon">👑</div><div class="badge-item__name">Nv. 10</div></div>
+              <div class="badge-item badge-item--locked" data-badge="level-15"><div class="badge-item__icon">🌟</div><div class="badge-item__name">Nv. 15</div></div>
+              <div class="badge-item badge-item--locked" data-badge="first-purchase"><div class="badge-item__icon">🛒</div><div class="badge-item__name">1er achat</div></div>
+              <div class="badge-item badge-item--locked" data-badge="big-spender"><div class="badge-item__icon">💰</div><div class="badge-item__name">Gros dépensier</div></div>
+              <div class="badge-item badge-item--locked" data-badge="live-viewer"><div class="badge-item__icon">📺</div><div class="badge-item__name">Live</div></div>
+              <div class="badge-item badge-item--locked" data-badge="early-bird"><div class="badge-item__icon">🌅</div><div class="badge-item__name">Matinal</div></div>
+              <div class="badge-item badge-item--locked" data-badge="night-owl"><div class="badge-item__icon">🦉</div><div class="badge-item__name">Noctambule</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="card">
+          <div class="card__header">
+            <h3 class="card__title">Activité récente</h3>
+            <a class="card__link" href="#">Tout voir →</a>
+          </div>
+          <div class="activity-feed" id="activityFeed">
+            <div class="activity-item">
+              <div class="activity-item__icon" style="background:rgba(0,214,143,.15)"><i data-lucide="user-plus"></i></div>
+              <div class="activity-item__content">
+                <p>Compte créé — <strong>+100 XP</strong> de bienvenue</p>
+                <span class="activity-item__time">À l'instant</span>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-item__icon" style="background:rgba(30,91,255,.15)"><i data-lucide="sparkles"></i></div>
+              <div class="activity-item__content">
+                <p>Bienvenue dans <strong>Skills DZ</strong> !</p>
+                <span class="activity-item__time">À l'instant</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== PAGE: FORMATIONS ========== -->
+      <section class="page" id="page-formations">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Mes <span>Formations</span></h1>
+            <p class="main-header__sub">Continuez là où vous en étiez.</p>
+          </div>
+        </header>
+        <div class="formations-grid" id="formationsGrid"></div>
+      </section>
+
+      <!-- ========== PAGE: VIDÉOS ========== -->
+      <section class="page" id="page-videos">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Vidéos <span>éducatives</span></h1>
+            <p class="main-header__sub">Apprenez en regardant. Chaque vidéo = +30 XP.</p>
+          </div>
+        </header>
+        <div class="videos-grid" id="videosGrid"></div>
+      </section>
+
+      <!-- ========== PAGE: MINI-JEUX ========== -->
+      <section class="page" id="page-jeux">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Mini-<span>Jeux</span></h1>
+            <p class="main-header__sub">Jouez pour gagner des XP et monter de niveau.</p>
+          </div>
+        </header>
+        <div id="miniGamesContainer"></div>
+      </section>
+
+      <!-- ========== PAGE: AGENTS IA ========== -->
+      <section class="page" id="page-agents">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Agents <span>IA</span></h1>
+            <p class="main-header__sub">Posez vos questions, nos agents vous répondent.</p>
+          </div>
+        </header>
+        <div id="agentsContainer"></div>
+      </section>
+
+      <!-- ========== PAGE: PARRAINAGE ========== -->
+      <section class="page" id="page-parrainage">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Parrainage</h1>
+            <p class="main-header__sub">Invitez vos amis et gagnez des récompenses.</p>
+          </div>
+        </header>
+        <div class="referral-card">
+          <div class="referral-card__panda">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:120px;height:120px;">
+              <defs>
+                <linearGradient id="refPandaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1E5BFF"/>
+                  <stop offset="100%" stop-color="#00C4FF"/>
+                </linearGradient>
+              </defs>
+              <circle cx="60" cy="38" r="24" fill="#0B1331"/><circle cx="140" cy="38" r="24" fill="#0B1331"/>
+              <ellipse cx="100" cy="88" rx="65" ry="58" fill="white"/>
+              <ellipse cx="74" cy="82" rx="20" ry="18" fill="#0B1331" transform="rotate(-5 74 82)"/>
+              <ellipse cx="126" cy="82" rx="20" ry="18" fill="#0B1331" transform="rotate(5 126 82)"/>
+              <circle cx="74" cy="80" r="8" fill="white"/><circle cx="126" cy="80" r="8" fill="white"/>
+              <circle cx="76" cy="79" r="4.5" fill="#0B1331"/><circle cx="128" cy="79" r="4.5" fill="#0B1331"/>
+              <circle cx="77.5" cy="77.5" r="1.8" fill="white"/><circle cx="129.5" cy="77.5" r="1.8" fill="white"/>
+              <ellipse cx="100" cy="96" rx="5" ry="3.5" fill="#0B1331"/>
+              <path d="M95 101 Q100 108 105 101" fill="none" stroke="#0B1331" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="58" cy="96" r="7" fill="#ff6b9d" opacity="0.2"/><circle cx="142" cy="96" r="7" fill="#ff6b9d" opacity="0.2"/>
+              <path d="M75 128 C60 145 55 165 75 178 C95 191 130 180 125 160 C120 140 140 135 145 145" fill="none" stroke="url(#refPandaGrad)" stroke-width="18" stroke-linecap="round"/>
+              <ellipse cx="100" cy="155" rx="42" ry="28" fill="white"/>
+            </svg>
+          </div>
+          <div class="referral-card__content">
+            <h3>Parrainez vos amis</h3>
+            <p>Partagez votre code et gagnez des récompenses exclusives.</p>
+            <div class="referral-code-box">
+              <span id="referralCodeDisplay">SKDZ-XXXX</span>
+              <button class="btn btn--accent" onclick="copyReferralCode()">
+                <i data-lucide="copy"></i>
+                Copier
+              </button>
+            </div>
+            <div class="referral-stats">
+              <div class="referral-stat">
+                <span class="referral-stat__num" id="referralCount">0</span>
+                <span class="referral-stat__label">Amis parrainés</span>
+              </div>
+              <div class="referral-stat">
+                <span class="referral-stat__num" id="referralXP">0</span>
+                <span class="referral-stat__label">XP gagnés</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Referral Tiers -->
+        <div class="referral-tiers">
+          <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">🏆 Paliers de récompense</h3>
+          <div class="referral-tier-grid">
+            <div class="referral-tier referral-tier--active">
+              <div class="referral-tier__count">1-5</div>
+              <div class="referral-tier__reward">200 XP / ami</div>
+              <div class="referral-tier__perk">Badge Parrain</div>
+            </div>
+            <div class="referral-tier">
+              <div class="referral-tier__count">6-15</div>
+              <div class="referral-tier__reward">300 XP / ami</div>
+              <div class="referral-tier__perk">+ 5,000 DA / 5 amis</div>
+            </div>
+            <div class="referral-tier">
+              <div class="referral-tier__count">16-30</div>
+              <div class="referral-tier__reward">500 XP / ami</div>
+              <div class="referral-tier__perk">+ Formation gratuite</div>
+            </div>
+            <div class="referral-tier">
+              <div class="referral-tier__count">31+</div>
+              <div class="referral-tier__reward">1000 XP / ami</div>
+              <div class="referral-tier__perk">+ Parrain d'honneur</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="referral-leaderboard">
+          <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">📊 Classement parrains</h3>
+          <div class="leaderboard-list">
+            <div class="leaderboard-item">
+              <span class="leaderboard-rank">🥇 1</span>
+              <span class="leaderboard-name">Yasmine H.</span>
+              <span class="leaderboard-count">24 parrainages</span>
+              <span class="leaderboard-xp">+4,800 XP</span>
+            </div>
+            <div class="leaderboard-item">
+              <span class="leaderboard-rank">🥈 2</span>
+              <span class="leaderboard-name">Ahmed B.</span>
+              <span class="leaderboard-count">18 parrainages</span>
+              <span class="leaderboard-xp">+3,600 XP</span>
+            </div>
+            <div class="leaderboard-item">
+              <span class="leaderboard-rank">🥉 3</span>
+              <span class="leaderboard-name">Fatima Z.</span>
+              <span class="leaderboard-count">12 parrainages</span>
+              <span class="leaderboard-xp">+2,400 XP</span>
+            </div>
+            <div class="leaderboard-item leaderboard-item--you">
+              <span class="leaderboard-rank">—</span>
+              <span class="leaderboard-name">Vous</span>
+              <span class="leaderboard-count" id="leaderboardYourCount">0 parrainages</span>
+              <span class="leaderboard-xp" id="leaderboardYourXP">+0 XP</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== PAGE: PROFIL ========== -->
+      <section class="page" id="page-profil">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Mon <span>Profil</span></h1>
+          </div>
+        </header>
+        <div class="profile-card">
+          <div class="profile-card__header">
+            <div class="profile-avatar" id="profileAvatar">KB</div>
+            <h2 id="profileName">Karim B.</h2>
+            <p id="profileEmail">karim@example.com</p>
+            <span class="profile-level-badge" id="profileLevel">Niveau 1 — Débutant</span>
+          </div>
+          <div class="profile-stats">
+            <div class="profile-stat"><span class="profile-stat__num" id="profileXP">0</span><span>XP total</span></div>
+            <div class="profile-stat"><span class="profile-stat__num" id="profileStreak">0</span><span>Jours de série</span></div>
+            <div class="profile-stat"><span class="profile-stat__num" id="profileBadges">0</span><span>Badges</span></div>
+            <div class="profile-stat"><span class="profile-stat__num" id="profileCourses">0</span><span>Cours</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== PAGE: RÉCOMPENSES ========== -->
+      <section class="page" id="page-recompenses">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Mes <span>Récompenses</span></h1>
+            <p class="main-header__sub">Tous vos badges et succès.</p>
+          </div>
+        </header>
+        <div class="rewards-grid" id="rewardsGrid"></div>
+      </section>
+
+      <!-- ========== PAGE: BOUTIQUE XP ========== -->
+      <section class="page" id="page-boutique">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Boutique <span>XP</span></h1>
+            <p class="main-header__sub">Échangez vos points contre des récompenses.</p>
+          </div>
+        </header>
+        <div class="shop-balance">
+          <div class="shop-balance__icon">💰</div>
+          <div class="shop-balance__info">
+            <span class="shop-balance__label">Solde XP</span>
+            <span class="shop-balance__amount" id="shopXpBalance">0 XP</span>
+          </div>
+        </div>
+        <div class="shop-filters">
+          <button class="shop-filter active" data-category="all">Tout</button>
+          <button class="shop-filter" data-category="subscription">Abonnements IA</button>
+          <button class="shop-filter" data-category="course">Cours gratuits</button>
+          <button class="shop-filter" data-category="physical">Cadeaux physiques</button>
+          <button class="shop-filter" data-category="discount">Réductions</button>
+        </div>
+        <div class="shop-grid" id="shopGrid"></div>
+      </section>
+
+      <!-- ========== PAGE: LIVE ========== -->
+      <section class="page" id="page-live">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Sessions <span>Live</span></h1>
+            <p class="main-header__sub">Regardez nos sessions en direct sur YouTube.</p>
+          </div>
+        </header>
+        <div class="live-container" id="liveContainer">
+          <div class="live-embed" id="liveEmbed">
+            <div class="live-placeholder">
+              <div class="live-placeholder__icon">📺</div>
+              <h3>Aucune session en cours</h3>
+              <p>Prochaine session bientôt ! Restez connectés.</p>
+            </div>
+          </div>
+          <div class="live-schedule" id="liveSchedule"></div>
+        </div>
+      </section>
+
+      <!-- ========== PAGE: PAIEMENTS ========== -->
+      <section class="page" id="page-paiements">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Mes <span>Paiements</span></h1>
+            <p class="main-header__sub">Déposez pour des formations ou services.</p>
+          </div>
+        </header>
+
+        <!-- New Payment -->
+        <div class="payment-new">
+          <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">💳 Nouveau paiement</h3>
+          <div class="payment-methods">
+            <button class="payment-method-btn active" data-method="cib">
+              <div class="payment-method-icon" style="background:#1E5BFF22;color:#1E5BFF">🏦</div>
+              <span>CIB / BaridiMob</span>
+              <small>QR code ou transfert</small>
+            </button>
+            <button class="payment-method-btn" data-method="redotpay">
+              <div class="payment-method-icon" style="background:#7c3aed22;color:#7c3aed">₿</div>
+              <span>RedotPay</span>
+              <small>Crypto USDT (TRC20)</small>
+            </button>
+            <button class="payment-method-btn" data-method="bybit">
+              <div class="payment-method-icon" style="background:#ffb54722;color:#ffb547">📊</div>
+              <span>Bybit P2P</span>
+              <small>Trading peer-to-peer</small>
+            </button>
+          </div>
+          <div class="payment-form">
+            <div class="form-group">
+              <label>Montant (DA)</label>
+              <input type="number" id="paymentAmount" min="500" step="500" value="5000" class="payment-input"/>
+            </div>
+            <div class="payment-presets">
+              <button class="payment-preset" data-amount="5000">5,000</button>
+              <button class="payment-preset" data-amount="10000">10,000</button>
+              <button class="payment-preset" data-amount="25000">25,000</button>
+              <button class="payment-preset" data-amount="45000">45,000</button>
+            </div>
+            <button class="btn btn--accent btn--block" id="createPaymentBtn">Créer le paiement</button>
+          </div>
+        </div>
+
+        <!-- Payment Instructions (hidden by default) -->
+        <div class="payment-instructions" id="paymentInstructions" style="display:none;">
+          <div class="payment-instructions-header">
+            <h3 id="paymentInstructionsTitle">Instructions</h3>
+            <button class="btn btn--ghost btn--sm" onclick="document.getElementById('paymentInstructions').style.display='none'">✕ Fermer</button>
+          </div>
+          <div id="paymentInstructionsContent"></div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="card" style="margin-top:24px;">
+          <div class="card__header">
+            <h3 class="card__title">Historique des paiements</h3>
+          </div>
+          <div id="paymentHistory"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- XP Toast -->
+  <div class="xp-toast" id="xpToast">
+    <i data-lucide="zap"></i>
+    <span id="xpToastText">+50 XP</span>
+  </div>
+
+  <!-- Level Up Modal -->
+  <div class="modal-overlay" id="levelUpModal">
+    <div class="modal">
+      <div class="modal__icon">🎉</div>
+      <h2 class="modal__title">Niveau supérieur !</h2>
+      <p class="modal__text">Félicitations ! Vous êtes maintenant au <strong id="newLevel">Niveau 2</strong>.</p>
+      <div class="modal__reward">
+        <i data-lucide="gift"></i>
+        <span>+100 XP bonus</span>
+      </div>
+      <button class="btn btn--accent btn--lg" onclick="closeModal()">Continuer</button>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/gamification.js"></script>
+  <script src="../assets/js/agents.js"></script>
+  <script src="../assets/js/minigames.js"></script>
+  <script src="../assets/js/migration.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

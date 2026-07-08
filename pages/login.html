@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Connexion — Skills DZ</title>
+  <meta name="theme-color" content="#0B1331"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../assets/css/auth.css"/>
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Left Panel -->
+    <div class="auth-panel auth-panel--left">
+      <div class="auth-panel__content">
+        <a href="../index.html" class="auth-logo">
+          <img src="../assets/img/logo.jpeg" alt="Skills DZ" class="auth-logo__img"/>
+          <span class="auth-logo__text">Skills<span>DZ</span></span>
+        </a>
+
+        <!-- Panda Mascot -->
+        <div class="panda-mascot">
+          <div class="panda-glow"></div>
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pandaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1E5BFF"/>
+                <stop offset="100%" stop-color="#00C4FF"/>
+              </linearGradient>
+            </defs>
+            <!-- Ears -->
+            <circle cx="60" cy="38" r="24" fill="#0B1331"/>
+            <circle cx="140" cy="38" r="24" fill="#0B1331"/>
+            <!-- Head -->
+            <ellipse cx="100" cy="88" rx="65" ry="58" fill="white"/>
+            <!-- Eye patches -->
+            <ellipse cx="74" cy="82" rx="20" ry="18" fill="#0B1331" transform="rotate(-5 74 82)"/>
+            <ellipse cx="126" cy="82" rx="20" ry="18" fill="#0B1331" transform="rotate(5 126 82)"/>
+            <!-- Eyes -->
+            <circle cx="74" cy="80" r="8" fill="white"/>
+            <circle cx="126" cy="80" r="8" fill="white"/>
+            <circle cx="76" cy="79" r="4.5" fill="#0B1331"/>
+            <circle cx="128" cy="79" r="4.5" fill="#0B1331"/>
+            <circle cx="77.5" cy="77.5" r="1.8" fill="white"/>
+            <circle cx="129.5" cy="77.5" r="1.8" fill="white"/>
+            <!-- Nose -->
+            <ellipse cx="100" cy="96" rx="5" ry="3.5" fill="#0B1331"/>
+            <!-- Mouth -->
+            <path d="M95 101 Q100 108 105 101" fill="none" stroke="#0B1331" stroke-width="2" stroke-linecap="round"/>
+            <!-- Blush -->
+            <circle cx="58" cy="96" r="7" fill="#ff6b9d" opacity="0.2"/>
+            <circle cx="142" cy="96" r="7" fill="#ff6b9d" opacity="0.2"/>
+            <!-- S-body shape -->
+            <path d="M75 128 C60 145 55 165 75 178 C95 191 130 180 125 160 C120 140 140 135 145 145" fill="none" stroke="url(#pandaGrad)" stroke-width="18" stroke-linecap="round"/>
+            <!-- Body -->
+            <ellipse cx="100" cy="155" rx="42" ry="28" fill="white"/>
+          </svg>
+          <div class="panda-speech">Salut ! 👋</div>
+        </div>
+
+        <h1 class="auth-panel__title">Bienvenue<br/>de retour !</h1>
+        <p class="auth-panel__desc">Connectez-vous pour reprendre votre apprentissage, gagner des points et monter de niveau.</p>
+
+        <div class="auth-features">
+          <div class="auth-feature">
+            <i data-lucide="trophy"></i>
+            <span>Système de points et niveaux</span>
+          </div>
+          <div class="auth-feature">
+            <i data-lucide="bot"></i>
+            <span>Agents IA personnalisés</span>
+          </div>
+          <div class="auth-feature">
+            <i data-lucide="gamepad-2"></i>
+            <span>Mini-jeux éducatifs</span>
+          </div>
+          <div class="auth-feature">
+            <i data-lucide="video"></i>
+            <span>Vidéos et cours interactifs</span>
+          </div>
+        </div>
+
+        <!-- Testimonial -->
+        <div class="auth-testimonial">
+          <p>"Grâce à la gamification, j'apprends comme jamais. Les points et niveaux me motivent à continuer !"</p>
+          <div class="auth-testimonial__author">
+            <div class="auth-testimonial__avatar">A</div>
+            <div>
+              <div class="auth-testimonial__name">Ahmed B.</div>
+              <div class="auth-testimonial__role">Niveau 8 — Expert Digital</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="auth-panel auth-panel--right">
+      <div class="auth-form-wrapper">
+        <div class="auth-form__badge">
+          <i data-lucide="shield-check"></i>
+          Connexion sécurisée
+        </div>
+        <h2 class="auth-form__title">Connexion</h2>
+        <p class="auth-form__subtitle">Entrez vos identifiants ou connectez-vous en un clic.</p>
+
+        <!-- Google Auth -->
+        <div class="auth-google-section">
+          <button type="button" class="btn--google" id="googleLoginBtn" onclick="handleGoogleLogin()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            <span class="google-text">Continuer avec Google</span>
+            <div class="google-loader"></div>
+          </button>
+          <div class="auth-alt-divider"><span>ou</span></div>
+        </div>
+
+        <form class="auth-form" id="loginForm">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-wrapper">
+              <i data-lucide="mail"></i>
+              <input type="email" id="email" name="email" placeholder="votre@email.com" required/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <div class="input-wrapper">
+              <i data-lucide="lock"></i>
+              <input type="password" id="password" name="password" placeholder="••••••••" required/>
+              <button type="button" class="toggle-password" onclick="togglePassword(this)">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" name="remember"/>
+              <span>Se souvenir de moi</span>
+            </label>
+            <a href="#" class="form-link">Mot de passe oublié ?</a>
+          </div>
+
+          <button type="submit" class="btn btn--accent btn--block btn--lg">
+            <i data-lucide="log-in"></i>
+            Se connecter
+          </button>
+        </form>
+
+        <div class="auth-trust">
+          <i data-lucide="lock"></i>
+          <span>Vos données sont protégées. Connexion SSL chiffrée.</span>
+        </div>
+
+        <p class="auth-form__footer" style="margin-top:20px;">
+          Pas encore de compte ? <a href="register.html">S'inscrire gratuitement</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="../config.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    lucide.createIcons();
+
+    // If already logged in, redirect to dashboard
+    if (Auth.isLoggedIn()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Panda speech bubble rotation
+    const speeches = ["Salut ! 👋", "On apprend ? 📚", "Prêt ? 🚀", "Niveau up ! ⬆️", "Tu peux ! 💪"];
+    let speechIdx = 0;
+    setInterval(() => {
+      const bubble = document.querySelector('.panda-speech');
+      if (bubble) {
+        bubble.style.opacity = '0';
+        bubble.style.transform = 'translateY(6px)';
+        setTimeout(() => {
+          speechIdx = (speechIdx + 1) % speeches.length;
+          bubble.textContent = speeches[speechIdx];
+          bubble.style.opacity = '1';
+          bubble.style.transform = 'translateY(0)';
+        }, 250);
+      }
+    }, 3500);
+
+    function togglePassword(btn) {
+      const input = btn.previousElementSibling;
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    // Google Real OAuth
+    function handleGoogleLogin() {
+      const btn = document.getElementById('googleLoginBtn');
+      btn.querySelector('.google-text').textContent = 'Ouverture Google...';
+      btn.disabled = true;
+
+      try {
+        google.accounts.id.initialize({
+          client_id: window.GOOGLE_CLIENT_ID || '',
+          callback: handleGoogleCredential,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+        google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            // Fallback: use popup
+            google.accounts.id.prompt();
+          }
+        });
+      } catch (e) {
+        // If Google SDK not loaded or no client ID, show message
+        btn.querySelector('.google-text').textContent = 'Continuer avec Google';
+        btn.disabled = false;
+        if (!window.GOOGLE_CLIENT_ID) {
+          alert('Google OAuth non configuré.\n\nPour activer :\n1. Allez sur console.cloud.google.com\n2. Créez un projet OAuth\n3. Ajoutez GOOGLE_CLIENT_ID dans les variables Vercel');
+        } else {
+          alert('Erreur Google: ' + e.message);
+        }
+      }
+    }
+
+    async function handleGoogleCredential(response) {
+      const btn = document.getElementById('googleLoginBtn');
+      btn.querySelector('.google-text').textContent = 'Connexion...';
+      try {
+        const data = await api.googleAuth({ credential: response.credential });
+        api.setToken(data.token);
+        Auth.setUser(data.user);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        alert('Erreur: ' + err.message);
+        btn.querySelector('.google-text').textContent = 'Continuer avec Google';
+        btn.disabled = false;
+      }
+    }
+
+    // Email/Password Login
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        alert('Veuillez remplir tous les champs');
+        return;
+      }
+
+      const submitBtn = this.querySelector('button[type="submit"]');
+      submitBtn.innerHTML = '<span>Connexion en cours...</span>';
+      submitBtn.disabled = true;
+
+      try {
+        await Auth.login(email, password);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        alert('Erreur: ' + err.message);
+        submitBtn.innerHTML = '<i data-lucide="log-in"></i> Se connecter';
+        submitBtn.disabled = false;
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>
