@@ -417,10 +417,10 @@ function renderLiveSessions() {
     const statusLabel = s.status === 'live' ? '🔴 EN DIRECT' : s.status === 'scheduled' ? '🟢 Programmée' : '⚫ Terminée';
     return `<div class="admin-live-item">
       <div class="admin-live-status admin-live-status--${statusClass}">${statusLabel}</div>
-      <div class="admin-live-info"><h4>${s.title}</h4><p>${dateStr} à ${timeStr} — ${s.youtube_url ? '<a href="' + s.youtube_url + '" target="_blank" style="color:#1E5BFF">YouTube</a>' : 'Pas de lien'}</p></div>
+      <div class="admin-live-info"><h4>${s.title}</h4><p>${dateStr} à ${timeStr} — ${(s.youtube_url || s.youtubeUrl) ? '<a href="' + (s.youtube_url || s.youtubeUrl) + '" target="_blank" style="color:#1E5BFF">YouTube</a>' : 'Pas de lien'}</p></div>
       <div class="admin-live-actions">
         <button class="btn btn--ghost btn--sm" onclick="openEditLiveModal('${s.id}')"><i data-lucide="edit"></i></button>
-        <button class="btn btn--danger btn--sm" onclick="confirmDeleteLive('${id}','${s.title.replace(/'/g,"\\'")}')"><i data-lucide="trash-2"></i></button>
+        <button class="btn btn--danger btn--sm" onclick="confirmDeleteLive('${s.id}','${s.title.replace(/'/g,"\\'")}')"><i data-lucide="trash-2"></i></button>
       </div>
     </div>`;
   }).join('');
@@ -477,7 +477,7 @@ function openEditLiveModal(sessionId) {
         <div class="form-group"><label>Heure</label><input type="time" id="esTime" class="form-input" value="${timeStr}"></div>
         <div class="form-group"><label>Statut</label><select id="esStatus" class="filter-select" style="width:100%"><option value="scheduled" ${s.status==='scheduled'?'selected':''}>Programmée</option><option value="live" ${s.status==='live'?'selected':''}>En direct</option><option value="ended" ${s.status==='ended'?'selected':''}>Terminée</option></select></div>
       </div>
-      <div class="form-group"><label>Lien YouTube</label><input type="url" id="esYoutube" class="form-input" value="${s.youtube_url || ''}"></div>
+      <div class="form-group"><label>Lien YouTube</label><input type="url" id="esYoutube" class="form-input" value="${s.youtube_url || s.youtubeUrl || ''}"></div>
       <div class="modal-footer"><button type="button" class="btn btn--ghost" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn--primary">Sauvegarder</button></div>
     </form>
   `);
