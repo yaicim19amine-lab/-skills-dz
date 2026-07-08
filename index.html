@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Skills DZ — Centre de Formation Professionnelle à Alger</title>
+  <meta name="description" content="Skills DZ, centre de formation agréé par l'État à Alger. Formations en marketing digital, développement web, IA. Inscrivez-vous maintenant !"/>
+  <link href="https://skills-dz.vercel.app/" rel="canonical"/>
+  <link href="https://skills-dz.vercel.app/" hreflang="fr" rel="alternate"/>
+  <link href="https://skills-dz.vercel.app/en/" hreflang="en" rel="alternate"/>
+  <link href="https://skills-dz.vercel.app/ar/" hreflang="ar" rel="alternate"/>
+  <link href="https://skills-dz.vercel.app/" hreflang="x-default" rel="alternate"/>
+
+  <!-- OpenGraph -->
+  <meta content="Skills DZ — Centre de Formation Professionnelle à Alger" property="og:title"/>
+  <meta content="Skills DZ, centre de formation agréé par l'État à Alger. Formations en marketing digital, développement web, IA." property="og:description"/>
+  <meta content="https://skills-dz.vercel.app/" property="og:url"/>
+  <meta content="https://skills-dz.vercel.app/assets/img/og-image.jpg" property="og:image"/>
+  <meta content="website" property="og:type"/>
+  <meta content="Skills DZ" property="og:site_name"/>
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Skills DZ — Centre de Formation Professionnelle à Alger"/>
+  <meta name="twitter:description" content="Formations en marketing digital, développement web, IA. Inscrivez-vous maintenant !"/>
+  <meta name="twitter:image" content="https://skills-dz.vercel.app/assets/img/og-image.jpg"/>
+
+  <!-- Theme -->
+  <meta name="theme-color" content="#1a1a2e"/>
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" href="assets/img/favicon.png"/>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1a1a2e',
+            secondary: '#16213e',
+            accent: '#e94560',
+            surface: '#f8fafc',
+          },
+          fontFamily: {
+            heading: ['Poppins', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="assets/css/styles.css"/>
+
+  <!-- JSON-LD Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "Skills DZ",
+    "description": "Centre de formation professionnelle agréé par l'État à Alger, dédié aux formations de terrain et aux compétences concrètes.",
+    "url": "https://skills-dz.vercel.app",
+    "logo": "https://skills-dz.vercel.app/assets/img/logo.png",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Alger",
+      "addressCountry": "DZ"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "36.7538",
+      "longitude": "3.0588"
+    },
+    "telephone": "+213-XX-XX-XX-XX",
+    "email": "contact@skills-dz.dz",
+    "sameAs": [
+      "https://www.facebook.com/SkillsGooDz/",
+      "https://www.instagram.com/skillsdz"
+    ],
+    "priceRange": "$$",
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+        "opens": "09:00",
+        "closes": "17:00"
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Quelles formations propose Skills DZ ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Skills DZ propose des formations en marketing digital, développement web, intelligence artificielle, design graphique, et gestion de projet. Toutes nos formations sont pratiques et dispensées par des experts du terrain."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Skills DZ est-il un centre agréé ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Oui, Skills DZ est un centre de formation agréé par l'État algérien. Nous délivrons des certificats reconnus."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Comment s'inscrire à une formation ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Vous pouvez vous inscrire directement en ligne via notre formulaire d'inscription, ou nous contacter par WhatsApp pour plus d'informations."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Les formations sont-elles en ligne ou en présentiel ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Nous proposons les deux formats : présentiel à Alger et formations en ligne pour toute l'Algérie."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Quels sont les modes de paiement acceptés ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Nous acceptons le paiement en espèces au centre, le virement bancaire, CIB/Edahabia, et BaridiMob."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Skip Link -->
+  <a class="skip-link" href="#main">Aller au contenu principal</a>
+
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a class="logo" href="index.html">
+        <span class="logo__text">Skills<span class="logo__accent">DZ</span></span>
+      </a>
+      <nav class="nav" id="nav">
+        <a class="nav__link" href="#formations">Formations</a>
+        <a class="nav__link" href="#pourquoi">Pourquoi nous</a>
+        <a class="nav__link" href="#temoignages">Avis</a>
+        <a class="nav__link" href="#faq">FAQ</a>
+      </nav>
+      <div class="head-actions">
+        <a class="lang-pill" href="en/">EN</a>
+        <a class="lang-pill" href="ar/">AR</a>
+        <a class="btn btn--accent" href="#inscription">S'inscrire</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero__bg-pattern"></div>
+      <div class="container hero__inner">
+        <div class="hero__content">
+          <span class="kicker">Centre agréé par l'État</span>
+          <h1>Formez-vous aux métiers du <span class="text-accent">digital</span></h1>
+          <p class="hero__subtitle">Skills DZ, centre de formation professionnelle à Alger, dédié aux formations de terrain et aux compétences concrètes. Rejoignez notre communauté de +500 diplômés.</p>
+          <div class="hero__actions">
+            <a class="btn btn--accent btn--lg" href="#inscription">
+              <i data-lucide="rocket"></i>
+              Commencer maintenant
+            </a>
+            <a class="btn btn--outline btn--lg" href="#formations">
+              <i data-lucide="book-open"></i>
+              Voir les formations
+            </a>
+          </div>
+          <div class="hero__trust">
+            <div class="trust-badge">
+              <i data-lucide="shield-check"></i>
+              <span>Agréé État</span>
+            </div>
+            <div class="trust-badge">
+              <i data-lucide="users"></i>
+              <span>+500 diplômés</span>
+            </div>
+            <div class="trust-badge">
+              <i data-lucide="award"></i>
+              <span>Certifiés</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <div class="hero__card hero__card--1">
+            <i data-lucide="code-2"></i>
+            <span>Développement Web</span>
+          </div>
+          <div class="hero__card hero__card--2">
+            <i data-lucide="trending-up"></i>
+            <span>Marketing Digital</span>
+          </div>
+          <div class="hero__card hero__card--3">
+            <i data-lucide="brain"></i>
+            <span>Intelligence Artificielle</span>
+          </div>
+          <div class="hero__card hero__card--4">
+            <i data-lucide="palette"></i>
+            <span>Design Graphique</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Strip -->
+    <section class="stats-strip">
+      <div class="container stats-grid">
+        <div class="stat">
+          <span class="stat__number" data-count="500">0</span>
+          <span class="stat__label">Diplômés</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" data-count="15">0</span>
+          <span class="stat__label">Formations</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" data-count="95">0</span>
+          <span class="stat__label">% Satisfaction</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" data-count="10">0</span>
+          <span class="stat__label">Formateurs experts</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Formations Section -->
+    <section class="section section--white" id="formations">
+      <div class="container">
+        <span class="kicker">Nos Formations</span>
+        <h2 class="section-title">Choisissez votre parcours</h2>
+        <p class="section-subtitle">Des formations pratiques, dispensées par des experts du terrain, pour acquérir les compétences les plus demandées du marché.</p>
+
+        <div class="formations-grid">
+          <!-- Formation 1 -->
+          <article class="formation-card">
+            <div class="formation-card__badge">Populaire</div>
+            <div class="formation-card__icon">
+              <i data-lucide="trending-up"></i>
+            </div>
+            <h3 class="formation-card__title">Marketing Digital</h3>
+            <p class="formation-card__desc">Maîtrisez les réseaux sociaux, la publicité en ligne, le SEO et l'analyse de données pour propulser votre carrière.</p>
+            <div class="formation-card__meta">
+              <span><i data-lucide="clock"></i> 3 mois</span>
+              <span><i data-lucide="signal"></i> Débutant</span>
+            </div>
+            <div class="formation-card__price">
+              <span class="price">45 000</span> DA
+            </div>
+            <a class="btn btn--accent btn--block" href="#inscription">S'inscrire</a>
+          </article>
+
+          <!-- Formation 2 -->
+          <article class="formation-card">
+            <div class="formation-card__badge formation-card__badge--new">Nouveau</div>
+            <div class="formation-card__icon">
+              <i data-lucide="brain"></i>
+            </div>
+            <h3 class="formation-card__title">Intelligence Artificielle</h3>
+            <p class="formation-card__desc">Apprenez les bases de l'IA, le machine learning, et les outils d'IA générative pour rester à la pointe.</p>
+            <div class="formation-card__meta">
+              <span><i data-lucide="clock"></i> 4 mois</span>
+              <span><i data-lucide="signal"></i> Intermédiaire</span>
+            </div>
+            <div class="formation-card__price">
+              <span class="price">55 000</span> DA
+            </div>
+            <a class="btn btn--accent btn--block" href="#inscription">S'inscrire</a>
+          </article>
+
+          <!-- Formation 3 -->
+          <article class="formation-card">
+            <div class="formation-card__icon">
+              <i data-lucide="code-2"></i>
+            </div>
+            <h3 class="formation-card__title">Développement Web</h3>
+            <p class="formation-card__desc">HTML, CSS, JavaScript, React, Node.js. Créez des sites web modernes et des applications complètes.</p>
+            <div class="formation-card__meta">
+              <span><i data-lucide="clock"></i> 6 mois</span>
+              <span><i data-lucide="signal"></i> Débutant</span>
+            </div>
+            <div class="formation-card__price">
+              <span class="price">60 000</span> DA
+            </div>
+            <a class="btn btn--accent btn--block" href="#inscription">S'inscrire</a>
+          </article>
+
+          <!-- Formation 4 -->
+          <article class="formation-card">
+            <div class="formation-card__icon">
+              <i data-lucide="palette"></i>
+            </div>
+            <h3 class="formation-card__title">Design Graphique</h3>
+            <p class="formation-card__desc">Maîtrisez Photoshop, Illustrator, Figma. Créez des visuels professionnels pour le web et les réseaux sociaux.</p>
+            <div class="formation-card__meta">
+              <span><i data-lucide="clock"></i> 3 mois</span>
+              <span><i data-lucide="signal"></i> Débutant</span>
+            </div>
+            <div class="formation-card__price">
+              <span class="price">40 000</span> DA
+            </div>
+            <a class="btn btn--accent btn--block" href="#inscription">S'inscrire</a>
+          </article>
+
+          <!-- Formation 5 -->
+          <article class="formation-card">
+            <div class="formation-card__icon">
+              <i data-lucide="bar-chart-3"></i>
+            </div>
+            <h3 class="formation-card__title">Business Intelligence</h3>
+            <p class="formation-card__desc">Excel avancé, Power BI, analyse de données. Transformez vos données en décisions stratégiques.</p>
+            <div class="formation-card__meta">
+              <span><i data-lucide="clock"></i> 2 mois</span>
+              <span><i data-lucide="signal"></i> Intermédiaire</span>
+            </div>
+            <div class="formation-card__price">
+              <span class="price">35 000</span> DA
+            </div>
+            <a class="btn btn--accent btn--block" href="#inscription">S'inscrire</a>
+          </article>
+
+          <!-- Formation 6 -->
+          <article class="formation-card">
+            <div class="formation-card__icon">
+              <i data-lucide="projector"></i>
+            </div>
+            <h3 class="formation-card__title">Gestion de Projet</h3>
+            <p class="formation-card__desc">Méthodologies Agile, Scrum, gestion d'équipe. Menez vos projets à bien avec efficacité.</p>
+            <div class="formation-card__meta">
+              <span><i data-lucide="clock"></i> 2 mois</span>
+              <span><i data-lucide="signal"></i> Tous niveaux</span>
+            </div>
+            <div class="formation-card__price">
+              <span class="price">30 000</span> DA
+            </div>
+            <a class="btn btn--accent btn--block" href="#inscription">S'inscrire</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pourquoi Nous Section -->
+    <section class="section section--gray" id="pourquoi">
+      <div class="container">
+        <span class="kicker">Pourquoi Skills DZ</span>
+        <h2 class="section-title">Une formation qui fait la différence</h2>
+        <p class="section-subtitle">Ce qui nous distingue des autres centres de formation.</p>
+
+        <div class="benefits-grid">
+          <article class="benefit-card">
+            <div class="benefit-card__icon">
+              <i data-lucide="shield-check"></i>
+            </div>
+            <h3 class="benefit-card__title">Agréé par l'État</h3>
+            <p class="benefit-card__desc">Centre agréé par le Ministère de la Formation et de l'Enseignement professionnels. Certificats reconnus.</p>
+          </article>
+
+          <article class="benefit-card">
+            <div class="benefit-card__icon">
+              <i data-lucide="wrench"></i>
+            </div>
+            <h3 class="benefit-card__title">Formations de terrain</h3>
+            <p class="benefit-card__desc">0% théorie, 100% pratique. Vous apprenez en faisant, avec des projets concrets et réels.</p>
+          </article>
+
+          <article class="benefit-card">
+            <div class="benefit-card__icon">
+              <i data-lucide="users"></i>
+            </div>
+            <h3 class="benefit-card__title">Petits groupes</h3>
+            <p class="benefit-card__desc">Max 15 élèves par groupe pour un suivi personnalisé et une interaction directe avec le formateur.</p>
+          </article>
+
+          <article class="benefit-card">
+            <div class="benefit-card__icon">
+              <i data-lucide="briefcase"></i>
+            </div>
+            <h3 class="benefit-card__title">Insertion professionnelle</h3>
+            <p class="benefit-card__desc">80% de nos diplômés trouvent un emploi dans les 3 mois. Nous les accompagnons dans leur recherche.</p>
+          </article>
+
+          <article class="benefit-card">
+            <div class="benefit-card__icon">
+              <i data-lucide="monitor"></i>
+            </div>
+            <h3 class="benefit-card__title">Présentiel & En ligne</h3>
+            <p class="benefit-card__desc">Suivez nos formations en présentiel à Alger ou en ligne depuis toute l'Algérie.</p>
+          </article>
+
+          <article class="benefit-card">
+            <div class="benefit-card__icon">
+              <i data-lucide="credit-card"></i>
+            </div>
+            <h3 class="benefit-card__title">Paiement flexible</h3>
+            <p class="benefit-card__desc">Payez en espèces, par virement, CIB/Edahabia, ou BaridiMob. Facilités de paiement disponibles.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Témoignages Section -->
+    <section class="section section--white" id="temoignages">
+      <div class="container">
+        <span class="kicker">Témoignages</span>
+        <h2 class="section-title">Ils nous font confiance</h2>
+        <p class="section-subtitle">Découvrez les retours de nos anciens élèves.</p>
+
+        <div class="testimonials-grid">
+          <article class="testimonial-card">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <p class="testimonial-card__text">"La formation Marketing Digital m'a permis de lancer ma propre agence. Le formateur est un vrai praticien, pas un théoricien."</p>
+            <div class="testimonial-card__author">
+              <div class="testimonial-card__avatar">A</div>
+              <div>
+                <h4 class="testimonial-card__name">Ahmed B.</h4>
+                <span class="testimonial-card__role">Marketing Digital — Promu 2024</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="testimonial-card">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <p class="testimonial-card__text">"J'ai appris Python et l'IA en 4 mois. Aujourd'hui je travaille comme data analyst dans une entreprise internationale."</p>
+            <div class="testimonial-card__author">
+              <div class="testimonial-card__avatar">S</div>
+              <div>
+                <h4 class="testimonial-card__name">Sarah K.</h4>
+                <span class="testimonial-card__role">IA & Data — Promue 2024</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="testimonial-card">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <p class="testimonial-card__text">"Le meilleur centre de formation à Alger. Les projets pratiques font toute la différence. Je recommande à 100%."</p>
+            <div class="testimonial-card__author">
+              <div class="testimonial-card__avatar">Y</div>
+              <div>
+                <h4 class="testimonial-card__name">Youcef M.</h4>
+                <span class="testimonial-card__role">Développement Web — Promu 2023</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inscription Section -->
+    <section class="section section--dark" id="inscription">
+      <div class="container">
+        <div class="inscription-layout">
+          <div class="inscription-info">
+            <span class="kicker kicker--light">Inscription</span>
+            <h2 class="section-title section-title--light">Rejoignez Skills DZ</h2>
+            <p class="section-subtitle section-subtitle--light">Remplissez le formulaire et notre équipe vous contactera sous 24h pour confirmer votre inscription.</p>
+
+            <div class="inscription-features">
+              <div class="inscription-feature">
+                <i data-lucide="check-circle"></i>
+                <span>Réponse sous 24h</span>
+              </div>
+              <div class="inscription-feature">
+                <i data-lucide="check-circle"></i>
+                <span>Paiement flexible</span>
+              </div>
+              <div class="inscription-feature">
+                <i data-lucide="check-circle"></i>
+                <span>Certificat agréé</span>
+              </div>
+              <div class="inscription-feature">
+                <i data-lucide="check-circle"></i>
+                <span>Suivi personnalisé</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="inscription-form-wrapper">
+            <form class="form form--dark" id="inscription-form" data-form="">
+              <div aria-live="polite" class="form-status" role="status"></div>
+
+              <!-- Honeypot -->
+              <input aria-hidden="true" autocomplete="off" class="hp-field" name="_hp" tabindex="-1" type="text"/>
+
+              <div class="field">
+                <label for="name">Nom complet *</label>
+                <input autocomplete="name" id="name" name="name" placeholder="Votre nom complet" required=""/>
+              </div>
+
+              <div class="field">
+                <label for="email">Email *</label>
+                <input autocomplete="email" id="email" name="email" placeholder="votre@email.com" required="" type="email"/>
+              </div>
+
+              <div class="field">
+                <label for="phone">Téléphone *</label>
+                <input autocomplete="tel" id="phone" inputmode="tel" name="phone" placeholder="05 XX XX XX XX" required="" type="tel"/>
+              </div>
+
+              <div class="field">
+                <label for="formation">Formation souhaitée *</label>
+                <select id="formation" name="formation" required="">
+                  <option value="">Choisir une formation</option>
+                  <option value="marketing-digital">Marketing Digital</option>
+                  <option value="intelligence-artificielle">Intelligence Artificielle</option>
+                  <option value="developpement-web">Développement Web</option>
+                  <option value="design-graphique">Design Graphique</option>
+                  <option value="business-intelligence">Business Intelligence</option>
+                  <option value="gestion-projet">Gestion de Projet</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="niveau">Niveau d'études</label>
+                <select id="niveau" name="niveau">
+                  <option value="">Choisir</option>
+                  <option value="lycee">Lycée</option>
+                  <option value="bts">BTS / DUT</option>
+                  <option value="licence">Licence</option>
+                  <option value="master">Master</option>
+                  <option value="professionnel">Professionnel</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="paiement">Mode de paiement</label>
+                <select id="paiement" name="paiement">
+                  <option value="">Choisir</option>
+                  <option value="especes">Espèces (au centre)</option>
+                  <option value="virement">Virement bancaire</option>
+                  <option value="cib">CIB / Edahabia</option>
+                  <option value="baridimob">BaridiMob</option>
+                </select>
+              </div>
+
+              <div class="field field--checkbox">
+                <input id="conditions" name="conditions" required="" type="checkbox"/>
+                <label for="conditions">J'accepte les conditions d'inscription et la politique de confidentialité *</label>
+              </div>
+
+              <button class="btn btn--accent btn--wide" type="submit">
+                <i data-lucide="send"></i>
+                Envoyer ma demande
+              </button>
+
+              <p class="helptext">Skills DZ vous contactera pour confirmer votre inscription et les détails de paiement.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="section section--white" id="faq">
+      <div class="container">
+        <span class="kicker">FAQ</span>
+        <h2 class="section-title">Questions fréquentes</h2>
+        <p class="section-subtitle">Trouvez rapidement les réponses à vos questions.</p>
+
+        <div class="faq">
+          <details open>
+            <summary>Quelles formations propose Skills DZ ?</summary>
+            <p>Skills DZ propose des formations en marketing digital, développement web, intelligence artificielle, design graphique, business intelligence et gestion de projet. Toutes nos formations sont pratiques et dispensées par des experts du terrain.</p>
+          </details>
+
+          <details>
+            <summary>Skills DZ est-il un centre agréé ?</summary>
+            <p>Oui, Skills DZ est un centre de formation agréé par l'État algérien. Nous délivrons des certificats reconnus par le Ministère de la Formation et de l'Enseignement professionnels.</p>
+          </details>
+
+          <details>
+            <summary>Comment s'inscrire à une formation ?</summary>
+            <p>Vous pouvez vous inscrire directement en ligne via notre formulaire d'inscription, ou nous contacter par WhatsApp pour plus d'informations. Notre équipe vous recontactera sous 24h.</p>
+          </details>
+
+          <details>
+            <summary>Les formations sont-elles en ligne ou en présentiel ?</summary>
+            <p>Nous proposons les deux formats : présentiel à Alger dans nos locaux, et formations en ligne pour toute l'Algérie. Vous choisissez le format qui vous convient.</p>
+          </details>
+
+          <details>
+            <summary>Quels sont les modes de paiement acceptés ?</summary>
+            <p>Nous acceptons le paiement en espèces au centre, le virement bancaire, CIB/Edahabia, et BaridiMob. Des facilités de paiement sont disponibles sur demande.</p>
+          </details>
+
+          <details>
+            <summary>Quelle est la durée des formations ?</summary>
+            <p>Les formations durent entre 2 et 6 mois selon le programme. Nous proposons également des bootcamps intensifs de 6 à 8 semaines.</p>
+          </details>
+
+          <details>
+            <summary>Obtient-on un certificat à la fin ?</summary>
+            <p>Oui, tous nos diplômés reçoivent un certificat de compétences reconnu par l'État algérien. Certaines formations préparent également à des certifications internationales.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="section section--accent">
+      <div class="container final-cta">
+        <h2>Prêt à lancer votre carrière ?</h2>
+        <p>Rejoignez +500 diplômés qui ont transformé leur vie grâce à Skills DZ.</p>
+        <a class="btn btn--white btn--lg" href="#inscription">
+          <i data-lucide="rocket"></i>
+          S'inscrire maintenant
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <span class="logo logo--light">Skills<span class="logo__accent">DZ</span></span>
+        <p>Centre de formation professionnelle agréé par l'État. Formations en marketing digital, développement web, IA et plus.</p>
+        <div class="socials">
+          <a aria-label="Facebook" href="https://www.facebook.com/SkillsGooDz/" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="facebook"></i>
+          </a>
+          <a aria-label="Instagram" href="https://www.instagram.com/skillsdz" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="instagram"></i>
+          </a>
+          <a aria-label="LinkedIn" href="#" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="linkedin"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer__links">
+        <h3>Formations</h3>
+        <ul>
+          <li><a href="#formations">Marketing Digital</a></li>
+          <li><a href="#formations">Intelligence Artificielle</a></li>
+          <li><a href="#formations">Développement Web</a></li>
+          <li><a href="#formations">Design Graphique</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__links">
+        <h3>Contact</h3>
+        <ul>
+          <li><a href="tel:+213XXXXXXXXX"><i data-lucide="phone"></i> +213 XX XX XX XX</a></li>
+          <li><a href="mailto:contact@skills-dz.dz"><i data-lucide="mail"></i> contact@skills-dz.dz</a></li>
+          <li><a href="#"><i data-lucide="map-pin"></i> Alger, Algérie</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer__copy">
+      <p>&copy; 2026 Skills DZ. Tous droits réservés.</p>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Float -->
+  <a class="whatsapp-float" href="https://wa.me/213XXXXXXXXX?text=Bonjour%20Skills%20DZ%20!%20Je%20suis%20intéressé%20par%20vos%20formations." target="_blank" rel="noopener noreferrer" aria-label="Contacter via WhatsApp">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+      <path d="M20.5 11.9A8.5 8.5 0 0 1 7.9 19.3L3 20.8l1.6-4.7A8.5 8.5 0 1 1 20.5 11.9Zm-11.2-4c-.2-.5-.4-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.3 3.1c.2.2 2.1 3.3 5.2 4.5 2.6 1 3.1.8 3.7.7.6-.1 1.8-.8 2-1.5.2-.7.2-1.3.2-1.5-.1-.1-.3-.2-.6-.4l-1.8-.9c-.3-.1-.5-.2-.7.2-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.8-2Z"/>
+    </svg>
+  </a>
+
+  <!-- Sticky Mobile Bar -->
+  <div class="sticky-mobile">
+    <div>
+      <b>Skills DZ</b><br/>
+      <span>Formations professionnelles</span>
+    </div>
+    <a class="btn btn--accent" href="#inscription">S'inscrire</a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
