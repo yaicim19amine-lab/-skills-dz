@@ -35,6 +35,10 @@
             Mes formations
             <span class="nav-badge">3</span>
           </a>
+          <a class="nav-item" data-page="cours" href="#">
+            <i data-lucide="graduation-cap"></i>
+            Mes Cours
+          </a>
           <a class="nav-item" data-page="videos" href="#">
             <i data-lucide="video"></i>
             Vidéos
@@ -341,6 +345,61 @@
           </div>
         </header>
         <div class="formations-grid" id="formationsGrid"></div>
+      </section>
+
+      <!-- ========== PAGE: MES COURS ========== -->
+      <section class="page" id="page-cours">
+        <header class="main-header">
+          <div>
+            <h1 class="main-header__title">Mes <span>Cours</span></h1>
+            <p class="main-header__sub">Suivez votre progression, présences et paiements.</p>
+          </div>
+        </header>
+
+        <!-- Stats résumé -->
+        <div class="cours-stats" id="coursStats">
+          <div class="cours-stat cours-stat--blue">
+            <div class="cours-stat__icon"><i data-lucide="book-open"></i></div>
+            <div class="cours-stat__info">
+              <span class="cours-stat__value" id="coursTotal">0</span>
+              <span class="cours-stat__label">Cours inscrits</span>
+            </div>
+          </div>
+          <div class="cours-stat cours-stat--green">
+            <div class="cours-stat__icon"><i data-lucide="check-circle"></i></div>
+            <div class="cours-stat__info">
+              <span class="cours-stat__value" id="coursPresent">0%</span>
+              <span class="cours-stat__label">Présence moyenne</span>
+            </div>
+          </div>
+          <div class="cours-stat cours-stat--cyan">
+            <div class="cours-stat__icon"><i data-lucide="clock"></i></div>
+            <div class="cours-stat__info">
+              <span class="cours-stat__value" id="coursRemaining">0</span>
+              <span class="cours-stat__label">Séances restantes</span>
+            </div>
+          </div>
+          <div class="cours-stat cours-stat--orange">
+            <div class="cours-stat__icon"><i data-lucide="wallet"></i></div>
+            <div class="cours-stat__info">
+              <span class="cours-stat__value" id="coursPaid">0 DA</span>
+              <span class="cours-stat__label">Solde restant</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="cours-filters">
+          <button class="cours-filter active" data-filter="all">Tous</button>
+          <button class="cours-filter" data-filter="present">Présent</button>
+          <button class="cours-filter" data-filter="absent">Absent</button>
+          <button class="cours-filter" data-filter="en-ligne">En ligne</button>
+        </div>
+
+        <!-- Liste des cours -->
+        <div class="cours-list" id="coursList">
+          <p style="color:var(--text-secondary);text-align:center;padding:2rem">Chargement de vos cours...</p>
+        </div>
       </section>
 
       <!-- ========== PAGE: VIDÉOS ========== -->

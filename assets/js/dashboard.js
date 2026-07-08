@@ -118,6 +118,8 @@ function navigateTo(page) {
     MiniGames.renderMenu('miniGamesContainer');
   } else if (page === 'formations') {
     loadFormations();
+  } else if (page === 'cours') {
+    loadCours();
   } else if (page === 'videos') {
     loadVideos();
   } else if (page === 'boutique') {
@@ -615,4 +617,203 @@ function loadPaymentHistory() {
   }).catch(() => {
     el.innerHTML = '<p style="padding:20px;text-align:center;color:#555;">Erreur de chargement</p>';
   });
+}
+
+/* ========================================
+   MES COURS — Présence, Sessions, Paiement, En ligne
+   ======================================== */
+let _coursFilter = 'all';
+
+function loadCours() {
+  const list = document.getElementById('coursList');
+  if (!list) return;
+
+  // Load from localStorage (enrolled courses with tracking data)
+  const user = JSON.parse(localStorage.getItem('skillsdz_user'));
+  const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
+
+  // If no enrolled courses, fetch from formations and create mock enrollment
+  api.getFormations().then(data => {
+    const formations = data.formations || [];
+    let courses = enrolled.length > 0 ? enrolled : formations.map(f => ({
+      id: f.id,
+      title: f.title,
+      emoji: f.emoji || '📚',
+      description: f.description || '',
+      totalSessions: f.duration_weeks * 2,
+      completedSessions: 0,
+      attendedSessions: 0,
+      priceTotal: f.price_dzd || 0,
+      pricePaid: 0,
+      isOnline: f.duration_weeks <= 4,
+      status: f.status || 'active',
+      nextSession: null,
+    }));
+
+    // Save initial state if first time
+    if (enrolled.length === 0 && courses.length > 0) {
+      localStorage.setItem('skillsdz_enrolled', JSON.stringify(courses));
+    }
+
+    renderCoursList(courses);
+    renderCoursStats(courses);
+    initCoursFilters();
+  }).catch(() => {
+    list.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem">Erreur de chargement</p>';
+  });
+}
+
+function renderCoursStats(courses) {
+  const total = courses.length;
+  const totalSessions = courses.reduce((s, c) => s + c.totalSessions, 0);
+  const attended = courses.reduce((s, c) => s + c.attendedSessions, 0);
+  const remaining = courses.reduce((s, c) => s + (c.totalSessions - c.completedSessions), 0);
+  const totalPaid = courses.reduce((s, c) => s + c.pricePaid, 0);
+  const totalPrice = courses.reduce((s, c) => s + c.priceTotal, 0);
+  const remainingPayment = totalPrice - totalPaid;
+  const presenceRate = totalSessions > 0 ? Math.round((attended / totalSessions) * 100) : 0;
+
+  setText('coursTotal', total);
+  setText('coursPresent', presenceRate + '%');
+  setText('coursRemaining', remaining);
+  setText('coursPaid', remainingPayment.toLocaleString('fr-DZ') + ' DA');
+}
+
+function renderCoursList(courses) {
+  const list = document.getElementById('coursList');
+  if (!list) return;
+
+  const filtered = _coursFilter === 'all' ? courses
+    : _coursFilter === 'present' ? courses.filter(c => c.attendedSessions > 0)
+    : _coursFilter === 'absent' ? courses.filter(c => c.attendedSessions === 0 && c.completedSessions > 0)
+    : _coursFilter === 'en-ligne' ? courses.filter(c => c.isOnline)
+    : courses;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem">Aucun cours dans cette catégorie</p>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(c => {
+    const presencePercent = c.totalSessions > 0 ? Math.round((c.attendedSessions / c.totalSessions) * 100) : 0;
+    const remainingSessions = c.totalSessions - c.completedSessions;
+    const remainingPayment = c.priceTotal - c.pricePaid;
+    const paymentPercent = c.priceTotal > 0 ? Math.round((c.pricePaid / c.priceTotal) * 100) : 100;
+    const presenceColor = presencePercent >= 70 ? '#00d68f' : presencePercent >= 40 ? '#ffb547' : '#ff4d6d';
+
+    return `
+      <div class="cours-card" data-filter="${c.isOnline ? 'en-ligne' : ''} ${c.attendedSessions > 0 ? 'present' : c.completedSessions > 0 ? 'absent' : ''}">
+        <div class="cours-card__header">
+          <div class="cours-card__emoji">${c.emoji}</div>
+          <div class="cours-card__title-group">
+            <h3 class="cours-card__title">${esc(c.title)}</h3>
+            <span class="cours-card__badge ${c.isOnline ? 'cours-card__badge--online' : 'cours-card__badge--onsite'}">
+              <i data-lucide="${c.isOnline ? 'wifi' : 'map-pin'}"></i>
+              ${c.isOnline ? 'En ligne' : 'Présentiel'}
+            </span>
+          </div>
+        </div>
+
+        <div class="cours-card__body">
+          <!-- Présence -->
+          <div class="cours-card__section">
+            <div class="cours-card__section-header">
+              <span class="cours-card__section-title"><i data-lucide="check-circle"></i> Présence</span>
+              <span class="cours-card__section-value" style="color:${presenceColor}">${presencePercent}%</span>
+            </div>
+            <div class="cours-card__progress">
+              <div class="cours-card__progress-bar" style="width:${presencePercent}%;background:${presenceColor}"></div>
+            </div>
+            <p class="cours-card__detail">${c.attendedSessions} / ${c.totalSessions} séances suivies</p>
+          </div>
+
+          <!-- Sessions restantes -->
+          <div class="cours-card__section">
+            <div class="cours-card__section-header">
+              <span class="cours-card__section-title"><i data-lucide="clock"></i> Sessions</span>
+              <span class="cours-card__section-value">${remainingSessions}</span>
+            </div>
+            <div class="cours-card__progress">
+              <div class="cours-card__progress-bar" style="width:${c.totalSessions > 0 ? (c.completedSessions / c.totalSessions * 100) : 0}%;background:#1E5BFF"></div>
+            </div>
+            <p class="cours-card__detail">${c.completedSessions} / ${c.totalSessions} séances terminées</p>
+          </div>
+
+          <!-- Paiement -->
+          <div class="cours-card__section">
+            <div class="cours-card__section-header">
+              <span class="cours-card__section-title"><i data-lucide="wallet"></i> Paiement</span>
+              <span class="cours-card__section-value">${remainingPayment > 0 ? remainingPayment.toLocaleString('fr-DZ') + ' DA restant' : '✅ Payé'}</span>
+            </div>
+            <div class="cours-card__progress">
+              <div class="cours-card__progress-bar" style="width:${paymentPercent}%;background:${paymentPercent >= 100 ? '#00d68f' : '#ffb547'}"></div>
+            </div>
+            <p class="cours-card__detail">${c.pricePaid.toLocaleString('fr-DZ')} / ${c.priceTotal.toLocaleString('fr-DZ')} DA versés</p>
+          </div>
+        </div>
+
+        <div class="cours-card__footer">
+          <button class="cours-card__btn cours-card__btn--primary" onclick="markCoursPresence('${c.id}')">
+            <i data-lucide="check"></i> Marquer présence
+          </button>
+          ${c.isOnline ? `<button class="cours-card__btn cours-card__btn--accent" onclick="openCoursOnline('${c.id}')"><i data-lucide="play-circle"></i> Cours en ligne</button>` : ''}
+          ${remainingPayment > 0 ? `<button class="cours-card__btn cours-card__btn--outline" onclick="payCoursRemaining('${c.id}')"><i data-lucide="credit-card"></i> Payer</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function initCoursFilters() {
+  document.querySelectorAll('.cours-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cours-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _coursFilter = btn.dataset.filter;
+      const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
+      if (enrolled.length > 0) renderCoursList(enrolled);
+    });
+  });
+}
+
+function markCoursPresence(coursId) {
+  const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
+  const course = enrolled.find(c => c.id === coursId);
+  if (!course) return;
+
+  if (course.completedSessions < course.totalSessions) {
+    course.completedSessions++;
+    course.attendedSessions++;
+    localStorage.setItem('skillsdz_enrolled', JSON.stringify(enrolled));
+
+    Gamification.earnXP('course');
+    showNotification(`Présence marquée pour "${course.title}" — +50 XP`, 'success');
+
+    renderCoursList(enrolled);
+    renderCoursStats(enrolled);
+  } else {
+    showNotification('Toutes les séances sont terminées', 'info');
+  }
+}
+
+function openCoursOnline(coursId) {
+  const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
+  const course = enrolled.find(c => c.id === coursId);
+  if (!course) return;
+
+  // Open videos page for online cours
+  navigateTo('videos');
+  showNotification(`Cours en ligne : ${course.title}`, 'info');
+}
+
+function payCoursRemaining(coursId) {
+  const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
+  const course = enrolled.find(c => c.id === coursId);
+  if (!course) return;
+
+  // Navigate to payments page
+  navigateTo('paiements');
+  showNotification(`Paiement pour "${course.title}" — ${course.priceTotal - course.pricePaid} DA restants`, 'info');
 }
