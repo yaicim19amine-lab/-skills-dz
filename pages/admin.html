@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Skills DZ - Panneau d'administration">
+  <meta name="theme-color" content="#0B1331">
+  <title>Skills DZ — Admin Panel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../assets/css/admin.css">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+
+  <div class="admin-wrapper">
+
+    <aside class="admin-sidebar" id="adminSidebar" role="navigation" aria-label="Navigation principale">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <i data-lucide="graduation-cap"></i>
+        </div>
+        <span class="brand-text">Skills DZ</span>
+        <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li><a href="#" class="nav-item active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a></li>
+          <li><a href="#" class="nav-item" data-page="users"><i data-lucide="users"></i><span>Utilisateurs</span></a></li>
+          <li><a href="#" class="nav-item" data-page="formations"><i data-lucide="book-open"></i><span>Formations</span></a></li>
+          <li><a href="#" class="nav-item" data-page="live"><i data-lucide="radio"></i><span>Sessions Live</span></a></li>
+          <li><a href="#" class="nav-item" data-page="finance"><i data-lucide="wallet"></i><span>Finances</span></a></li>
+          <li><a href="#" class="nav-item" data-page="settings"><i data-lucide="settings"></i><span>Paramètres</span></a></li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-badge">
+          <i data-lucide="shield-check"></i>
+          <span>Super Admin</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-overlay" id="adminOverlay"></div>
+
+    <div class="admin-main">
+
+      <header class="admin-header" role="banner">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="header-greeting">
+            <h1 class="greeting-title" id="greetingTitle">Bonjour, Admin</h1>
+            <p class="greeting-sub">Voici ce qui se passe aujourd'hui</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="header-search">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="search" class="search-input" placeholder="Rechercher..." aria-label="Rechercher">
+          </div>
+          <button class="header-btn notification-btn" id="notificationBtn" aria-label="Notifications">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge" id="notifBadge">0</span>
+          </button>
+          <div class="header-avatar" id="adminAvatar" role="button" tabindex="0" aria-label="Menu administrateur">
+            <div class="avatar-circle">A</div>
+            <span class="avatar-name">Admin</span>
+            <i data-lucide="chevron-down" class="avatar-chevron"></i>
+          </div>
+        </div>
+      </header>
+
+      <main class="admin-content" role="main">
+
+        <!-- ═══ DASHBOARD ═══ -->
+        <section class="admin-page active" id="page-admin-dashboard">
+          <div class="page-header">
+            <h2 class="page-title">Dashboard</h2>
+            <p class="page-subtitle">Vue d'ensemble de la plateforme</p>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card stat-card--blue">
+              <div class="stat-icon"><i data-lucide="users"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="statUsers">—</span>
+                <span class="stat-label">Total Utilisateurs</span>
+              </div>
+            </div>
+            <div class="stat-card stat-card--green">
+              <div class="stat-icon"><i data-lucide="banknote"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="statRevenue">— DA</span>
+                <span class="stat-label">Revenus (DA)</span>
+              </div>
+            </div>
+            <div class="stat-card stat-card--cyan">
+              <div class="stat-icon"><i data-lucide="zap"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="statXP">—</span>
+                <span class="stat-label">XP distribués</span>
+              </div>
+            </div>
+            <div class="stat-card stat-card--red">
+              <div class="stat-icon"><i data-lucide="book-open"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="statFormations">—</span>
+                <span class="stat-label">Formations actives</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card chart-card">
+              <div class="card-header">
+                <h3 class="card-title">Activité récente</h3>
+              </div>
+              <div class="chart-placeholder">
+                <div class="chart-bars">
+                  <div class="chart-bar" style="--h:40%"></div>
+                  <div class="chart-bar" style="--h:65%"></div>
+                  <div class="chart-bar" style="--h:45%"></div>
+                  <div class="chart-bar" style="--h:80%"></div>
+                  <div class="chart-bar" style="--h:55%"></div>
+                  <div class="chart-bar" style="--h:70%"></div>
+                  <div class="chart-bar" style="--h:90%"></div>
+                </div>
+                <div class="chart-labels">
+                  <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card activity-card">
+              <div class="card-header">
+                <h3 class="card-title">Dernières activités</h3>
+              </div>
+              <ul class="activity-feed" id="activityFeed">
+                <li class="activity-item"><div class="activity-dot activity-dot--blue"></div><div class="activity-body"><p>Chargement...</p></div></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ USERS ═══ -->
+        <section class="admin-page" id="page-admin-users">
+          <div class="page-header">
+            <h2 class="page-title">Utilisateurs</h2>
+            <div class="page-actions">
+              <button class="btn btn--primary" id="addUserBtn"><i data-lucide="user-plus"></i> Ajouter</button>
+              <button class="btn btn--outline" id="exportUsersBtn"><i data-lucide="download"></i> Exporter</button>
+            </div>
+          </div>
+
+          <div class="filters-bar">
+            <div class="filter-search">
+              <i data-lucide="search"></i>
+              <input type="search" placeholder="Rechercher un utilisateur..." id="userSearch">
+            </div>
+            <div class="filter-group">
+              <select class="filter-select" id="filterLevel">
+                <option value="">Tous les niveaux</option>
+                <option value="beginner">Débutant (1-3)</option>
+                <option value="intermediate">Intermédiaire (4-7)</option>
+                <option value="advanced">Avancé (8+)</option>
+              </select>
+              <select class="filter-select" id="filterStatus">
+                <option value="">Tous les statuts</option>
+                <option value="active">Actif</option>
+                <option value="banned">Banni</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="usersTable">
+              <thead>
+                <tr>
+                  <th>Utilisateur</th>
+                  <th>Email</th>
+                  <th>Niveau</th>
+                  <th>XP</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr><td colspan="6" style="text-align:center;color:#8892b0;padding:2rem">Chargement...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ═══ FORMATIONS ═══ -->
+        <section class="admin-page" id="page-admin-formations">
+          <div class="page-header">
+            <h2 class="page-title">Formations</h2>
+            <div class="page-actions">
+              <button class="btn btn--primary" id="addFormationBtn"><i data-lucide="plus-circle"></i> Nouvelle formation</button>
+            </div>
+          </div>
+
+          <div class="formations-grid" id="adminFormationsGrid">
+            <p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">Chargement...</p>
+          </div>
+        </section>
+
+        <!-- ═══ LIVE SESSIONS ═══ -->
+        <section class="admin-page" id="page-admin-live">
+          <div class="page-header">
+            <h2 class="page-title">Sessions Live</h2>
+            <div class="page-actions">
+              <button class="btn btn--primary" id="addSessionBtn"><i data-lucide="plus-circle"></i> Nouvelle session</button>
+            </div>
+          </div>
+
+          <div class="live-sessions" id="adminLiveList">
+            <p style="color:#8892b0;text-align:center;padding:2rem">Chargement...</p>
+          </div>
+        </section>
+
+        <!-- ═══ FINANCE ═══ -->
+        <section class="admin-page" id="page-admin-finance">
+          <div class="page-header">
+            <h2 class="page-title">Finances</h2>
+            <div class="page-actions">
+              <button class="btn btn--outline" id="exportFinanceBtn"><i data-lucide="download"></i> Exporter CSV</button>
+            </div>
+          </div>
+
+          <div class="stats-grid stats-grid--finance">
+            <div class="stat-card stat-card--green">
+              <div class="stat-icon"><i data-lucide="trending-up"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="totalRevenue">— DA</span>
+                <span class="stat-label">Revenus confirmés</span>
+              </div>
+            </div>
+            <div class="stat-card stat-card--blue">
+              <div class="stat-icon"><i data-lucide="share-2"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="totalReferrals">— DA</span>
+                <span class="stat-label">Parrainages payés</span>
+              </div>
+            </div>
+            <div class="stat-card stat-card--cyan">
+              <div class="stat-icon"><i data-lucide="shopping-bag"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="totalShopPurchases">— DA</span>
+                <span class="stat-label">Achats boutique</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Transactions récentes</h3>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table" id="financeTable">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Utilisateur</th>
+                    <th>Montant</th>
+                    <th>Méthode</th>
+                    <th>Statut</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody id="financeTableBody">
+                  <tr><td colspan="6" style="text-align:center;color:#8892b0;padding:2rem">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ SETTINGS ═══ -->
+        <section class="admin-page" id="page-admin-settings">
+          <div class="page-header">
+            <h2 class="page-title">Paramètres</h2>
+          </div>
+          <div class="settings-grid">
+            <div class="card settings-card">
+              <div class="card-header">
+                <h3 class="card-title"><i data-lucide="user-cog"></i> Profil administrateur</h3>
+              </div>
+              <form class="settings-form" id="adminProfileForm">
+                <div class="form-group">
+                  <label for="adminName">Nom complet</label>
+                  <input type="text" id="adminName" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label for="adminEmail">Email</label>
+                  <input type="email" id="adminEmail" class="form-input" disabled>
+                </div>
+                <div class="form-group">
+                  <label for="adminPassword">Nouveau mot de passe</label>
+                  <input type="password" id="adminPassword" placeholder="••••••••" class="form-input">
+                </div>
+                <button type="submit" class="btn btn--primary">Sauvegarder</button>
+              </form>
+            </div>
+            <div class="card settings-card">
+              <div class="card-header">
+                <h3 class="card-title"><i data-lucide="bell"></i> Notifications</h3>
+              </div>
+              <div class="settings-options">
+                <label class="toggle-row">
+                  <span>Email pour nouvelles inscriptions</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Alerte paiements en attente</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Rapport hebdomadaire</span>
+                  <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Notifications sessions live</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Titre</h3>
+        <button class="modal-close" id="modalClose" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- NOTIFICATION PANEL -->
+  <div class="notification-panel" id="notificationPanel" aria-hidden="true">
+    <div class="notif-header">
+      <h3>Notifications</h3>
+      <button class="notif-clear" id="notifClear">Tout marquer lu</button>
+    </div>
+    <ul class="notif-list" id="notifList"></ul>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/admin.js"></script>
+
+  <script>
+    // Toggle switches for settings
+    document.querySelectorAll('.toggle').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const isActive = toggle.classList.toggle('active');
+        toggle.setAttribute('aria-checked', isActive);
+      });
+    });
+  </script>
+</body>
+</html>
