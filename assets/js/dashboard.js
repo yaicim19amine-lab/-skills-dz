@@ -2,6 +2,12 @@
    SKILLS DZ — Dashboard Logic
    ======================================== */
 
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function closeLevelUpModal() { document.getElementById('levelUpModal')?.classList.remove('open'); }
+
+let _pandaSpeechInterval = null;
+let _notifTimeout = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   // Auth guard — redirect to login if not authenticated
   if (typeof Auth !== 'undefined' && !Auth.isLoggedIn()) {
@@ -15,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (result.success) {
         console.log('Migration effectuée:', result.data);
       }
+    }).catch(err => {
+      console.error('Migration failed:', err);
     });
   }
 
@@ -38,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let speechIdx = 0;
   const sub = document.getElementById('welcomeSub');
   if (sub) {
-    setInterval(() => {
+    if (_pandaSpeechInterval) clearInterval(_pandaSpeechInterval);
+    _pandaSpeechInterval = setInterval(() => {
       sub.style.opacity = '0';
       setTimeout(() => {
         speechIdx = (speechIdx + 1) % speeches.length;
@@ -76,12 +85,73 @@ function loadUserData() {
     setText('profileStreak', Gamification.getState().streak);
     setText('profileBadges', Gamification.getState().badges.length);
     setText('profileCourses', Gamification.getState().coursesCompleted.length);
+
+    // Animated KPI counters
+    const kpiEls = {
+      coursesCompleted: Gamification.getState().coursesCompleted.length,
+      videosWatched: Gamification.getState().videosWatched || 0,
+      gamesPlayed: Gamification.getState().gamesPlayed || 0,
+      badgesCount: Gamification.getState().badges.length,
+    };
+    Object.entries(kpiEls).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) animateValue(el, 0, val, 800);
+    });
+
+  // Greeting based on time
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+  const welcomeEl = document.getElementById('welcomeName');
+  if (welcomeEl) welcomeEl.parentElement.innerHTML = `${greeting}, <span id="welcomeName">${esc(name)}</span> !`;
+
+  const continueCard = document.getElementById('continueCard');
+  const continueDesc = document.getElementById('continueDesc');
+  const continueBtn = document.getElementById('continueBtn');
+  if (continueCard && continueDesc && continueBtn) {
+    api.getMyFormations().then(data => {
+      const course = (data.courses || [])[0];
+      if (!course) return;
+      const total = Math.max(1, (course.duration_weeks || 0) * (course.days_per_week || 2));
+      const completed = Math.round(((course.progress || 0) / 100) * total);
+      const remaining = total - completed;
+      if (remaining > 0) {
+        continueCard.style.display = 'flex';
+        continueDesc.textContent = `${course.title} — ${remaining} séances restantes`;
+        continueBtn.onclick = () => navigateTo('cours');
+      }
+    }).catch(() => {});
+  }
   } catch {}
 }
 
 function setText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
+}
+
+function animateValue(el, start, end, duration) {
+  if (!el || start === end) return;
+  const range = end - start;
+  const startTime = performance.now();
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(start + range * eased);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function showSkeleton(container, count = 3) {
+  if (!container) return;
+  container.innerHTML = Array(count).fill('').map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton skeleton--circle"></div>
+      <div class="skeleton skeleton--line" style="width:60%"></div>
+      <div class="skeleton skeleton--line" style="width:80%"></div>
+    </div>
+  `).join('');
 }
 
 /* ========================================
@@ -124,8 +194,6 @@ function navigateTo(page) {
     loadVideos();
   } else if (page === 'boutique') {
     loadShop();
-  } else if (page === 'paiements') {
-    loadPayments();
   } else if (page === 'live') {
     loadLiveSessions();
   }
@@ -164,19 +232,53 @@ function initQuickActions() {
   if (window._quickInit) return;
   window._quickInit = true;
   document.querySelectorAll('.quick-action').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const action = btn.dataset.action;
-      const xpMap = { course: 50, video: 30, game: 100, form: 20, ai: 15, referral: 200 };
+      const navMap = { course: 'cours', video: 'videos', game: 'jeux', ai: 'agents', referral: 'parrainage' };
+      const serverXpMap = { game: 100, form: 20, ai: 15 };
 
-      // earnXP internally calls addXP — do NOT call addXP separately (double XP bug fix)
-      Gamification.earnXP(action);
-      addActivity(action, xpMap[action] || 0);
+      if (navMap[action]) navigateTo(navMap[action]);
+
+      if (!serverXpMap[action]) {
+        addActivity(action, 0);
+      } else {
+        btn.disabled = true;
+        try {
+          const data = await api.awardXpEvent(action, serverXpMap[action], quickActionReason(action));
+          updateCachedUserProgress(data);
+          addActivity(action, data.awarded || serverXpMap[action]);
+          showNotification(`+${data.awarded || serverXpMap[action]} XP enregistrés`, 'success');
+        } catch (err) {
+          showNotification(err.message, 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      }
 
       // Visual feedback
       btn.style.borderColor = '#00d68f';
       setTimeout(() => btn.style.borderColor = '#1c2035', 600);
     });
   });
+}
+
+function quickActionReason(action) {
+  const reasons = { game: 'Jeu lancé depuis actions rapides', form: 'Formulaire rempli', ai: 'Agent IA consulté' };
+  return reasons[action] || 'Action complétée';
+}
+
+function updateCachedUserProgress(data) {
+  if (!data || typeof data.xp !== 'number') return;
+  try {
+    const user = JSON.parse(localStorage.getItem('skillsdz_user') || '{}');
+    user.xp = data.xp;
+    if (typeof data.level === 'number') user.level = data.level;
+    localStorage.setItem('skillsdz_user', JSON.stringify(user));
+  } catch {}
+  const userXp = document.getElementById('userXp');
+  const userLevelBadge = document.getElementById('userLevelBadge');
+  if (userXp) userXp.textContent = `${data.xp} XP`;
+  if (userLevelBadge && typeof data.level === 'number') userLevelBadge.textContent = `Nv. ${data.level}`;
 }
 
 /* ========================================
@@ -199,7 +301,7 @@ function addActivity(type, xp) {
   item.innerHTML = `
     <div class="activity-item__icon" style="background:rgba(30,91,255,.15)"><i data-lucide="${iconMap[type] || 'zap'}"></i></div>
     <div class="activity-item__content">
-      <p>${labelMap[type] || type} — <strong>+${xp} XP</strong></p>
+      <p>${labelMap[type] || type}${xp > 0 ? ` — <strong>+${xp} XP</strong>` : ''}</p>
       <span class="activity-item__time">À l'instant</span>
     </div>
   `;
@@ -225,18 +327,19 @@ function initNotifications() {
 function showNotification(message, type = 'info') {
   const existing = document.querySelector('.notification');
   if (existing) existing.remove();
+  if (_notifTimeout) clearTimeout(_notifTimeout);
   const notif = document.createElement('div');
   notif.className = 'notification';
   notif.style.cssText = `
     position:fixed;top:24px;right:24px;padding:16px 24px;border-radius:12px;
     background:${type==='success'?'#00d68f':type==='error'?'#ff4d6d':'#1E5BFF'};
-    color:white;font-size:14px;font-weight:600;
-    box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:1000;
-    animation:fadeIn 0.3s ease;
+    color:white;font-size:14px;font-weight:600;z-index:1000;
+    animation:fadeIn 0.3s ease;max-width:360px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.3);
   `;
   notif.textContent = message;
   document.body.appendChild(notif);
-  setTimeout(() => { notif.style.opacity = '0'; notif.style.transition = 'opacity 0.3s'; setTimeout(() => notif.remove(), 300); }, 3000);
+  _notifTimeout = setTimeout(() => { notif.style.opacity = '0'; notif.style.transition = 'opacity 0.3s'; setTimeout(() => notif.remove(), 300); }, 3000);
 }
 
 /* ========================================
@@ -245,6 +348,8 @@ function showNotification(message, type = 'info') {
 function loadFormations() {
   const grid = document.getElementById('formationsGrid');
   if (!grid) return;
+
+  showSkeleton(grid, 3);
 
   api.getFormations().then(data => {
     const formations = data.formations || [];
@@ -255,13 +360,13 @@ function loadFormations() {
     grid.innerHTML = formations.map(f => `
       <div class="formation-card">
         <div class="formation-card__header">
-          <div class="formation-card__emoji">${f.emoji || '📚'}</div>
+          <div class="formation-card__emoji">${esc(f.emoji || '📚')}</div>
           <div class="formation-card__xp">+${f.xp_reward} XP</div>
-          <h3 class="formation-card__title">${f.title}</h3>
+          <h3 class="formation-card__title">${esc(f.title)}</h3>
           <p class="formation-card__meta">${f.duration_weeks} semaines · ${f.max_slots} places · ${f.price_dzd.toLocaleString()} DA</p>
         </div>
         <div class="formation-card__body">
-          <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem">${f.description || ''}</p>
+          <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem">${esc(f.description || '')}</p>
           <div class="formation-card__footer">
             <span class="formation-card__status formation-card__status--active">Disponible</span>
           </div>
@@ -276,40 +381,70 @@ function loadFormations() {
 /* ========================================
    VIDEOS DATA
    ======================================== */
+let _videoCat = 'all';
+
 function loadVideos() {
   const grid = document.getElementById('videosGrid');
   if (!grid) return;
 
+  showSkeleton(grid, 6);
+
+  // Init filter buttons
+  if (!window._videoFilterInit) {
+    window._videoFilterInit = true;
+    document.querySelectorAll('.video-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.video-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        _videoCat = btn.dataset.cat;
+        renderVideosFromData(grid);
+      });
+    });
+  }
+
   api.getVideos().then(data => {
-    const videos = data.videos || [];
-    if (videos.length === 0) {
-      grid.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem">Aucune vidéo disponible pour le moment.</p>';
-      return;
-    }
-    grid.innerHTML = videos.map(v => {
-      const mins = Math.floor((v.duration_seconds || 0) / 60);
-      const secs = (v.duration_seconds || 0) % 60;
-      const duration = `${mins}:${secs.toString().padStart(2, '0')}`;
-      return `
-        <div class="video-card">
-          <div class="video-card__thumb">
-            <div class="video-card__play"><i data-lucide="play"></i></div>
-            <span class="video-card__duration">${duration}</span>
-          </div>
-          <div class="video-card__body">
-            <h4 class="video-card__title">${v.title}</h4>
-            <div class="video-card__meta">
-              <span>${v.category || ''}</span>
-              <span class="video-card__xp">+${v.xp_reward} XP</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    window._videoData = data.videos || [];
+    renderVideosFromData(grid);
   }).catch(err => {
     grid.innerHTML = `<p style="color:var(--error);text-align:center;padding:2rem">Erreur de chargement: ${err.message}</p>`;
   });
+}
+
+function renderVideosFromData(grid) {
+  const allVideos = window._videoData || [];
+  const filtered = _videoCat === 'all' ? allVideos : allVideos.filter(v => (v.category || '').toLowerCase() === _videoCat);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem">Aucune vidéo dans cette catégorie</p>';
+    return;
+  }
+
+  const catColors = { introduction: '#94a3b8', debutant: '#00d68f', intermediaire: '#1E5BFF', avance: '#7c3aed', pro: '#ffb547' };
+  const catLabels = { introduction: 'Introduction', debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé', pro: 'Pro' };
+
+  grid.innerHTML = filtered.map(v => {
+    const mins = Math.floor((v.duration_seconds || 0) / 60);
+    const secs = (v.duration_seconds || 0) % 60;
+    const duration = `${mins}:${secs.toString().padStart(2, '0')}`;
+    const cat = (v.category || 'debutant').toLowerCase();
+    return `
+      <div class="video-card">
+        <div class="video-card__thumb">
+          <div class="video-card__play"><i data-lucide="play"></i></div>
+          <span class="video-card__duration">${esc(duration)}</span>
+          <span class="video-card__cat" style="background:${catColors[cat] || '#1E5BFF'}">${esc(catLabels[cat] || cat)}</span>
+        </div>
+        <div class="video-card__body">
+          <h4 class="video-card__title">${esc(v.title)}</h4>
+          <div class="video-card__meta">
+            <span>${esc(v.category || '')}</span>
+            <span class="video-card__xp">+${v.xp_reward} XP</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 /* ========================================
@@ -376,8 +511,16 @@ function loadShop() {
   const balanceEl = document.getElementById('shopXpBalance');
   if (!grid) return;
 
-  const state = Gamification.getState();
-  if (balanceEl) balanceEl.textContent = `${state.xp} XP`;
+  window._serverXp = null;
+  if (balanceEl) balanceEl.textContent = 'Chargement...';
+
+  api.getMe().then(data => {
+    if (typeof data.user?.xp === 'number') {
+      window._serverXp = data.user.xp;
+      if (balanceEl) balanceEl.textContent = `${window._serverXp} XP`;
+      if (window._shopItems) renderShopItems(document.querySelector('.shop-filter.active')?.dataset.category || 'all');
+    }
+  }).catch(() => {});
 
   api.getShopItems().then(data => {
     const items = data.items || [];
@@ -407,22 +550,22 @@ function renderShopItems(category) {
   const grid = document.getElementById('shopGrid');
   if (!grid) return;
 
-  const state = Gamification.getState();
+  const availableXp = typeof window._serverXp === 'number' ? window._serverXp : -1;
   const allItems = window._shopItems || [];
   const items = category === 'all' ? allItems : allItems.filter(i => i.category === category);
 
   grid.innerHTML = items.map(item => {
-    const canAfford = state.xp >= item.xp_cost;
+    const canAfford = availableXp >= item.xp_cost;
     const inStock = item.stock === -1 || item.stock > 0;
     return `
       <div class="shop-card ${!canAfford || !inStock ? 'shop-card--disabled' : ''}">
-        <h4 class="shop-card__name">${item.name}</h4>
-        <p class="shop-card__desc">${item.description || ''}</p>
+        <h4 class="shop-card__name">${esc(item.name)}</h4>
+        <p class="shop-card__desc">${esc(item.description || '')}</p>
         <div class="shop-card__footer">
           <span class="shop-card__cost">${item.xp_cost} XP</span>
-          ${!inStock ? '<span class="shop-card__stock">Rupture</span>' : item.stock > 0 ? `<span class="shop-card__stock">${item.stock} restants</span>` : '<span class="shop-card__stock">Illimité</span>'}
+          ${!inStock ? '<span class="shop-card__stock">Rupture</span>' : item.stock > 0 ? `<span class="shop-card__stock">${esc(item.stock)} restants</span>` : '<span class="shop-card__stock">Illimité</span>'}
         </div>
-        <button class="btn btn--accent btn--block shop-buy-btn" ${!canAfford || !inStock ? 'disabled' : ''} data-item-id="${item.id}">
+        <button class="btn btn--accent btn--block shop-buy-btn" ${!canAfford || !inStock ? 'disabled' : ''} data-item-id="${esc(item.id)}">
           ${canAfford && inStock ? 'Échanger' : 'XP insuffisants'}
         </button>
       </div>
@@ -438,14 +581,18 @@ function purchaseShopItem(itemId) {
   const item = (window._shopItems || []).find(i => i.id === itemId);
   if (!item) return;
 
-  const state = Gamification.getState();
-  if (state.xp < item.xp_cost) {
+  const availableXp = typeof window._serverXp === 'number' ? window._serverXp : -1;
+  if (availableXp < item.xp_cost) {
     showNotification('XP insuffisants !', 'error');
     return;
   }
 
-  api.purchaseItem(itemId).then(() => {
-    Gamification.deductXP(item.xp_cost, `Achat: ${item.name}`);
+  api.purchaseItem(itemId).then(data => {
+    if (typeof data.remainingXp === 'number') {
+      window._serverXp = data.remainingXp;
+      const balanceEl = document.getElementById('shopXpBalance');
+      if (balanceEl) balanceEl.textContent = `${window._serverXp} XP`;
+    }
     showNotification(`${item.name} échangé ! -${item.xp_cost} XP`, 'success');
     loadShop();
   }).catch(err => {
@@ -470,10 +617,10 @@ function loadLiveSessions() {
       <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">📅 Prochaines sessions</h3>
       ${sessions.map(s => `
         <div class="live-session-card">
-          <div class="live-session-card__status live-session-card__status--${s.status}">${s.status === 'live' ? '🔴 En direct' : s.status === 'scheduled' ? '🟢 Programmé' : '⚫ Terminé'}</div>
+          <div class="live-session-card__status live-session-card__status--${esc(s.status)}">${s.status === 'live' ? '🔴 En direct' : s.status === 'scheduled' ? '🟢 Programmé' : '⚫ Terminé'}</div>
           <div class="live-session-card__info">
-            <h4>${s.title}</h4>
-            <p>${s.speaker || ''} · ${new Date(s.date || s.scheduled_at).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à ${new Date(s.date || s.scheduled_at).getHours()}h${String(new Date(s.date || s.scheduled_at).getMinutes()).padStart(2, '0')}</p>
+            <h4>${esc(s.title)}</h4>
+            <p>${esc(s.speaker || '')} · ${new Date(s.date || s.scheduled_at).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à ${new Date(s.date || s.scheduled_at).getHours()}h${String(new Date(s.date || s.scheduled_at).getMinutes()).padStart(2, '0')}</p>
           </div>
           <button class="btn btn--ghost btn--sm" ${s.youtubeUrl ? '' : 'disabled'}>Regarder</button>
         </div>
@@ -485,164 +632,24 @@ function loadLiveSessions() {
 }
 
 /* ========================================
-   PAIEMENTS
-   ======================================== */
-let selectedPaymentMethod = 'cib';
-
-function loadPayments() {
-  if (!window._paymentInit) {
-    window._paymentInit = true;
-    // Method selection
-    document.querySelectorAll('.payment-method-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedPaymentMethod = btn.dataset.method;
-      });
-    });
-
-    // Preset amounts
-    document.querySelectorAll('.payment-preset').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.getElementById('paymentAmount').value = btn.dataset.amount;
-      });
-    });
-
-    // Create payment button
-    document.getElementById('createPaymentBtn')?.addEventListener('click', createPayment);
-  }
-
-  // Load history
-  loadPaymentHistory();
-}
-
-async function createPayment() {
-  const amount = parseInt(document.getElementById('paymentAmount').value);
-  if (!amount || amount < 500) {
-    showNotification('Montant minimum: 500 DA', 'error');
-    return;
-  }
-
-  const btn = document.getElementById('createPaymentBtn');
-  btn.innerHTML = '<span>Création en cours...</span>';
-  btn.disabled = true;
-
-  try {
-    const data = await api.createPayment({ amount, method: selectedPaymentMethod });
-    showPaymentInstructions(data.instructions, amount);
-    showNotification('Paiement créé !', 'success');
-  } catch (err) {
-    showNotification('Erreur: ' + err.message, 'error');
-  } finally {
-    btn.innerHTML = 'Créer le paiement';
-    btn.disabled = false;
-  }
-}
-
-function showPaymentInstructions(instructions, amount) {
-  const container = document.getElementById('paymentInstructions');
-  const title = document.getElementById('paymentInstructionsTitle');
-  const content = document.getElementById('paymentInstructionsContent');
-
-  if (!container || !content) return;
-
-  title.textContent = instructions.title;
-  container.style.display = 'block';
-
-  let html = '';
-
-  if (instructions.qrData) {
-    html += `
-      <div class="payment-qr">
-        <img src="${instructions.qrData}" alt="QR Code" width="200" height="200" style="border-radius:12px;background:white;padding:8px;"/>
-        <p style="font-size:12px;color:#8892b0;margin-top:8px;">Scannez le QR code avec BaridiMob</p>
-      </div>
-    `;
-  }
-
-  if (instructions.walletAddress) {
-    html += `
-      <div class="payment-wallet">
-        <p style="font-size:12px;color:#8892b0;">Adresse wallet (${instructions.network})</p>
-        <div style="display:flex;gap:8px;align-items:center;margin:8px 0;">
-          <code style="flex:1;padding:8px 12px;background:#0B1331;border:1px solid #1c2035;border-radius:8px;font-size:12px;color:#00C4FF;word-break:break-all;">${instructions.walletAddress}</code>
-          <button class="btn btn--ghost btn--sm" onclick="navigator.clipboard.writeText('${instructions.walletAddress}');showNotification('Copié !','success')">📋</button>
-        </div>
-        <p style="font-size:14px;font-weight:700;color:#ffb547;">${instructions.amountUSDT} USDT ≈ ${amount} DA</p>
-      </div>
-    `;
-  }
-
-  if (instructions.steps) {
-    html += `
-      <div class="payment-steps">
-        <h4 style="font-size:14px;font-weight:700;color:white;margin:16px 0 8px;">📋 Étapes :</h4>
-        <ol style="padding-left:20px;">
-          ${instructions.steps.map(s => `<li style="font-size:13px;color:#8892b0;margin-bottom:8px;line-height:1.5;">${s}</li>`).join('')}
-        </ol>
-      </div>
-    `;
-  }
-
-  html += `
-    <div style="margin-top:16px;padding:12px;background:#ffb54722;border:1px solid #ffb54744;border-radius:10px;">
-      <p style="font-size:13px;color:#ffb547;"><strong>⚡ Confirmation :</strong> Envoyez la preuve de paiement par WhatsApp au <strong>06 56 47 15 47</strong></p>
-    </div>
-  `;
-
-  content.innerHTML = html;
-  container.scrollIntoView({ behavior: 'smooth' });
-}
-
-function loadPaymentHistory() {
-  const el = document.getElementById('paymentHistory');
-  if (!el) return;
-
-  api.getPayments().then(data => {
-    const payments = data.payments || [];
-    if (payments.length === 0) {
-      el.innerHTML = '<p style="padding:20px;text-align:center;color:#555;">Aucun paiement</p>';
-      return;
-    }
-    el.innerHTML = payments.map(p => `
-      <div class="payment-history-item">
-        <div class="payment-history-method payment-history-method--${(p.method || 'cib').toLowerCase()}">${p.method || 'N/A'}</div>
-        <div class="payment-history-info">
-          <strong>${(p.amount_dzd || 0).toLocaleString()} DA</strong>
-          <span>${new Date(p.created_at).toLocaleDateString('fr-FR')} · ${p.reference || 'N/A'}</span>
-        </div>
-        <span class="status-badge status-badge--${p.status}">${p.status === 'paid' ? '✅ Payé' : '⏳ En attente'}</span>
-      </div>
-    `).join('');
-  }).catch(() => {
-    el.innerHTML = '<p style="padding:20px;text-align:center;color:#555;">Erreur de chargement</p>';
-  });
-}
-
-/* ========================================
-   MES COURS — Présence, Sessions, Paiement, En ligne
+   MES COURS — Présence, Sessions, En ligne
    ======================================== */
 let _coursFilter = 'all';
+let _coursData = [];
 
 function loadCours() {
   const list = document.getElementById('coursList');
   if (!list) return;
 
-  // Load from localStorage (enrolled courses with tracking data)
-  const user = JSON.parse(localStorage.getItem('skillsdz_user'));
-  const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
-
-  // If no enrolled courses, fetch from formations and create mock enrollment
-  api.getFormations().then(data => {
-    const formations = data.formations || [];
-    let courses = enrolled.length > 0 ? enrolled : formations.map(f => ({
+  api.getMyFormations().then(data => {
+    const courses = (data.courses || []).map(f => ({
       id: f.id,
       title: f.title,
       emoji: f.emoji || '📚',
       description: f.description || '',
-      totalSessions: f.duration_weeks * 2,
-      completedSessions: 0,
-      attendedSessions: 0,
+      totalSessions: Math.max(1, (f.duration_weeks || 0) * (f.days_per_week || 2)),
+      completedSessions: Math.round(((f.progress || 0) / 100) * Math.max(1, (f.duration_weeks || 0) * (f.days_per_week || 2))),
+      attendedSessions: Math.round(((f.progress || 0) / 100) * Math.max(1, (f.duration_weeks || 0) * (f.days_per_week || 2))),
       priceTotal: f.price_dzd || 0,
       pricePaid: 0,
       isOnline: f.duration_weeks <= 4,
@@ -650,33 +657,60 @@ function loadCours() {
       nextSession: null,
     }));
 
-    // Save initial state if first time
-    if (enrolled.length === 0 && courses.length > 0) {
-      localStorage.setItem('skillsdz_enrolled', JSON.stringify(courses));
-    }
-
-    renderCoursList(courses);
-    renderCoursStats(courses);
+    _coursData = courses;
+    renderCoursList(_coursData);
+    renderCoursStats(_coursData);
     initCoursFilters();
   }).catch(() => {
     list.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem">Erreur de chargement</p>';
   });
 }
 
+function markCoursPresence(coursId) {
+  api.put('/profile', { action: 'markCoursPresence', coursId }).then(data => {
+    showNotification(`Présence enregistrée ! +${data.awarded || 20} XP`, 'success');
+    if (typeof data.xp === 'number') {
+      updateCachedUserProgress(data);
+    }
+    loadCours();
+  }).catch(err => {
+    showNotification(err.message || 'Erreur lors de l\'enregistrement', 'error');
+  });
+}
+
+function openCoursOnline(coursId) {
+  const course = _coursData.find(c => c.id === coursId);
+  if (course) {
+    navigateTo('videos');
+    showNotification(`Cours en ligne : ${course.title}`, 'info');
+    return;
+  }
+
+  api.watchVideo(coursId).then(data => {
+    showNotification(`Progression vidéo enregistrée : +${data.awarded || 30} XP`, 'success');
+    if (typeof data.xp === 'number') {
+      updateCachedUserProgress(data);
+    }
+    loadCours();
+  }).catch(err => {
+    showNotification(err.message || 'Erreur vidéo', 'error');
+  });
+}
+
+function payCoursRemaining(coursId) {
+  const course = _coursData.find(c => c.id === coursId);
+  if (!course) return;
+
+  navigateTo('paiements');
+  showNotification(`Paiement pour "${course.title}" — ${course.priceTotal - course.pricePaid} DA restants`, 'info');
+}
+
 function renderCoursStats(courses) {
   const total = courses.length;
-  const totalSessions = courses.reduce((s, c) => s + c.totalSessions, 0);
-  const attended = courses.reduce((s, c) => s + c.attendedSessions, 0);
   const remaining = courses.reduce((s, c) => s + (c.totalSessions - c.completedSessions), 0);
-  const totalPaid = courses.reduce((s, c) => s + c.pricePaid, 0);
-  const totalPrice = courses.reduce((s, c) => s + c.priceTotal, 0);
-  const remainingPayment = totalPrice - totalPaid;
-  const presenceRate = totalSessions > 0 ? Math.round((attended / totalSessions) * 100) : 0;
 
   setText('coursTotal', total);
-  setText('coursPresent', presenceRate + '%');
   setText('coursRemaining', remaining);
-  setText('coursPaid', remainingPayment.toLocaleString('fr-DZ') + ' DA');
 }
 
 function renderCoursList(courses) {
@@ -697,8 +731,6 @@ function renderCoursList(courses) {
   list.innerHTML = filtered.map(c => {
     const presencePercent = c.totalSessions > 0 ? Math.round((c.attendedSessions / c.totalSessions) * 100) : 0;
     const remainingSessions = c.totalSessions - c.completedSessions;
-    const remainingPayment = c.priceTotal - c.pricePaid;
-    const paymentPercent = c.priceTotal > 0 ? Math.round((c.pricePaid / c.priceTotal) * 100) : 100;
     const presenceColor = presencePercent >= 70 ? '#00d68f' : presencePercent >= 40 ? '#ffb547' : '#ff4d6d';
 
     return `
@@ -738,26 +770,13 @@ function renderCoursList(courses) {
             </div>
             <p class="cours-card__detail">${c.completedSessions} / ${c.totalSessions} séances terminées</p>
           </div>
-
-          <!-- Paiement -->
-          <div class="cours-card__section">
-            <div class="cours-card__section-header">
-              <span class="cours-card__section-title"><i data-lucide="wallet"></i> Paiement</span>
-              <span class="cours-card__section-value">${remainingPayment > 0 ? remainingPayment.toLocaleString('fr-DZ') + ' DA restant' : '✅ Payé'}</span>
-            </div>
-            <div class="cours-card__progress">
-              <div class="cours-card__progress-bar" style="width:${paymentPercent}%;background:${paymentPercent >= 100 ? '#00d68f' : '#ffb547'}"></div>
-            </div>
-            <p class="cours-card__detail">${c.pricePaid.toLocaleString('fr-DZ')} / ${c.priceTotal.toLocaleString('fr-DZ')} DA versés</p>
-          </div>
         </div>
 
         <div class="cours-card__footer">
-          <button class="cours-card__btn cours-card__btn--primary" onclick="markCoursPresence('${c.id}')">
+          <button class="cours-card__btn cours-card__btn--primary" onclick="markCoursPresence('${esc(c.id)}')">
             <i data-lucide="check"></i> Marquer présence
           </button>
-          ${c.isOnline ? `<button class="cours-card__btn cours-card__btn--accent" onclick="openCoursOnline('${c.id}')"><i data-lucide="play-circle"></i> Cours en ligne</button>` : ''}
-          ${remainingPayment > 0 ? `<button class="cours-card__btn cours-card__btn--outline" onclick="payCoursRemaining('${c.id}')"><i data-lucide="credit-card"></i> Payer</button>` : ''}
+          ${c.isOnline ? `<button class="cours-card__btn cours-card__btn--accent" onclick="openCoursOnline('${esc(c.id)}')"><i data-lucide="play-circle"></i> Cours en ligne</button>` : ''}
         </div>
       </div>
     `;
@@ -767,53 +786,14 @@ function renderCoursList(courses) {
 }
 
 function initCoursFilters() {
+  if (window._coursFilterInit) return;
+  window._coursFilterInit = true;
   document.querySelectorAll('.cours-filter').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.cours-filter').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       _coursFilter = btn.dataset.filter;
-      const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
-      if (enrolled.length > 0) renderCoursList(enrolled);
+      renderCoursList(_coursData);
     });
   });
-}
-
-function markCoursPresence(coursId) {
-  const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
-  const course = enrolled.find(c => c.id === coursId);
-  if (!course) return;
-
-  if (course.completedSessions < course.totalSessions) {
-    course.completedSessions++;
-    course.attendedSessions++;
-    localStorage.setItem('skillsdz_enrolled', JSON.stringify(enrolled));
-
-    Gamification.earnXP('course');
-    showNotification(`Présence marquée pour "${course.title}" — +50 XP`, 'success');
-
-    renderCoursList(enrolled);
-    renderCoursStats(enrolled);
-  } else {
-    showNotification('Toutes les séances sont terminées', 'info');
-  }
-}
-
-function openCoursOnline(coursId) {
-  const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
-  const course = enrolled.find(c => c.id === coursId);
-  if (!course) return;
-
-  // Open videos page for online cours
-  navigateTo('videos');
-  showNotification(`Cours en ligne : ${course.title}`, 'info');
-}
-
-function payCoursRemaining(coursId) {
-  const enrolled = JSON.parse(localStorage.getItem('skillsdz_enrolled') || '[]');
-  const course = enrolled.find(c => c.id === coursId);
-  if (!course) return;
-
-  // Navigate to payments page
-  navigateTo('paiements');
-  showNotification(`Paiement pour "${course.title}" — ${course.priceTotal - course.pricePaid} DA restants`, 'info');
 }

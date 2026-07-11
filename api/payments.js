@@ -1,6 +1,7 @@
 import { handleOptions, jsonError, jsonResponse } from './_lib/cors.js';
-import { getSupabase, getSupabaseAdmin } from './_lib/supabase.js';
+import { getSupabaseAdmin } from './_lib/supabase.js';
 import { getUserFromRequest } from './_lib/auth.js';
+import { rateLimit, getClientIp } from './_lib/rateLimit.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -18,8 +19,13 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
       if (!user) return jsonError(res, 401, 'Non autorisé');
+      const ip = getClientIp(req);
+      const rl = rateLimit(`pay:${user.userId}`, { windowMs: 300000, max: 5 });
+      if (!rl.allowed) return jsonError(res, 429, 'Trop de paiements. Réessayez dans 5 minutes');
       const { amount, method, reference } = req.body;
       if (!amount || amount <= 0) return jsonError(res, 400, 'Montant invalide');
+      if (amount < 500) return jsonError(res, 400, 'Montant minimum: 500 DA');
+      if (amount > 500000) return jsonError(res, 400, 'Montant maximum: 500,000 DA');
       if (!['cib', 'redotpay', 'bybit'].includes(method)) return jsonError(res, 400, 'Méthode invalide');
 
       const paymentRef = reference || `SKDZ-${Date.now().toString(36).toUpperCase()}`;

@@ -1,6 +1,7 @@
 import { handleOptions, jsonError, jsonResponse } from './_lib/cors.js';
-import { getSupabase, getSupabaseAdmin } from './_lib/supabase.js';
+import { getSupabaseAdmin } from './_lib/supabase.js';
 import { getUserFromRequest } from './_lib/auth.js';
+import { rateLimit } from './_lib/rateLimit.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -21,34 +22,22 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
       if (!user) return jsonError(res, 401, 'Non autorisé');
+      const rl = rateLimit(`shop:${user.userId}`, { windowMs: 60000, max: 10 });
+      if (!rl.allowed) return jsonError(res, 429, 'Trop d\'achats. Réessayez dans 1 minute');
       const { itemId } = req.body;
       if (!itemId) return jsonError(res, 400, 'ID article requis');
 
-      const { data: item } = await supabase.from('shop_items').select('*').eq('id', itemId).eq('is_active', true).single();
-      if (!item) return jsonError(res, 404, 'Article non trouvé');
-      if (item.stock === 0) return jsonError(res, 400, 'Rupture de stock');
-
-      const { data: profile } = await supabase.from('profiles').select('xp').eq('id', user.userId).single();
-      if (!profile || profile.xp < item.xp_cost) return jsonError(res, 400, `XP insuffisants (${profile?.xp || 0}/${item.xp_cost})`);
-
-      // Atomic stock decrement to prevent race conditions
-      if (item.stock > 0) {
-        const { data: updated, error: stockErr } = await supabase
-          .from('shop_items')
-          .update({ stock: item.stock - 1 })
-          .eq('id', itemId)
-          .eq('stock', item.stock) // optimistic lock
-          .select('stock');
-        if (stockErr || !updated || updated.length === 0) {
-          return jsonError(res, 409, 'Article plus disponible, stock épuisé');
-        }
+      const { data, error } = await supabase.rpc('purchase_item', { p_user_id: user.userId, p_item_id: itemId });
+      if (error) {
+        const msg = error.message || '';
+        if (msg.includes('item not found')) return jsonError(res, 404, 'Article non trouvé');
+        if (msg.includes('out of stock')) return jsonError(res, 400, 'Rupture de stock');
+        if (msg.includes('insufficient xp')) return jsonError(res, 400, 'XP insuffisants');
+        return jsonError(res, 500, msg);
       }
 
-      await supabase.rpc('decrement_xp', { user_id: user.userId, amount: item.xp_cost });
-      await supabase.from('purchases').insert({ user_id: user.userId, item_id: itemId, xp_spent: item.xp_cost, status: 'pending' });
-      await supabase.from('xp_transactions').insert({ user_id: user.userId, amount: -item.xp_cost, reason: `Achat: ${item.name}`, source: 'shop' });
-
-      jsonResponse(res, 200, { success: true, message: `"${item.name}" échangé ! -${item.xp_cost} XP`, remainingXp: profile.xp - item.xp_cost });
+      const result = Array.isArray(data) ? data[0] : data;
+      jsonResponse(res, 200, { success: true, message: 'Article échangé !', remainingXp: result?.remaining_xp, purchaseId: result?.purchase_id });
     }
 
     jsonError(res, 405, 'Méthode non autorisée');

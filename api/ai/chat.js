@@ -1,6 +1,7 @@
 import { handleOptions, jsonError, jsonResponse } from '../_lib/cors.js';
 import { getUserFromRequest } from '../_lib/auth.js';
 import { AI_PROVIDERS, AGENT_SYSTEM_PROMPTS } from '../_lib/ai-providers.js';
+import { rateLimit, getClientIp } from '../_lib/rateLimit.js';
 
 async function callGroq(messages) {
   const res = await fetch(AI_PROVIDERS.groq.url, {
@@ -115,6 +116,13 @@ export default async function handler(req, res) {
     return jsonError(res, 405, 'Méthode non autorisée');
   }
 
+  const ip = getClientIp(req);
+  const rl = rateLimit(`ai:${ip}`, { windowMs: 60000, max: 20 });
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', rl.retryAfter);
+    return jsonError(res, 429, `Limite atteinte. Réessayez dans ${rl.retryAfter}s`);
+  }
+
   const user = getUserFromRequest(req);
   if (!user) return jsonError(res, 401, 'Non autorisé');
 
@@ -125,22 +133,27 @@ export default async function handler(req, res) {
       return jsonError(res, 400, 'Message et agentId requis');
     }
 
-    const systemPrompt = AGENT_SYSTEM_PROMPTS[agentId] || AGENT_SYSTEM_PROMPTS.coach;
+    const VALID_AGENTS = ['coach', 'dev', 'explorer'];
+    const safeAgentId = VALID_AGENTS.includes(agentId) ? agentId : 'coach';
+
+    const systemPrompt = AGENT_SYSTEM_PROMPTS[safeAgentId] || AGENT_SYSTEM_PROMPTS.coach;
+
+    const maxHistory = 10;
+    const safeHistory = history.slice(-maxHistory).map(h => ({
+      role: h.role === 'assistant' ? 'assistant' : 'user',
+      content: typeof h.content === 'string' ? h.content.slice(0, 2000) : '',
+    }));
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...history.map(h => ({
-        role: h.role === 'assistant' ? 'assistant' : 'user',
-        content: h.content,
-      })),
-      { role: 'user', content: message },
+      ...safeHistory,
+      { role: 'user', content: message.slice(0, 2000) },
     ];
 
     let response = await getAIResponse(messages);
 
-    // Fallback to local if no API key configured
     if (!response) {
-      const localPool = LOCAL_RESPONSES[agentId] || LOCAL_RESPONSES.coach;
+      const localPool = LOCAL_RESPONSES[safeAgentId] || LOCAL_RESPONSES.coach;
       response = localPool[Math.floor(Math.random() * localPool.length)];
     }
 

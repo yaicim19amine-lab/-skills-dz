@@ -2,7 +2,7 @@
    SKILLS DZ — Admin Panel (Full CRUD)
    ======================================== */
 
-let adminData = { users: [], formations: [], payments: [], liveSessions: [], stats: {} };
+let adminData = { users: [], formations: [], payments: [], liveSessions: [], tasks: [], auditLogs: [], stats: {} };
 let _adminPage = 'dashboard';
 let _searchTerm = '';
 
@@ -29,6 +29,12 @@ function esc(str) {
   const d = document.createElement('div');
   d.textContent = str || '';
   return d.innerHTML;
+}
+
+function userLabel(userId) {
+  const u = adminData.users.find(u => u.id === userId);
+  if (!u) return userId ? `${userId.slice(0, 8)}...` : '—';
+  return `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email || `${userId.slice(0, 8)}...`;
 }
 
 /* ========================================
@@ -80,6 +86,7 @@ function initEventListeners() {
   document.getElementById('exportUsersBtn')?.addEventListener('click', exportUsersCSV);
   document.getElementById('addFormationBtn')?.addEventListener('click', () => openFormationModal());
   document.getElementById('addSessionBtn')?.addEventListener('click', () => openLiveModal());
+  document.getElementById('addTaskBtn')?.addEventListener('click', () => openTaskModal());
   document.getElementById('exportFinanceBtn')?.addEventListener('click', exportFinanceCSV);
 
   document.getElementById('adminProfileForm')?.addEventListener('submit', (e) => {
@@ -151,12 +158,14 @@ function loadAdminData() {
   document.querySelectorAll('[id^="stat"]').forEach(el => el.textContent = '...');
 
   Promise.all([
-    api.getAdminData().catch(err => { console.error('Admin data error:', err); return { users: [], formations: [], payments: [], stats: {} }; }),
+    api.getAdminData().catch(err => { console.error('Admin data error:', err); return { users: [], formations: [], payments: [], tasks: [], auditLogs: [], stats: {} }; }),
     api.getLiveSessions().catch(err => { console.error('Live sessions error:', err); return { schedule: [] }; })
   ]).then(([adminResult, liveResult]) => {
     adminData.users = adminResult.users || [];
     adminData.formations = adminResult.formations || [];
     adminData.payments = adminResult.payments || [];
+    adminData.tasks = adminResult.tasks || [];
+    adminData.auditLogs = adminResult.auditLogs || [];
     adminData.stats = adminResult.stats || {};
     adminData.liveSessions = liveResult.schedule || [];
     renderDashboard();
@@ -164,6 +173,8 @@ function loadAdminData() {
     renderFormations();
     renderLiveSessions();
     renderFinances();
+    renderTasks();
+    renderAuditLogs();
     updateNotifBadge();
   });
 }
@@ -268,25 +279,7 @@ function viewUser(userId) {
 }
 
 function openUserModal() {
-  openModal('Nouvel utilisateur', `
-    <form id="userForm" style="display:flex;flex-direction:column;gap:12px">
-      <div class="form-group"><label>Prénom</label><input type="text" id="modalFirstName" class="form-input" placeholder="Prénom"></div>
-      <div class="form-group"><label>Nom</label><input type="text" id="modalLastName" class="form-input" placeholder="Nom"></div>
-      <div class="form-group"><label>Email</label><input type="email" id="modalEmail" class="form-input" placeholder="email@domaine.com" required></div>
-      <div class="form-group"><label>Mot de passe</label><input type="password" id="modalPassword" class="form-input" placeholder="••••••••" required></div>
-      <div class="modal-footer"><button type="button" class="btn btn--ghost" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn--primary">Créer</button></div>
-    </form>
-  `);
-  document.getElementById('userForm')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('modalEmail')?.value?.trim();
-    const password = document.getElementById('modalPassword')?.value;
-    const first_name = document.getElementById('modalFirstName')?.value?.trim();
-    const last_name = document.getElementById('modalLastName')?.value?.trim();
-    if (!email || !password) return showToast('Email et mot de passe requis', 'error');
-    showToast('Création non disponible — utilisez la page register', 'info');
-    closeModal();
-  });
+  window.open('register.html', '_blank');
 }
 
 function toggleBanUser(userId, action) {
@@ -325,7 +318,7 @@ function renderFormations() {
       <div class="admin-formation-header"><span class="admin-formation-emoji">${emoji}</span><span class="status-badge status-badge--${statusCls}">${statusLbl}</span></div>
       <h4>${title}</h4>
       <div class="admin-formation-meta">
-        <span>⏱ ${f.duration_weeks || '?'} semaines</span>
+        <span>⏱ ${f.duration_weeks || '?'} semaines · ${f.days_per_week || 5}j/sem · ${f.hours_per_day || 3}h/j</span>
         <span>💰 ${(f.price_dzd || 0).toLocaleString()} DA</span>
         <span>⭐ +${f.xp_reward || 0} XP</span>
       </div>
@@ -347,6 +340,10 @@ function openFormationModal() {
       <div class="form-group"><label>Description</label><input type="text" id="fDesc" class="form-input" placeholder="Description courte"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="form-group"><label>Durée (semaines)</label><input type="number" id="fDuration" class="form-input" value="8" min="1"></div>
+        <div class="form-group"><label>Jours / semaine</label><select id="fDaysPerWeek" class="filter-select" style="width:100%"><option value="1">1 jour</option><option value="2">2 jours</option><option value="3">3 jours</option><option value="4">4 jours</option><option value="5" selected>5 jours</option><option value="6">6 jours</option><option value="7">7 jours</option></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group"><label>Heures / jour</label><select id="fHoursPerDay" class="filter-select" style="width:100%"><option value="1">1h</option><option value="2">2h</option><option value="3" selected>3h</option><option value="4">4h</option><option value="5">5h</option><option value="6">6h</option></select></div>
         <div class="form-group"><label>Prix (DA)</label><input type="number" id="fPrice" class="form-input" value="0" min="0"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -367,6 +364,8 @@ function submitFormation(e) {
     description: document.getElementById('fDesc')?.value?.trim() || '',
     emoji: document.getElementById('fEmoji')?.value?.trim() || '📘',
     duration_weeks: parseInt(document.getElementById('fDuration')?.value) || 8,
+    days_per_week: parseInt(document.getElementById('fDaysPerWeek')?.value) || 5,
+    hours_per_day: parseInt(document.getElementById('fHoursPerDay')?.value) || 3,
     price_dzd: parseInt(document.getElementById('fPrice')?.value) || 0,
     xp_reward: parseInt(document.getElementById('fXP')?.value) || 100,
     max_slots: parseInt(document.getElementById('fSlots')?.value) || 20,
@@ -556,20 +555,143 @@ function renderFinances() {
 
   const tbody = document.getElementById('financeTableBody');
   if (!tbody) return;
-  if (payments.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8892b0">Aucun paiement enregistré</td></tr>'; return; }
+  if (payments.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8892b0">Aucun paiement enregistré</td></tr>'; return; }
 
   tbody.innerHTML = payments.slice(0, 20).map(p => {
     const d = new Date(p.created_at).toLocaleDateString('fr-FR');
     const uid = p.user_id?.slice(0, 8) || 'N/A';
     const statusClass = p.status === 'paid' ? 'green' : p.status === 'pending' ? 'yellow' : 'red';
     const statusLabel = p.status === 'paid' ? 'Payé' : p.status === 'pending' ? 'En attente' : 'Échoué';
+    const actions = p.status === 'pending' ? `
+      <div class="action-btns">
+        <button class="icon-btn icon-btn--success" title="Valider" onclick="updatePaymentStatus('${p.id}','approvePayment')"><i data-lucide="check-circle"></i></button>
+        <button class="icon-btn icon-btn--danger" title="Rejeter" onclick="updatePaymentStatus('${p.id}','rejectPayment')"><i data-lucide="x-circle"></i></button>
+      </div>` : `<span style="color:#64748b;font-size:12px">${p.confirmed_by ? 'Traité' : '—'}</span>`;
     return `<tr>
       <td>${d}</td>
-      <td><div class="user-cell"><div class="avatar-sm" style="background:#1E5BFF">${esc(uid[0])}</div><span>${esc(uid)}...</span></div></td>
+      <td><div class="user-cell"><div class="avatar-sm" style="background:#1E5BFF">${esc(userLabel(p.user_id)[0] || '?')}</div><span>${esc(userLabel(p.user_id))}</span></div></td>
       <td style="font-weight:600;color:${p.status === 'paid' ? '#00d68f' : '#ffb547'}">${(p.amount_dzd || 0).toLocaleString()} DA</td>
       <td><span class="method-badge">${esc(p.method || 'N/A')}</span></td>
       <td><span class="badge badge--${statusClass}">${statusLabel}</span></td>
       <td>${esc(p.type || 'N/A')}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function updatePaymentStatus(paymentId, action) {
+  const approved = action === 'approvePayment';
+  const note = prompt(approved ? 'Note admin (optionnelle)' : 'Motif du rejet (optionnel)', '') || '';
+  api.updateAdminAction({ action, paymentId, adminNote: note })
+    .then(data => { loadAdminData(); showToast(data.message || 'Paiement mis à jour', approved ? 'success' : 'info'); })
+    .catch(err => showToast('Erreur: ' + err.message, 'error'));
+}
+
+/* ========================================
+   TASKS
+   ======================================== */
+function renderTasks() {
+  const board = document.getElementById('adminTasksBoard');
+  if (!board) return;
+  const tasks = adminData.tasks || [];
+  const statuses = [
+    ['todo', 'À faire'],
+    ['doing', 'En cours'],
+    ['done', 'Terminé'],
+    ['cancelled', 'Annulé'],
+  ];
+  board.innerHTML = statuses.map(([status, label]) => {
+    const items = tasks.filter(t => t.status === status);
+    return `<div class="task-column">
+      <div class="task-column__header"><span>${label}</span><strong>${items.length}</strong></div>
+      <div class="task-column__items">
+        ${items.length ? items.map(renderTaskCard).join('') : '<div class="task-empty">Aucune tâche</div>'}
+      </div>
+    </div>`;
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function renderTaskCard(t) {
+  const priorityLabel = { low: 'Basse', medium: 'Moyenne', high: 'Haute' }[t.priority] || 'Moyenne';
+  const due = t.due_at ? new Date(t.due_at).toLocaleDateString('fr-FR') : 'Sans échéance';
+  return `<article class="task-card task-card--${esc(t.priority || 'medium')}">
+    <div class="task-card__top">
+      <h4>${esc(t.title)}</h4>
+      <span class="badge badge--${t.priority === 'high' ? 'red' : t.priority === 'low' ? 'green' : 'yellow'}">${priorityLabel}</span>
+    </div>
+    ${t.description ? `<p>${esc(t.description)}</p>` : ''}
+    <div class="task-card__meta">
+      <span><i data-lucide="clock"></i> ${esc(due)}</span>
+      ${t.related_user_id ? `<span><i data-lucide="user"></i> ${esc(userLabel(t.related_user_id))}</span>` : ''}
+    </div>
+    <div class="task-card__actions">
+      ${t.status !== 'doing' ? `<button class="btn btn--ghost btn--sm" onclick="setTaskStatus('${t.id}','doing')">En cours</button>` : ''}
+      ${t.status !== 'done' ? `<button class="btn btn--ghost btn--sm" onclick="setTaskStatus('${t.id}','done')">Terminer</button>` : ''}
+      <button class="btn btn--danger btn--sm" onclick="deleteTask('${t.id}')"><i data-lucide="trash-2"></i></button>
+    </div>
+  </article>`;
+}
+
+function openTaskModal() {
+  const userOptions = adminData.users.map(u => `<option value="${u.id}">${esc(userLabel(u.id))}</option>`).join('');
+  openModal('Nouvelle tâche', `
+    <form id="taskForm" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group"><label>Titre *</label><input type="text" id="taskTitle" class="form-input" placeholder="Ex: Vérifier preuve paiement" required></div>
+      <div class="form-group"><label>Description</label><textarea id="taskDescription" class="form-input" rows="3" placeholder="Détails de la tâche"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group"><label>Priorité</label><select id="taskPriority" class="filter-select" style="width:100%"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
+        <div class="form-group"><label>Échéance</label><input type="date" id="taskDue" class="form-input"></div>
+      </div>
+      <div class="form-group"><label>Utilisateur lié</label><select id="taskRelatedUser" class="filter-select" style="width:100%"><option value="">Aucun</option>${userOptions}</select></div>
+      <div class="modal-footer"><button type="button" class="btn btn--ghost" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn--primary">Créer</button></div>
+    </form>`);
+  document.getElementById('taskForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const due = document.getElementById('taskDue')?.value;
+    api.createAdminAction({
+      action: 'createTask',
+      title: document.getElementById('taskTitle')?.value?.trim(),
+      description: document.getElementById('taskDescription')?.value?.trim() || '',
+      priority: document.getElementById('taskPriority')?.value || 'medium',
+      dueAt: due ? `${due}T09:00:00` : null,
+      relatedUserId: document.getElementById('taskRelatedUser')?.value || null,
+    }).then(() => { closeModal(); loadAdminData(); showToast('Tâche créée', 'success'); })
+      .catch(err => showToast('Erreur: ' + err.message, 'error'));
+  });
+}
+
+function setTaskStatus(taskId, status) {
+  api.updateAdminAction({ action: 'updateTask', id: taskId, status })
+    .then(() => { loadAdminData(); showToast('Tâche mise à jour', 'success'); })
+    .catch(err => showToast('Erreur: ' + err.message, 'error'));
+}
+
+function deleteTask(taskId) {
+  if (!confirm('Supprimer cette tâche ?')) return;
+  api.deleteAdminAction({ action: 'deleteTask', id: taskId })
+    .then(() => { loadAdminData(); showToast('Tâche supprimée', 'success'); })
+    .catch(err => showToast('Erreur: ' + err.message, 'error'));
+}
+
+/* ========================================
+   AUDIT LOGS
+   ======================================== */
+function renderAuditLogs() {
+  const tbody = document.getElementById('auditTableBody');
+  if (!tbody) return;
+  const logs = adminData.auditLogs || [];
+  if (logs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#8892b0;padding:2rem">Aucune action auditée</td></tr>'; return; }
+  tbody.innerHTML = logs.map(log => {
+    const date = new Date(log.created_at).toLocaleString('fr-FR');
+    const details = log.metadata && Object.keys(log.metadata).length ? JSON.stringify(log.metadata).slice(0, 140) : '—';
+    return `<tr>
+      <td>${date}</td>
+      <td>${esc(userLabel(log.actor_id))}</td>
+      <td><span class="badge badge--blue">${esc(log.action)}</span></td>
+      <td>${esc(log.entity_type)}${log.entity_id ? ` · ${esc(log.entity_id.slice(0, 8))}` : ''}</td>
+      <td style="max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(details)}</td>
     </tr>`;
   }).join('');
 }
@@ -665,50 +787,21 @@ function loadNotifications(count) {
 }
 
 /* ========================================
-   JOURNAL D'IDÉES — Insights par domaine
+   JOURNAL D'IDÉES — Insights automatisés (APIs gratuites)
    ======================================== */
-const JOURNAL_INSIGHTS = [
-  // ─── MARKETING DIGITAL ───
-  { cat: 'marketing', icon: 'trending-up', color: '#1E5BFF', title: 'Reels vs TikTok en Algérie', body: 'Les Reels Instagram génèrent 2.3x plus d\'engagement que TikTok chez les 18-25 ans en Algérie. Le format court reste roi, mais la confiance vient d\'Instagram.', source: 'Étude Algérie Digitale 2026' },
-  { cat: 'marketing', icon: 'target', color: '#1E5BFF', title: 'Ciblage géo : le vrai pouvoir', body: 'Les campagnes Meta Ads ciblant Alger Centre ont un CPA 40% plus bas que le ciblage national. Le micro-ciblage géo est sous-exploité en Algérie.', source: 'Analytics Platform' },
-  { cat: 'marketing', icon: 'message-circle', color: '#1E5BFF', title: 'WhatsApp Business : le CRM algérien', body: '87% des acheteurs algériens préfèrent WhatsApp pour poser leurs questions avant achat. Intégrer un bot WhatsApp = réduire le temps de réponse de 80%.', source: 'Tendances E-commerce DZ' },
-  { cat: 'marketing', icon: 'bar-chart-2', color: '#1E5BFF', title: 'Contenu éducatif = confiance', body: 'Les centres de formation qui publient du contenu éducatif gratuit voient leurs inscriptions augmenter de 35%. Le marketing de valeur fonctionne mieux que la pub directe.', source: 'Inbound Marketing DZ' },
-  { cat: 'marketing', icon: 'eye', color: '#1E5BFF', title: 'SEO local : Google My Business', body: '60% des recherches "formation à Alger" passent par Google Maps. Un profil GMB complet avec avis = trafic organique gratuit.', source: 'Google Algérie Data' },
-  { cat: 'marketing', icon: 'share-2', color: '#1E5BFF', title: 'Les stories = engagement x3', body: 'Publier 5+ stories par jour sur Instagram maintient la visibilité. Les sondages et quiz dans les stories génèrent 4x plus d\'interactions qu\'un post classique.', source: 'Social Media Report DZ' },
-  { cat: 'marketing', icon: 'zap', color: '#1E5BFF', title: 'Email marketing : le dormant', body: 'Pour 1 Dirham investi en email marketing, le ROI moyen est de 36 DA. Pourtant, 80% des centres de formation algériens n\'ont pas de liste email.', source: 'Email Marketing Stats' },
-  { cat: 'marketing', icon: 'users', color: '#1E5BFF', title: 'Programme de parrainage viral', body: 'Un programme de parrainage avec double récompense (donneur + reçu) augmente les inscriptions de 25%. Le bouche-à-oreille digital est le levier #1 en Algérie.', source: 'Growth Hacking DZ' },
 
-  // ─── DEV WEB ───
-  { cat: 'dev', icon: 'code-2', color: '#00C4FF', title: 'React vs Vue : le choix DZ', body: 'En Algérie, React domine avec 65% des offres d\'emploi dev web. Mais Vue.js monte vite grâce à sa courbe d\'apprentissage plus douce pour les débutants.', source: 'Job Market Tech DZ' },
-  { cat: 'dev', icon: 'smartphone', color: '#00C4FF', title: 'Mobile-first obligatoire', body: '78% du trafic web algérien vient du mobile. Tout site web doit être conçu mobile-first. Le responsive n\'est plus une option, c\'est la base.', source: 'StatCounter Algérie' },
-  { cat: 'dev', icon: 'git-branch', color: '#00C4FF', title: 'Git : compétence n°1', body: '92% des entreprises tech exigent Git. Pourtant, seulement 30% des formations couvrent le versioning. Un atelier Git = avantage concurrentiel.', source: 'Dev Survey DZ' },
-  { cat: 'dev', icon: 'server', color: '#00C4FF', title: 'Node.js pour les APIs', body: 'Node.js est le framework backend le plus demandé en Algérie (40% des offres). Son écosystème npm et sa vitesse de développement le rendent idéal pour les startups.', source: 'Tech Jobs Report' },
-  { cat: 'dev', icon: 'layout', color: '#00C4FF', title: 'Tailwind CSS : productivité x2', body: 'Les développeurs utilisant Tailwind CSS livrent 2x plus vite que ceux en CSS classique. La tendance est claire : utility-first est le futur du styling web.', source: 'State of CSS 2026' },
-  { cat: 'dev', icon: 'database', color: '#00C4FF', title: 'PostgreSQL > MySQL', body: 'PostgreSQL dépasse MySQL dans les nouvelles projets algériens grâce à ses fonctionnalités avancées (JSON, arrays, full-text search). Supabase accélère cette migration.', source: 'DB Trends Report' },
-  { cat: 'dev', icon: 'shield', color: '#00C4FF', title: 'Sécurité : les bases oubliées', body: '60% des sites web algériens n\'ont pas de certificat SSL valide. HTTPS est devenu un minimum. Les formations dev devraient intégraler la sécurité dès le jour 1.', source: 'Cybersecurity DZ' },
-  { cat: 'dev', icon: 'package', color: '#00C4FF', title: 'Next.js : le framework tout-en-un', body: 'Next.js combine SSR, API routes et SSG. Pour les projets algériens qui veulent du SEO + performance, c\'est le choix optimal. La courbe d\'adoption est forte.', source: 'Framework Trends' },
-
-  // ─── INTELLIGENCE ARTIFICIELLE ───
-  { cat: 'ai', icon: 'brain', color: '#7c3aed', title: 'ChatGPT : adoption massive', body: '45% des étudiants algériens utilisent ChatGPT pour leurs études. L\'IA générative n\'est plus un luxe, c\'un outil de base. L\'enseigner = rester pertinent.', source: 'AI Usage Survey DZ' },
-  { cat: 'ai', icon: 'sparkles', color: '#7c3aed', title: 'Prompt Engineering : nouveau métier', body: 'Les offres d\'emploi "Prompt Engineer" ont augmenté de 300% en 2025. Maîtriser l\'art du prompt est devenu une compétence professionnelle à part entière.', source: 'Job Market AI 2026' },
-  { cat: 'ai', icon: 'bot', color: '#7c3aed', title: 'Agents IA : l\'avenir de l\'éducation', body: 'Les agents IA personnalisés améliorent les résultats d\'apprentissage de 40%. Un tuteur IA qui s\'adapte au niveau de l\'élève = révolution pédagogique.', source: 'EdTech Research' },
-  { cat: 'ai', icon: 'image', color: '#7c3aed', title: 'IA et création visuelle', body: 'Midjourney et DALL-E changent la game pour les créatifs. Un graphic designer qui maîtrise l\'IA génère 5x plus de propositions en moins de temps.', source: 'Creative AI Report' },
-  { cat: 'ai', icon: 'file-text', color: '#7c3aed', title: 'Automatisation : gagner du temps', body: 'L\'automatisation des tâches répétitives avec l\'IA peut libérer 10h/semaine. Les entreprises qui automatisent leurs processus ont 30% de productivité en plus.', source: 'Productivity AI Study' },
-  { cat: 'ai', icon: 'mic', color: '#7c3aed', title: 'Voice AI en arabe', body: 'La reconnaissance vocale en arabe s\'améliore rapidement. Les assistants vocaux arabes ouvrent un marché de 400M de locuteurs. Opportunité massive pour les devs DZ.', source: 'Voice Tech Report' },
-  { cat: 'ai', icon: 'code', color: '#7c3aed', title: 'Copilot : dev assisté par IA', body: 'GitHub Copilot augmente la productivité de dev de 55%. Les développeurs qui intègrent l\'IA dans leur workflow sont plus compétitifs. former sur ces outils = valeur.', source: 'Dev Productivity Study' },
-  { cat: 'ai', icon: 'graduation-cap', color: '#7c3aed', title: 'IA éthique : former les consciences', body: 'Biais algorithmiques, vie privée, deepfakes... L\'IA éthique devient un sujet de cours obligatoire. Les formations qui l\'intègrent auront un avantage moral et commercial.', source: 'AI Ethics Report' },
-
-  // ─── BUSINESS ───
-  { cat: 'business', icon: 'dollar-sign', color: '#ffb547', title: 'Économie numérique DZ : +18%', body: 'Le secteur numérique algérien croît de 18% par an. Les formations tech captent une part croissante de ce marché. Le timing est idéal pour investir.', source: 'Ministère du Numérique' },
-  { cat: 'business', icon: 'pie-chart', color: '#ffb547', title: 'Prix : le psychologique', body: 'Un formation à 25,000 DA se vend mieux qu\'à 24,000 DA. Les prix ronds avec un zéro suscitent plus de confiance. Le pricing est un art, pas juste un calcul.', source: 'Pricing Strategy DZ' },
-  { cat: 'business', icon: 'repeat', color: '#ffb547', title: 'Récurrence = stabilité', body: 'Les abonnements mensuels génèrent 3x plus de valeur client sur 12 mois qu\'un paiement unique. Le modèle SaaS s\'adapte parfaitement aux formations en ligne.', source: 'SaaS Metrics' },
-  { cat: 'business', icon: 'award', color: '#ffb547', title: 'Certification = confiance', body: 'Un certificat reconnu par l\'État augmente la valeur perçue d\'une formation de 60%. La labellisation officielle est un avantage concurrentiel majeur.', source: 'Education Business DZ' },
-  { cat: 'business', icon: 'heart', color: '#ffb547', title: 'Communauté avant produit', body: 'Construire une communauté engagée avant de lancer un produit réduit les coûts d\'acquisition de 50%. Discord, Telegram, WhatsApp : les outils sont gratuits.', source: 'Community-Led Growth' },
-  { cat: 'business', icon: 'trending-up', color: '#ffb547', title: 'L\'Algérie : marché émergent', body: 'Avec 45M d\'habitants et un taux de pénétration internet de 70%, l\'Algérie est le plus grand marché francophone d\'Afrique. Le digital est le futur.', source: 'Market Research DZ' },
-  { cat: 'business', icon: 'lightbulb', color: '#ffb547', title: 'Lean Startup : tester vite', body: 'Lancer un MVP en 2 semaines plutôt qu\'un produit parfait en 6 mois. Les startups algériennes qui testent vite pivotent plus efficacement et échouent moins.', source: 'Startup Algeria' },
-  { cat: 'business', icon: 'briefcase', color: '#ffb547', title: 'Freelancing : le tremplin', body: 'Le freelance tech en Algérie gagne en moyenne 80,000 DA/mois. Former au freelancing = donner des outils concrets pour l\'emploi indépendant.', source: 'Freelance Market DZ' },
+const JOURNAL_SOURCES = [
+  { cat: 'marketing', icon: 'trending-up', color: '#1E5BFF', api: 'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.feedburner.com/MarketingLand', label: 'Marketing Land' },
+  { cat: 'marketing', icon: 'target', color: '#1E5BFF', api: 'https://api.rss2json.com/v1/api.json?rss_url=https://searchengineland.com/feed', label: 'Search Engine Land' },
+  { cat: 'dev', icon: 'code-2', color: '#00C4FF', api: 'https://api.rss2json.com/v1/api.json?rss_url=https://dev.to/feed', label: 'Dev.to' },
+  { cat: 'dev', icon: 'server', color: '#00C4FF', api: 'https://api.rss2json.com/v1/api.json?rss_url=https://hacks.mozilla.org/feed/', label: 'Mozilla Hacks' },
+  { cat: 'ai', icon: 'brain', color: '#7c3aed', api: 'https://api.rss2json.com/v1/api.json?rss_url=https://techcrunch.com/category/artificial-intelligence/feed/', label: 'TechCrunch AI' },
+  { cat: 'ai', icon: 'sparkles', color: '#7c3aed', api: 'https://api.rss2json.com/v1/api.json?rss_url=https://the-decoder.com/feed/', label: 'The Decoder' },
+  { cat: 'business', icon: 'briefcase', color: '#ffb547', api: 'https://api.rss2json.com/v1/api.json?rss_url=https://www.journaldunet.com/rss/media/', label: 'Journal du Net' },
+  { cat: 'business', icon: 'trending-up', color: '#ffb547', api: 'https://api.rss2json.com/v1/api.json?rss_url=https://www.silicon.fr/feed/', label: 'Silicon.fr' },
 ];
 
+let _fetchedInsights = [];
 let _journalFilter = 'all';
 let _journalCustomIdeas = JSON.parse(localStorage.getItem('skillsdz_journal_ideas') || '[]');
 let _journalTimer = null;
@@ -723,74 +816,81 @@ function initJournal() {
       renderJournal();
     });
   });
-
   document.getElementById('addIdeaBtn')?.addEventListener('click', openIdeaModal);
-  renderJournal();
+  fetchAllInsights();
   startJournalTimer();
 }
 
-function getHourlyInsights() {
-  const hour = new Date().getHours();
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  const filtered = JOURNAL_INSIGHTS;
-  const count = Math.min(6, filtered.length);
-  const startIdx = ((dayOfYear * 3 + hour) % filtered.length);
-  const selected = [];
-  for (let i = 0; i < count; i++) {
-    selected.push(filtered[(startIdx + i) % filtered.length]);
+async function fetchAllInsights() {
+  _fetchedInsights = [];
+  const promises = JOURNAL_SOURCES.map(async (src) => {
+    try {
+      const resp = await fetch(src.api);
+      const data = await resp.json();
+      if (data.items && data.items.length > 0) {
+        const item = data.items[Math.floor(Math.random() * Math.min(5, data.items.length))];
+        _fetchedInsights.push({
+          cat: src.cat, icon: src.icon, color: src.color,
+          title: (item.title || '').slice(0, 80),
+          body: (item.description || item.content || '').replace(/<[^>]*>/g, '').slice(0, 200),
+          source: src.label, link: item.link || '#', pubDate: item.pubDate || new Date().toISOString(),
+        });
+      }
+    } catch (e) { console.warn('Failed to fetch', src.label, e); }
+  });
+  await Promise.allSettled(promises);
+  if (_fetchedInsights.length < 4) {
+    _fetchedInsights = [
+      { cat: 'marketing', icon: 'trending-up', color: '#1E5BFF', title: 'Reels vs TikTok en Algérie', body: 'Les Reels Instagram génèrent 2.3x plus d\'engagement que TikTok chez les 18-25 ans en Algérie.', source: 'Étude DZ 2026' },
+      { cat: 'dev', icon: 'code-2', color: '#00C4FF', title: 'React domine le marché DZ', body: '65% des offres d\'emploi dev web en Algérie demandent React. Vue.js monte avec 25%.', source: 'Job Market DZ' },
+      { cat: 'ai', icon: 'brain', color: '#7c3aed', title: 'ChatGPT adoption massive', body: '45% des étudiants algériens utilisent ChatGPT. L\'IA générative est devenue un outil de base.', source: 'AI Survey DZ' },
+      { cat: 'business', icon: 'briefcase', color: '#ffb547', title: 'Économie numérique DZ +18%', body: 'Le secteur numérique algérien croît de 18% par an. Le timing est idéal pour investir.', source: 'Ministère du Numérique' },
+    ];
   }
-  return selected;
+  renderJournal();
+}
+
+function getHourlyInsights() {
+  return _fetchedInsights.length > 0 ? _fetchedInsights.slice(0, 8) : [
+    { cat: 'marketing', icon: 'trending-up', color: '#1E5BFF', title: 'Chargement...', body: 'Récupération des insights...', source: 'API' },
+    { cat: 'dev', icon: 'code-2', color: '#00C4FF', title: 'Chargement...', body: 'Récupération des insights...', source: 'API' },
+    { cat: 'ai', icon: 'brain', color: '#7c3aed', title: 'Chargement...', body: 'Récupération des insights...', source: 'API' },
+    { cat: 'business', icon: 'briefcase', color: '#ffb547', title: 'Chargement...', body: 'Récupération des insights...', source: 'API' },
+  ];
 }
 
 function renderJournal() {
   const grid = document.getElementById('journalGrid');
   if (!grid) return;
-
   const hourly = getHourlyInsights();
   const customs = _journalCustomIdeas.filter(i => _journalFilter === 'all' || i.cat === _journalFilter);
   const filtered = hourly.filter(i => _journalFilter === 'all' || i.cat === _journalFilter);
-
-  const allIdeas = [
-    ...customs.map(i => ({ ...i, isCustom: true })),
-    ...filtered.map(i => ({ ...i, isCustom: false })),
-  ];
-
-  if (allIdeas.length === 0) {
-    grid.innerHTML = '<p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">Aucun insight pour cette catégorie</p>';
-    return;
-  }
-
+  const allIdeas = [...customs.map(i => ({ ...i, isCustom: true })), ...filtered.map(i => ({ ...i, isCustom: false }))];
+  if (allIdeas.length === 0) { grid.innerHTML = '<p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">Aucun insight</p>'; return; }
   const catLabels = { marketing: 'Marketing Digital', dev: 'Dev Web', ai: 'Intelligence Artificielle', business: 'Business' };
   const catColors = { marketing: '#1E5BFF', dev: '#00C4FF', ai: '#7c3aed', business: '#ffb547' };
-
   grid.innerHTML = allIdeas.map(idea => `
     <div class="journal-card" style="--card-accent:${idea.color || catColors[idea.cat] || '#1E5BFF'}">
       <div class="journal-card__header">
-        <div class="journal-card__icon" style="background:${idea.color || catColors[idea.cat]}20;color:${idea.color || catColors[idea.cat]}">
-          <i data-lucide="${idea.icon || 'lightbulb'}"></i>
-        </div>
+        <div class="journal-card__icon" style="background:${idea.color || catColors[idea.cat]}20;color:${idea.color || catColors[idea.cat]}"><i data-lucide="${idea.icon || 'lightbulb'}"></i></div>
         <div class="journal-card__meta">
           <span class="journal-card__cat" style="color:${idea.color || catColors[idea.cat]}">${catLabels[idea.cat] || idea.cat}</span>
-          <span class="journal-card__time">${idea.isCustom ? 'Personnalisé' : 'Heure ' + new Date().getHours() + 'h'}</span>
+          <span class="journal-card__time">${idea.isCustom ? 'Personnalisé' : idea.source || ''}</span>
         </div>
         ${idea.isCustom ? `<button class="journal-card__delete" onclick="deleteJournalIdea('${idea.id}')" title="Supprimer"><i data-lucide="trash-2"></i></button>` : ''}
       </div>
       <h4 class="journal-card__title">${esc(idea.title)}</h4>
       <p class="journal-card__body">${esc(idea.body)}</p>
-      ${idea.source ? `<div class="journal-card__source"><i data-lucide="external-link"></i> ${esc(idea.source)}</div>` : ''}
+      ${idea.link && !idea.isCustom ? `<a class="journal-card__source" href="${esc(idea.link)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i> ${esc(idea.source)} — Lire</a>` : idea.source ? `<div class="journal-card__source"><i data-lucide="external-link"></i> ${esc(idea.source)}</div>` : ''}
     </div>
   `).join('');
-
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function startJournalTimer() {
   updateCountdown();
   _journalCountdownInterval = setInterval(updateCountdown, 1000);
-  _journalTimer = setInterval(() => {
-    renderJournal();
-    showToast('Insights mis à jour', 'info');
-  }, 3600000);
+  _journalTimer = setInterval(() => { fetchAllInsights(); showToast('Insights mis à jour', 'info'); }, 3600000);
 }
 
 function updateCountdown() {
@@ -807,55 +907,31 @@ function updateCountdown() {
 function openIdeaModal() {
   const bodyHTML = `
     <form id="ideaForm" class="settings-form">
-      <div class="form-group">
-        <label>Catégorie</label>
-        <select class="form-input" id="ideaCat" required>
-          <option value="marketing">Marketing Digital</option>
-          <option value="dev">Dev Web</option>
-          <option value="ai">Intelligence Artificielle</option>
-          <option value="business">Business</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Titre de l'idée</label>
-        <input type="text" class="form-input" id="ideaTitle" placeholder="Ex: Tendance Instagram 2026" required>
-      </div>
-      <div class="form-group">
-        <label>Description</label>
-        <textarea class="form-input" id="ideaBody" rows="4" placeholder="Votre insight ou analyse..." required></textarea>
-      </div>
-      <div class="form-group">
-        <label>Source (optionnel)</label>
-        <input type="text" class="form-input" id="ideaSource" placeholder="Ex: Étude Google Algérie">
-      </div>
-      <button type="submit" class="btn btn--primary" style="width:100%">Ajouter au journal</button>
-    </form>
-  `;
+      <div class="form-group"><label>Catégorie</label><select class="form-input" id="ideaCat" required>
+        <option value="marketing">Marketing Digital</option><option value="dev">Dev Web</option>
+        <option value="ai">Intelligence Artificielle</option><option value="business">Business</option>
+      </select></div>
+      <div class="form-group"><label>Titre</label><input type="text" class="form-input" id="ideaTitle" placeholder="Ex: Tendance 2026" required></div>
+      <div class="form-group"><label>Description</label><textarea class="form-input" id="ideaBody" rows="4" placeholder="Votre insight..." required></textarea></div>
+      <div class="form-group"><label>Source (optionnel)</label><input type="text" class="form-input" id="ideaSource" placeholder="Ex: Étude Google"></div>
+      <button type="submit" class="btn btn--primary" style="width:100%">Ajouter</button>
+    </form>`;
   openModal('Nouvelle idée', bodyHTML);
-
   document.getElementById('ideaForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const idea = {
-      id: Date.now().toString(36),
-      cat: document.getElementById('ideaCat').value,
-      title: document.getElementById('ideaTitle').value.trim(),
-      body: document.getElementById('ideaBody').value.trim(),
-      source: document.getElementById('ideaSource').value.trim() || null,
-      icon: 'lightbulb',
+    const idea = { id: Date.now().toString(36), cat: document.getElementById('ideaCat').value,
+      title: document.getElementById('ideaTitle').value.trim(), body: document.getElementById('ideaBody').value.trim(),
+      source: document.getElementById('ideaSource').value.trim() || null, icon: 'lightbulb',
       color: { marketing: '#1E5BFF', dev: '#00C4FF', ai: '#7c3aed', business: '#ffb547' }[document.getElementById('ideaCat').value],
-      createdAt: new Date().toISOString(),
-    };
+      createdAt: new Date().toISOString() };
     _journalCustomIdeas.unshift(idea);
     localStorage.setItem('skillsdz_journal_ideas', JSON.stringify(_journalCustomIdeas));
-    closeModal();
-    renderJournal();
-    showToast('Idée ajoutée au journal', 'success');
+    closeModal(); renderJournal(); showToast('Idée ajoutée', 'success');
   });
 }
 
 function deleteJournalIdea(id) {
   _journalCustomIdeas = _journalCustomIdeas.filter(i => i.id !== id);
   localStorage.setItem('skillsdz_journal_ideas', JSON.stringify(_journalCustomIdeas));
-  renderJournal();
-  showToast('Idée supprimée', 'info');
+  renderJournal(); showToast('Idée supprimée', 'info');
 }

@@ -3,6 +3,19 @@
   "outputDirectory": ".",
   "buildCommand": "echo 'No build step'",
   "routes": [
+    {
+      "src": "/(.*)",
+      "headers": {
+        "Access-Control-Allow-Origin": "https://skills-dz.vercel.app",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://vnilzepsbysxfgktpsyo.supabase.co https://oauth2.googleapis.com https://accounts.google.com https://api.rss2json.com; frame-src https://www.youtube.com https://accounts.google.com;"
+      },
+      "continue": true
+    },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/pages/(.*)", "dest": "/pages/$1" },
     { "src": "/assets/(.*)", "dest": "/assets/$1" },
@@ -10,16 +23,5 @@
     { "src": "/favicon\\.ico", "dest": "/favicon.ico" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" }
-      ]
-    }
   ]
 }

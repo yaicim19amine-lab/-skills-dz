@@ -3,6 +3,12 @@
    ======================================== */
 
 const MiniGames = (() => {
+  function esc(value) {
+    const d = document.createElement('div');
+    d.textContent = value ?? '';
+    return d.innerHTML;
+  }
+
   const XP = { quiz_correct: 25, quiz_bonus: 50, match: 30, word: 40, streak_bonus: 100 };
   const LEVELS = [
     { name: 'Débutant', icon: '🌱', min: 0 },
@@ -58,8 +64,42 @@ const MiniGames = (() => {
     state.level = newLevel;
     save();
     updateUI(amount, reason);
+    syncXPWithServer(amount, reason);
     if (newLevel > oldLevel) showLevelUp(newLevel);
     return { xp: state.xp, level: newLevel, leveledUp: newLevel > oldLevel };
+  }
+
+  function syncXPWithServer(amount, reason) {
+    if (amount <= 0 || typeof api === 'undefined' || !api.getToken?.()) return;
+    const eventType = /bonus série/i.test(reason || '') ? 'streak' : 'game';
+    api.awardXpEvent(eventType, amount, reason || 'Mini-jeu terminé')
+      .then(data => applyServerProgress(data))
+      .catch(err => {
+        console.warn('XP serveur non enregistré:', err.message);
+      });
+  }
+
+  function applyServerProgress(data) {
+    if (!data || typeof data.xp !== 'number') return;
+    state.xp = data.xp;
+    if (typeof data.level === 'number') state.level = data.level;
+    if (typeof data.totalXp === 'number') state.totalXP = data.totalXp;
+    save();
+
+    document.querySelectorAll('[data-xp]').forEach(el => el.textContent = state.xp);
+    document.querySelectorAll('[data-level]').forEach(el => el.textContent = getLevelName());
+    document.querySelectorAll('[data-level-icon]').forEach(el => el.textContent = getLevelIcon());
+    const bar = document.querySelector('.level-progress__fill');
+    if (bar) bar.style.width = getXPProgress() + '%';
+    const lvlNum = document.querySelector('.level-progress__num');
+    if (lvlNum) lvlNum.textContent = getLevel();
+
+    try {
+      const user = JSON.parse(localStorage.getItem('skillsdz_user') || '{}');
+      user.xp = state.xp;
+      user.level = state.level;
+      localStorage.setItem('skillsdz_user', JSON.stringify(user));
+    } catch {}
   }
 
   function checkStreak() {
@@ -343,6 +383,7 @@ const MiniGames = (() => {
 
   function renderMatchCards(containerId) {
     const grid = document.getElementById('matchGrid');
+    if (!grid) return;
     grid.innerHTML = matchState.cards.map((card, i) => {
       const isMatched = matchState.matched.includes(card.pairId);
       const isSelected = matchState.selected === i;
@@ -456,12 +497,13 @@ const MiniGames = (() => {
 
   function renderWordState(containerId) {
     const display = document.getElementById('wordDisplay');
+    const grid = document.getElementById('letterGrid');
+    if (!display || !grid) return;
     display.innerHTML = wordState.letters.map((l, i) => {
       const show = wordState.revealed[i];
       return `<div style="width:40px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;${show ? 'background:rgba(0,214,143,0.1);border:1px solid #00d68f;color:#00d68f;' : 'background:#13151e;border:1px solid #232840;color:#232840;'}">${show ? l : '·'}</div>`;
     }).join('');
 
-    const grid = document.getElementById('letterGrid');
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     grid.innerHTML = alphabet.split('').map(l => {
       const used = wordState.usedLetters.includes(l);
@@ -519,6 +561,200 @@ const MiniGames = (() => {
     `;
   }
 
+  /* ===== CODE CHALLENGE GAME ===== */
+  const CODE_CHALLENGES = [
+    { title: 'JavaScript — Variables & Types', icon: '📦', difficulty: 'Débutant', questions: [
+      { q: 'Qu\'est-ce que `typeof null` retourne ?', code: 'typeof null', options: ['"null"', '"undefined"', '"object"', '"boolean"'], correct: 2, explanation: 'Un bug historique de JavaScript — typeof null retourne "object".' },
+      { q: 'Quelle est la différence entre `let` et `var` ?', options: ['Aucune', 'let a une portée de bloc, var a une portée de fonction', 'var est plus rapide', 'let est déprécié'], correct: 1, explanation: 'let respecte la portée de bloc {} tandis que var sort de la fonction.' },
+      { q: 'Que retourne `console.log(1 + "2" + 3)` ?', code: '1 + "2" + 3', options: ['6', '"123"', '"33"', '123'], correct: 1, explanation: 'La concaténation prend le pas sur l\'addition ici.' },
+      { q: 'Quelle est la bonne façon de déclarer une constante ?', options: ['var PI = 3.14', 'let PI = 3.14', 'const PI = 3.14', 'constant PI = 3.14'], correct: 2, explanation: 'const déclare une constante qui ne peut pas être réaffectée.' },
+      { q: 'Que retourne `typeof NaN` ?', code: 'typeof NaN', options: ['"NaN"', '"undefined"', '"number"', '"object"'], correct: 2, explanation: 'NaN est de type "number" en JavaScript — c\'est un cas spécial.' },
+      { q: 'Qu\'est-ce qu\'un template literal ?', options: ['Une chaîne avec des guillemets simples', 'Une chaîne avec `${variable}`', 'Un type de variable', 'Une fonction built-in'], correct: 1, explanation: 'Les template literals utilisent les backticks et ${} pour l\'interpolation.' },
+    ]},
+    { title: 'JavaScript — Fonctions & Scope', icon: '⚡', difficulty: 'Intermédiaire', questions: [
+      { q: 'Que fait `setTimeout(() => {}, 0)` ?', options: ['Rien', 'Exécute après 0ms', 'Exécute immédiatement', 'Erreur'], correct: 1, explanation: 'setTimeout met la callback dans la file d\'attente, elle s\'exécute après le code同步.' },
+      { q: 'Quelle est la différence entre `map` et `forEach` ?', options: ['Aucune', 'map retourne un nouveau tableau', 'forEach est plus rapide', 'map modifie l\'original'], correct: 1, explanation: 'map crée un nouveau tableau, forEach retourne undefined.' },
+      { q: 'Que retourne `const add = (a, b = 5) => a + b; add(3);` ?', code: 'const add = (a, b = 5) => a + b; add(3);', options: ['undefined', '8', '3', 'Erreur'], correct: 1, explanation: 'b a une valeur par défaut de 5, donc 3 + 5 = 8.' },
+      { q: 'Qu\'est-ce qu\'une IIFE ?', options: ['Une fonction fléchée', 'Une fonction auto-invoquée', 'Une fonction async', 'Une fonction globale'], correct: 1, explanation: 'IIFE = Immediately Invoked Function Expression — elle s\'exécute dès sa définition.' },
+      { q: 'Que fait `...rest` dans une fonction ?', options: ['Copie les arguments', 'Regroupe les arguments en tableau', 'Supprime les arguments', 'Retourne le dernier argument'], correct: 1, explanation: 'Le paramètre rest collecte tous les arguments restants dans un tableau.' },
+      { q: 'Quelle est la différence entre `==` et `===` ?', options: ['Aucune', '=== vérifie aussi le type', '== est plus strict', '=== est déprécié'], correct: 1, explanation: '=== compare la valeur ET le type (pas de conversion implicite).' },
+    ]},
+    { title: 'HTML & CSS — Structure & Layout', icon: '🎨', difficulty: 'Débutant', questions: [
+      { q: 'Quelle balise est sémantiquement correcte pour un menu ?', options: ['<div class="menu">', '<nav>', '<menu>', '<header>'], correct: 1, explanation: '<nav> est la balise sémantique HTML5 pour la navigation.' },
+      { q: 'Quelle propriété CSS centre un élément en flexbox ?', options: ['text-align: center', 'justify-content: center', 'margin: auto', 'position: center'], correct: 1, explanation: 'justify-content: center aligne sur l\'axe principal en flexbox.' },
+      { q: 'Qu\'est-ce que `box-sizing: border-box` fait ?', options: ['Ajoute une bordure', 'Inclut padding et border dans la largeur', 'Supprime le padding', 'Change la police'], correct: 1, explanation: 'border-box inclut padding et border dans la dimensions totale.' },
+      { q: 'Quelle est la différence entre `display: none` et `visibility: hidden` ?', options: ['Aucune', 'none supprime l\'espace, hidden garde l\'espace', 'hidden est plus rapide', 'none est déprécié'], correct: 1, explanation: 'display:none retire complètement, visibility:hidden garde l\'espace.' },
+      { q: 'Quelle unité est relative à la taille de la police parent ?', options: ['px', 'em', 'vh', '%'], correct: 1, explanation: 'em est relatif à la taille de police de l\'élément parent.' },
+      { q: 'Comment créer un sélecteur qui cible un enfant direct ?', options: ['div p', 'div > p', 'div + p', 'div ~ p'], correct: 1, explanation: 'Le sélecteur > cible uniquement les enfants directs.' },
+    ]},
+    { title: 'React — Composants & Hooks', icon: '⚛️', difficulty: 'Avancé', questions: [
+      { q: 'Qu\'est-ce qu\'un Hook personnalisé ?', options: ['Un composant', 'Une fonction qui utilise d\'autres Hooks', 'Un type de props', 'Un état global'], correct: 1, explanation: 'Un custom Hook est une fonction qui commence par "use" et peut appeler d\'autres Hooks.' },
+      { q: 'Quand `useEffect` s\'exécute-t-il ?', options: ['À chaque render', 'Seulement au montage', 'Après le render, selon les dépendances', 'Avant le render'], correct: 2, explanation: 'useEffect s\'exécute après le rendu, et ses dépendances contrôlent la fréquence.' },
+      { q: 'Que fait `useMemo(() => compute(x), [x])` ?', options: ['Recalcule à chaque render', 'Mémoïse le résultat tant que x ne change pas', 'Supprime le calcul', 'Crée une nouvelle fonction'], correct: 1, explanation: 'useMemo évite les calculs inutiles en mémoïsant le résultat.' },
+      { q: 'Quelle est la bonne façon de mettre à jour un state objet ?', options: ['state.key = value', 'setState({...state, key: value})', 'setState(state.key = value)', 'setState.concat({key: value})'], correct: 1, explanation: 'On doit toujours créer un nouvel objet pour déclencher un re-render.' },
+      { q: 'Qu\'est-ce que le Virtual DOM ?', options: ['Le vrai DOM', 'Une copie légère du DOM pour diffing', 'Un ORM', 'Un type de composant'], correct: 1, explanation: 'Le Virtual DOM est une représentation en mémoire pour optimiser les mises à jour.' },
+      { q: 'Quand utiliser `useCallback` ?', options: ['Toujours', 'Pour mémoïser une fonction', 'Pour le state local', 'Pour les effets secondaires'], correct: 1, explanation: 'useCallback évite de recréer une fonction à chaque render si les dépendances ne changent pas.' },
+    ]},
+    { title: 'Python — Syntaxe & Structures', icon: '🐍', difficulty: 'Intermédiaire', questions: [
+      { q: 'Quelle est la différence entre une liste et un tuple ?', options: ['Aucune', 'Liste mutable, tuple immutable', 'Tuple est plus rapide', 'Liste est plus courte'], correct: 1, explanation: 'Les listes [] sont modifiables, les tuples () sont fixes après création.' },
+      { q: 'Que fait `*args` dans une fonction Python ?', options: ['Multiplie les arguments', 'Capture les args supplémentaires en tuple', 'Supprime les arguments', 'Retourne un dictionnaire'], correct: 1, explanation: '*args permet de passer un nombre variable d\'arguments sous forme de tuple.' },
+      { q: 'Quelle est la différence entre `is` et `==` ?', options: ['Aucune', 'is compare l\'identité, == la valeur', 'is est plus rapide', '== est déprécié'], correct: 1, explanation: 'is vérifie si deux objets sont le même en mémoire, == compare les valeurs.' },
+      { q: 'Que fait un décorateur `@property` ?', options: ['Crée une variable', 'Transforme une méthode en attribut', 'Supprime une méthode', 'Ajoute une constante'], correct: 1, explanation: '@property permet d\'accéder à une méthode comme un attribut (get/set).' },
+      { q: 'Qu\'est-ce qu\'un comprehension de liste ?', options: ['Une boucle complexe', 'Une création de liste concise avec [expr for x in iter]', 'Un type de variable', 'Une fonction built-in'], correct: 1, explanation: '[x*2 for x in range(10)] crée une liste en une ligne.' },
+      { q: 'Que retourne `len({"a": 1, "b": 2})` ?', code: 'len({"a": 1, "b": 2})', options: ['1', '2', '3', 'Erreur'], correct: 1, explanation: 'len() retourne le nombre de clés dans le dictionnaire.' },
+    ]},
+    { title: 'SQL — Requêtes & Manipulation', icon: '🗄️', difficulty: 'Intermédiaire', questions: [
+      { q: 'Quelle clause filtre les résultats d\'une requête ?', options: ['SELECT', 'WHERE', 'FROM', 'GROUP BY'], correct: 1, explanation: 'WHERE filtre les lignes avant le groupement.' },
+      { q: 'Quelle est la différence entre `INNER JOIN` et `LEFT JOIN` ?', options: ['Aucune', 'LEFT JOIN retourne toutes les lignes de la gauche', 'INNER JOIN est plus rapide', 'LEFT JOIN est déprécié'], correct: 1, explanation: 'LEFT JOIN retourne toutes les lignes de la table de gauche même sans correspondance.' },
+      { q: 'Que fait `GROUP BY` ?', options: ['Filtre les lignes', 'Regroupe les lignes identiques', 'Trie les résultats', 'Supprime les doublons'], correct: 1, explanation: 'GROUP BY regroupe les lignes avec des valeurs identiques pour les agrégations.' },
+      { q: 'Quelle fonction agrège la somme ?', options: ['COUNT()', 'SUM()', 'AVG()', 'MAX()'], correct: 1, explanation: 'SUM() calcule la totalité d\'une colonne numérique.' },
+      { q: 'Qu\'est-ce qu\'une vue (VIEW) ?', options: ['Une table physique', 'Une requête stockée comme une table virtuelle', 'Un index', 'Un trigger'], correct: 1, explanation: 'Une vue est une requête SQL sauvegardée qu\'on peut interroger comme une table.' },
+      { q: 'Que fait `DISTINCT` ?', options: ['Trie les résultats', 'Supprime les doublons', 'Limite les résultats', 'Inverse l\'ordre'], correct: 1, explanation: 'DISTINCT élimine les lignes en double du résultat.' },
+    ]},
+  ];
+
+  let codeState = {};
+
+  function renderCodeSelector(containerId) {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    c.innerHTML = CODE_CHALLENGES.map((ch, i) => `
+      <div class="code-card" data-challenge="${i}" style="background:#13151e;border:1px solid #1c2035;border-radius:14px;padding:20px;cursor:pointer;transition:all .2s ease;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:32px;">${ch.icon}</div>
+          <span style="font-size:11px;padding:4px 10px;border-radius:20px;background:${ch.difficulty === 'Débutant' ? 'rgba(0,214,143,0.15);color:#00d68f' : ch.difficulty === 'Intermédiaire' ? 'rgba(255,181,71,0.15);color:#ffb547' : 'rgba(124,58,237,0.15);color:#7c3aed'}">${ch.difficulty}</span>
+        </div>
+        <h4 style="font-size:15px;font-weight:700;color:white;margin-bottom:6px;">${ch.title}</h4>
+        <p style="font-size:12px;color:#8892b0;">${ch.questions.length} exercices • +${ch.questions.length * 35} XP max</p>
+      </div>
+    `).join('');
+    c.querySelectorAll('.code-card').forEach(card => {
+      card.addEventListener('click', () => startCodeChallenge(parseInt(card.dataset.challenge), containerId));
+      card.addEventListener('mouseenter', () => { card.style.borderColor = '#232840'; card.style.transform = 'translateY(-2px)'; });
+      card.addEventListener('mouseleave', () => { card.style.borderColor = '#1c2035'; card.style.transform = 'none'; });
+    });
+  }
+
+  function startCodeChallenge(index, containerId) {
+    const challenge = CODE_CHALLENGES[index];
+    codeState = { challengeIndex: index, qIndex: 0, score: 0, answers: [], startTime: Date.now() };
+    const c = document.getElementById(containerId);
+    c.innerHTML = `
+      <div style="text-align:center;margin-bottom:24px;">
+        <h3 style="font-family:'Poppins',sans-serif;font-size:20px;color:white;">${challenge.icon} ${challenge.title}</h3>
+        <p style="font-size:13px;color:#8892b0;" id="codeProgress">Exercice 1/${challenge.questions.length}</p>
+      </div>
+      <div id="codeBody"></div>
+    `;
+    renderCodeQuestion(containerId);
+  }
+
+  function renderCodeQuestion(containerId) {
+    const challenge = CODE_CHALLENGES[codeState.challengeIndex];
+    const q = challenge.questions[codeState.qIndex];
+    document.getElementById('codeProgress').textContent = `Exercice ${codeState.qIndex + 1}/${challenge.questions.length}`;
+    const codeBlock = q.code ? `<div style="background:#0B1331;border:1px solid #1c2035;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-family:'Fira Code',monospace;font-size:13px;color:#00C4FF;overflow-x:auto;">${esc(q.code)}</div>` : '';
+    document.getElementById('codeBody').innerHTML = `
+      <div style="background:#13151e;border:1px solid #1c2035;border-radius:14px;padding:24px;margin-bottom:16px;">
+        <p style="font-size:16px;font-weight:600;color:white;margin-bottom:16px;line-height:1.5;">${esc(q.q)}</p>
+        ${codeBlock}
+        <div style="display:flex;flex-direction:column;gap:10px;" id="codeOptions">
+          ${q.options.map((opt, i) => `
+            <button class="code-opt" data-idx="${i}" style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:#0B1331;border:1px solid #232840;border-radius:10px;cursor:pointer;font-size:14px;color:#e8eaf6;text-align:left;transition:all .15s ease;width:100%;text-align:left;font-family:'Fira Code',monospace;">
+              <span style="width:28px;height:28px;border-radius:8px;background:#1c2035;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#8892b0;flex-shrink:0;">${String.fromCharCode(65 + i)}</span>
+              ${esc(opt)}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;color:#8892b0;">Score: <strong style="color:#00d68f;">${codeState.score}</strong></span>
+        <span style="font-size:13px;color:#8892b0;">+${codeState.score * 35} XP gagnés</span>
+      </div>
+    `;
+    document.querySelectorAll('.code-opt').forEach(btn => {
+      btn.addEventListener('click', () => answerCode(parseInt(btn.dataset.idx), containerId));
+      btn.addEventListener('mouseenter', () => { btn.style.borderColor = '#1E5BFF'; btn.style.background = '#161a26'; });
+      btn.addEventListener('mouseleave', () => { btn.style.borderColor = '#232840'; btn.style.background = '#0B1331'; });
+    });
+  }
+
+  function answerCode(selected, containerId) {
+    const challenge = CODE_CHALLENGES[codeState.challengeIndex];
+    const q = challenge.questions[codeState.qIndex];
+    const isCorrect = selected === q.correct;
+    if (isCorrect) codeState.score++;
+
+    const opts = document.querySelectorAll('.code-opt');
+    opts.forEach((opt, i) => {
+      opt.style.pointerEvents = 'none';
+      if (i === q.correct) { opt.style.borderColor = '#00d68f'; opt.style.background = 'rgba(0,214,143,0.1)'; }
+      else if (i === selected && !isCorrect) { opt.style.borderColor = '#ff4d6d'; opt.style.background = 'rgba(255,77,109,0.1)'; }
+    });
+
+    codeState.answers.push({ question: q.q, selected, correct: q.correct, isCorrect });
+
+    const explanation = document.createElement('div');
+    explanation.style.cssText = 'margin-top:12px;padding:12px 16px;border-radius:8px;font-size:13px;line-height:1.5;';
+    explanation.style.background = isCorrect ? 'rgba(0,214,143,0.08)' : 'rgba(255,77,109,0.08)';
+    explanation.style.border = isCorrect ? '1px solid rgba(0,214,143,0.2)' : '1px solid rgba(255,77,109,0.2)';
+    explanation.style.color = isCorrect ? '#00d68f' : '#ff4d6d';
+    explanation.innerHTML = `<strong>${isCorrect ? '✓ Correct !' : '✗ Incorrect'}</strong> — ${esc(q.explanation)}`;
+    document.getElementById('codeBody').querySelector('div').appendChild(explanation);
+
+    setTimeout(() => {
+      codeState.qIndex++;
+      if (codeState.qIndex < challenge.questions.length) {
+        renderCodeQuestion(containerId);
+      } else {
+        endCodeChallenge(containerId);
+      }
+    }, 2000);
+  }
+
+  function endCodeChallenge(containerId) {
+    const challenge = CODE_CHALLENGES[codeState.challengeIndex];
+    const total = challenge.questions.length;
+    const pct = Math.round((codeState.score / total) * 100);
+    const xp = codeState.score * 35;
+    const bonus = pct === 100 ? 75 : pct >= 80 ? 30 : 0;
+    const totalXP = xp + bonus;
+
+    addXP(totalXP, `Code Challenge — ${challenge.title} — ${codeState.score}/${total}`);
+    state.quizzesCompleted++;
+    checkStreak();
+    save();
+
+    const grade = pct >= 90 ? '🏆 Excellent !' : pct >= 70 ? '💪 Très bien !' : pct >= 50 ? '👍 Pas mal !' : '📚 Continue !';
+
+    document.getElementById(containerId).innerHTML = `
+      <div style="text-align:center;padding:40px 20px;">
+        <div style="font-size:64px;margin-bottom:16px;">${pct >= 90 ? '🎉' : pct >= 50 ? '✨' : '📖'}</div>
+        <h3 style="font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;color:white;margin-bottom:8px;">Challenge Terminé !</h3>
+        <p style="font-size:16px;color:#8892b0;margin-bottom:24px;">${grade}</p>
+        <div style="display:flex;justify-content:center;gap:32px;margin-bottom:32px;">
+          <div style="text-align:center;">
+            <div style="font-family:'Poppins',sans-serif;font-size:36px;font-weight:800;color:white;">${codeState.score}/${total}</div>
+            <div style="font-size:12px;color:#8892b0;">Bons réponses</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Poppins',sans-serif;font-size:36px;font-weight:800;color:#00d68f;">+${totalXP}</div>
+            <div style="font-size:12px;color:#8892b0;">XP gagnés</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Poppins',sans-serif;font-size:36px;font-weight:800;color:#ffb547;">${pct}%</div>
+            <div style="font-size:12px;color:#8892b0;">Score</div>
+          </div>
+        </div>
+        ${bonus > 0 ? `<p style="font-size:14px;color:#ffb547;margin-bottom:24px;">🎯 Bonus performance : +${bonus} XP</p>` : ''}
+        <div style="display:flex;justify-content:center;gap:12px;">
+          <button onclick="MiniGames.renderCodeSelector('${containerId}')" style="padding:12px 24px;background:linear-gradient(135deg,#1E5BFF,#00C4FF);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Rejouer</button>
+          <button onclick="MiniGames.renderMenu('${containerId}')" style="padding:12px 24px;background:#13151e;border:1px solid #1c2035;color:#8892b0;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Retour</button>
+        </div>
+      </div>
+    `;
+  }
+
   /* ===== MENU ===== */
   function renderMenu(containerId) {
     const c = document.getElementById(containerId);
@@ -529,13 +765,14 @@ const MiniGames = (() => {
         <h3 style="font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:white;margin-bottom:8px;">🎮 Mini-Jeux</h3>
         <p style="font-size:14px;color:#8892b0;">Jouez pour gagner des XP et monter de niveau</p>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;" id="gamesGrid"></div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;" id="gamesGrid"></div>
     `;
     const grid = document.getElementById('gamesGrid');
     const games = [
       { icon: '❓', title: 'Quiz', desc: 'Testez vos connaissances', action: `MiniGames.renderQuizSelector('${containerId}')`, xp: '+25 XP/question' },
       { icon: '🔗', title: 'Association', desc: 'Reliez termes et définitions', action: `MiniGames.renderMatchSelector('${containerId}')`, xp: '+30 XP/paire' },
       { icon: '🔤', title: 'Mot Mystère', desc: 'Devinez le mot caché', action: `MiniGames.startWordGame('${containerId}')`, xp: '+40 XP/lettre' },
+      { icon: '💻', title: 'Code Challenge', desc: 'Exercices de programmation', action: `MiniGames.renderCodeSelector('${containerId}')`, xp: '+35 XP/exercice' },
     ];
     grid.innerHTML = games.map(g => `
       <div class="game-card" style="background:#13151e;border:1px solid #1c2035;border-radius:16px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s ease;">
@@ -551,6 +788,7 @@ const MiniGames = (() => {
         if (i === 0) MiniGames.renderQuizSelector(containerId);
         else if (i === 1) MiniGames.renderMatchSelector(containerId);
         else if (i === 2) MiniGames.startWordGame(containerId);
+        else if (i === 3) MiniGames.renderCodeSelector(containerId);
       });
       card.addEventListener('mouseenter', () => { card.style.borderColor = '#232840'; card.style.transform = 'translateY(-4px)'; });
       card.addEventListener('mouseleave', () => { card.style.borderColor = '#1c2035'; card.style.transform = 'none'; });
@@ -565,6 +803,6 @@ const MiniGames = (() => {
 
   return {
     getXP, getLevel, getLevelName, getLevelIcon, getXPToNext, getXPProgress, addXP, checkStreak,
-    renderMenu, renderQuizSelector, renderMatchSelector, startWordGame, startQuiz
+    renderMenu, renderQuizSelector, renderMatchSelector, startWordGame, startQuiz, renderCodeSelector
   };
 })();

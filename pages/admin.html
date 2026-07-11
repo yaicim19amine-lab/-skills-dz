@@ -37,7 +37,9 @@
           <li><a href="#" class="nav-item" data-page="formations"><i data-lucide="book-open"></i><span>Formations</span></a></li>
           <li><a href="#" class="nav-item" data-page="live"><i data-lucide="radio"></i><span>Sessions Live</span></a></li>
           <li><a href="#" class="nav-item" data-page="finance"><i data-lucide="wallet"></i><span>Finances</span></a></li>
+          <li><a href="#" class="nav-item" data-page="tasks"><i data-lucide="list-checks"></i><span>Tâches</span></a></li>
           <li><a href="#" class="nav-item" data-page="journal"><i data-lucide="lightbulb"></i><span>Journal d'idées</span></a></li>
+          <li><a href="#" class="nav-item" data-page="audit"><i data-lucide="clipboard-list"></i><span>Audit</span></a></li>
           <li><a href="#" class="nav-item" data-page="settings"><i data-lucide="settings"></i><span>Paramètres</span></a></li>
         </ul>
       </nav>
@@ -277,13 +279,27 @@
                     <th>Méthode</th>
                     <th>Statut</th>
                     <th>Type</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="financeTableBody">
-                  <tr><td colspan="6" style="text-align:center;color:#8892b0;padding:2rem">Chargement...</td></tr>
+                  <tr><td colspan="7" style="text-align:center;color:#8892b0;padding:2rem">Chargement...</td></tr>
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+
+        <!-- ═══ TASKS ═══ -->
+        <section class="admin-page" id="page-admin-tasks">
+          <div class="page-header">
+            <h2 class="page-title">Tâches gestion</h2>
+            <div class="page-actions">
+              <button class="btn btn--primary" id="addTaskBtn"><i data-lucide="plus-circle"></i> Nouvelle tâche</button>
+            </div>
+          </div>
+          <div class="tasks-board" id="adminTasksBoard">
+            <p style="color:#8892b0;text-align:center;padding:2rem">Chargement...</p>
           </div>
         </section>
 
@@ -315,12 +331,39 @@
           </div>
         </section>
 
+        <!-- ═══ AUDIT ═══ -->
+        <section class="admin-page" id="page-admin-audit">
+          <div class="page-header">
+            <h2 class="page-title">Journal d'audit</h2>
+            <p class="page-subtitle">Historique des actions sensibles réalisées par les administrateurs</p>
+          </div>
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table" id="auditTable">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Admin</th>
+                    <th>Action</th>
+                    <th>Entité</th>
+                    <th>Détails</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                  <tr><td colspan="5" style="text-align:center;color:#8892b0;padding:2rem">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <!-- ═══ SETTINGS ═══ -->
         <section class="admin-page" id="page-admin-settings">
           <div class="page-header">
             <h2 class="page-title">Paramètres</h2>
           </div>
           <div class="settings-grid">
+            <!-- Profil Admin -->
             <div class="card settings-card">
               <div class="card-header">
                 <h3 class="card-title"><i data-lucide="user-cog"></i> Profil administrateur</h3>
@@ -341,6 +384,8 @@
                 <button type="submit" class="btn btn--primary">Sauvegarder</button>
               </form>
             </div>
+
+            <!-- Notifications -->
             <div class="card settings-card">
               <div class="card-header">
                 <h3 class="card-title"><i data-lucide="bell"></i> Notifications</h3>
@@ -360,6 +405,102 @@
                 </label>
                 <label class="toggle-row">
                   <span>Notifications sessions live</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Apparence -->
+            <div class="card settings-card">
+              <div class="card-header">
+                <h3 class="card-title"><i data-lucide="palette"></i> Apparence</h3>
+              </div>
+              <div class="settings-options">
+                <label class="toggle-row">
+                  <span>Mode sombre (par défaut)</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Animations réduites</span>
+                  <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Compact mode</span>
+                  <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Sécurité -->
+            <div class="card settings-card">
+              <div class="card-header">
+                <h3 class="card-title"><i data-lucide="shield"></i> Sécurité</h3>
+              </div>
+              <div class="settings-options">
+                <label class="toggle-row">
+                  <span>Double authentification (2FA)</span>
+                  <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Connexion par email uniquement</span>
+                  <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Historique des connexions</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Plateforme -->
+            <div class="card settings-card">
+              <div class="card-header">
+                <h3 class="card-title"><i data-lucide="settings-2"></i> Plateforme</h3>
+              </div>
+              <div class="settings-options">
+                <label class="toggle-row">
+                  <span>Inscription ouverte</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Agents IA activés</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Mini-jeux activés</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Système de parrainage</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Boutique XP</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Gamification -->
+            <div class="card settings-card">
+              <div class="card-header">
+                <h3 class="card-title"><i data-lucide="trophy"></i> Gamification</h3>
+              </div>
+              <div class="settings-options">
+                <label class="toggle-row">
+                  <span>Afficher les badges</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Classement public</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Notifications XP</span>
+                  <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
+                </label>
+                <label class="toggle-row">
+                  <span>Système de série (streak)</span>
                   <div class="toggle active" role="switch" aria-checked="true" tabindex="0"></div>
                 </label>
               </div>

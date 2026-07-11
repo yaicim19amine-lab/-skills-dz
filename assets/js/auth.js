@@ -1,25 +1,34 @@
 const Auth = (() => {
+  const STORAGE_KEY = 'skillsdz_user';
+  const TOKEN_KEY = 'skillsdz_token';
+  const GAME_KEY = 'skillsdz_game';
+  const MINIGAMES_KEY = 'skillsdz_minigames';
+  const ENROLLED_KEY = 'skillsdz_enrolled';
+  const JOURNAL_KEY = 'skillsdz_journal_ideas';
+
   function getUser() {
     try {
-      return JSON.parse(localStorage.getItem('skillsdz_user'));
+      return JSON.parse(localStorage.getItem(STORAGE_KEY));
     } catch {
       return null;
     }
   }
 
   function setUser(user) {
-    localStorage.setItem('skillsdz_user', JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
   }
 
   function clearUser() {
-    localStorage.removeItem('skillsdz_user');
-    localStorage.removeItem('skillsdz_token');
-    localStorage.removeItem('skillsdz_game');
-    localStorage.removeItem('skillsdz_minigames');
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(GAME_KEY);
+    localStorage.removeItem(MINIGAMES_KEY);
+    localStorage.removeItem(ENROLLED_KEY);
+    localStorage.removeItem(JOURNAL_KEY);
   }
 
   function isLoggedIn() {
-    return !!getUser() && !!localStorage.getItem('skillsdz_token');
+    return !!getUser() && !!localStorage.getItem(TOKEN_KEY);
   }
 
   function requireAuth() {

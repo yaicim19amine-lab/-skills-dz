@@ -20,6 +20,8 @@ class ApiClient {
 
   async request(path, options = {}) {
     const url = `${API_BASE}${path}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), options.timeout || 15000);
     const headers = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -34,9 +36,11 @@ class ApiClient {
       const response = await fetch(url, {
         ...options,
         headers,
+        signal: controller.signal,
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : { error: await response.text() };
 
       if (!response.ok) {
         throw new Error(data.error || 'Erreur serveur');
@@ -44,10 +48,15 @@ class ApiClient {
 
       return data;
     } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Délai dépassé. Réessayez dans quelques secondes.');
+      }
       if (err.message === 'Failed to fetch') {
         throw new Error('Erreur de connexion. Vérifiez votre connexion internet.');
       }
       throw err;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -80,14 +89,17 @@ class ApiClient {
   getMe() { return this.get('/auth?action=me'); }
 
   // Profile
+  getProfile() { return this.get('/profile'); }
   updateProfile(data) { return this.put('/profile', data); }
+  awardXpEvent(eventType, amount, reason) { return this.post('/profile', { action: 'xpEvent', eventType, amount, reason }); }
 
   // Formations
   getFormations() { return this.get('/formations'); }
+  getMyFormations() { return this.get('/formations?mine=1'); }
   enrollFormation(formationId) { return this.post('/formations', { formationId }); }
 
   // Videos
-  getVideos(category) { return this.get(`/videos${category ? `?category=${category}` : ''}`); }
+  getVideos(category) { return this.get(`/videos${category ? `?category=${encodeURIComponent(category)}` : ''}`); }
   watchVideo(videoId) { return this.post('/videos', { videoId }); }
 
   // Referrals
@@ -97,7 +109,7 @@ class ApiClient {
   chat(agentId, message, history) { return this.post('/ai/chat', { agentId, message, history }); }
 
   // Shop
-  getShopItems(category) { return this.get(`/shop${category ? `?category=${category}` : ''}`); }
+  getShopItems(category) { return this.get(`/shop${category ? `?category=${encodeURIComponent(category)}` : ''}`); }
   purchaseItem(itemId) { return this.post('/shop', { itemId }); }
 
   // Payments
@@ -110,6 +122,9 @@ class ApiClient {
   // Admin
   getAdminData() { return this.get('/admin'); }
   updateUser(data) { return this.put('/admin', data); }
+  createAdminAction(data) { return this.post('/admin', data); }
+  updateAdminAction(data) { return this.put('/admin', data); }
+  deleteAdminAction(data) { return this.request('/admin', { method: 'DELETE', body: JSON.stringify(data) }); }
 }
 
 const api = new ApiClient();

@@ -69,10 +69,6 @@
             <i data-lucide="shopping-bag"></i>
             Boutique XP
           </a>
-          <a class="nav-item" data-page="paiements" href="#">
-            <i data-lucide="credit-card"></i>
-            Paiements
-          </a>
           <a class="nav-item" data-page="live" href="#">
             <i data-lucide="radio"></i>
             Live
@@ -90,7 +86,7 @@
             <i data-lucide="trophy"></i>
             Récompenses
           </a>
-          <a class="nav-item" href="#" onclick="localStorage.clear();window.location.href='../index.html'">
+          <a class="nav-item" href="#" onclick="Auth.logout();return false;">
             <i data-lucide="log-out"></i>
             Déconnexion
           </a>
@@ -211,26 +207,36 @@
 
         <!-- KPIs -->
         <div class="kpi-row">
-          <div class="kpi-card">
+          <div class="kpi-card" style="--kpi-color:#1E5BFF">
             <div class="kpi-card__icon" style="background:rgba(30,91,255,.1)"><i data-lucide="book-open"></i></div>
             <div class="kpi-card__value" id="coursesCompleted">0</div>
             <div class="kpi-card__label">Cours suivis</div>
           </div>
-          <div class="kpi-card">
+          <div class="kpi-card" style="--kpi-color:#00C4FF">
             <div class="kpi-card__icon" style="background:rgba(0,196,255,.1)"><i data-lucide="video"></i></div>
             <div class="kpi-card__value" id="videosWatched">0</div>
             <div class="kpi-card__label">Vidéos vues</div>
           </div>
-          <div class="kpi-card">
+          <div class="kpi-card" style="--kpi-color:#00d68f">
             <div class="kpi-card__icon" style="background:rgba(0,214,143,.1)"><i data-lucide="gamepad-2"></i></div>
             <div class="kpi-card__value" id="gamesPlayed">0</div>
             <div class="kpi-card__label">Jeux joués</div>
           </div>
-          <div class="kpi-card">
+          <div class="kpi-card" style="--kpi-color:#7c3aed">
             <div class="kpi-card__icon" style="background:rgba(124,58,237,.1)"><i data-lucide="trophy"></i></div>
             <div class="kpi-card__value" id="badgesCount">0</div>
             <div class="kpi-card__label">Badges</div>
           </div>
+        </div>
+
+        <!-- Continue Learning -->
+        <div class="continue-card" id="continueCard" style="display:none;">
+          <div class="continue-card__icon">📚</div>
+          <div class="continue-card__info">
+            <h4 class="continue-card__title">Reprendre l'apprentissage</h4>
+            <p class="continue-card__desc" id="continueDesc">Continuez là où vous en étiez</p>
+          </div>
+          <button class="btn btn--accent" id="continueBtn">Continuer</button>
         </div>
 
         <!-- 2-col Grid -->
@@ -365,25 +371,11 @@
               <span class="cours-stat__label">Cours inscrits</span>
             </div>
           </div>
-          <div class="cours-stat cours-stat--green">
-            <div class="cours-stat__icon"><i data-lucide="check-circle"></i></div>
-            <div class="cours-stat__info">
-              <span class="cours-stat__value" id="coursPresent">0%</span>
-              <span class="cours-stat__label">Présence moyenne</span>
-            </div>
-          </div>
           <div class="cours-stat cours-stat--cyan">
             <div class="cours-stat__icon"><i data-lucide="clock"></i></div>
             <div class="cours-stat__info">
               <span class="cours-stat__value" id="coursRemaining">0</span>
               <span class="cours-stat__label">Séances restantes</span>
-            </div>
-          </div>
-          <div class="cours-stat cours-stat--orange">
-            <div class="cours-stat__icon"><i data-lucide="wallet"></i></div>
-            <div class="cours-stat__info">
-              <span class="cours-stat__value" id="coursPaid">0 DA</span>
-              <span class="cours-stat__label">Solde restant</span>
             </div>
           </div>
         </div>
@@ -410,6 +402,14 @@
             <p class="main-header__sub">Apprenez en regardant. Chaque vidéo = +30 XP.</p>
           </div>
         </header>
+        <div class="video-filters">
+          <button class="video-filter active" data-cat="all">Toutes</button>
+          <button class="video-filter" data-cat="introduction">Introduction</button>
+          <button class="video-filter" data-cat="debutant">Débutant</button>
+          <button class="video-filter" data-cat="intermediaire">Intermédiaire</button>
+          <button class="video-filter" data-cat="avance">Avancé</button>
+          <button class="video-filter" data-cat="pro">Pro</button>
+        </div>
         <div class="videos-grid" id="videosGrid"></div>
       </section>
 
@@ -628,67 +628,6 @@
       </section>
 
       <!-- ========== PAGE: PAIEMENTS ========== -->
-      <section class="page" id="page-paiements">
-        <header class="main-header">
-          <div>
-            <h1 class="main-header__title">Mes <span>Paiements</span></h1>
-            <p class="main-header__sub">Déposez pour des formations ou services.</p>
-          </div>
-        </header>
-
-        <!-- New Payment -->
-        <div class="payment-new">
-          <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">💳 Nouveau paiement</h3>
-          <div class="payment-methods">
-            <button class="payment-method-btn active" data-method="cib">
-              <div class="payment-method-icon" style="background:#1E5BFF22;color:#1E5BFF">🏦</div>
-              <span>CIB / BaridiMob</span>
-              <small>QR code ou transfert</small>
-            </button>
-            <button class="payment-method-btn" data-method="redotpay">
-              <div class="payment-method-icon" style="background:#7c3aed22;color:#7c3aed">₿</div>
-              <span>RedotPay</span>
-              <small>Crypto USDT (TRC20)</small>
-            </button>
-            <button class="payment-method-btn" data-method="bybit">
-              <div class="payment-method-icon" style="background:#ffb54722;color:#ffb547">📊</div>
-              <span>Bybit P2P</span>
-              <small>Trading peer-to-peer</small>
-            </button>
-          </div>
-          <div class="payment-form">
-            <div class="form-group">
-              <label>Montant (DA)</label>
-              <input type="number" id="paymentAmount" min="500" step="500" value="5000" class="payment-input"/>
-            </div>
-            <div class="payment-presets">
-              <button class="payment-preset" data-amount="5000">5,000</button>
-              <button class="payment-preset" data-amount="10000">10,000</button>
-              <button class="payment-preset" data-amount="25000">25,000</button>
-              <button class="payment-preset" data-amount="45000">45,000</button>
-            </div>
-            <button class="btn btn--accent btn--block" id="createPaymentBtn">Créer le paiement</button>
-          </div>
-        </div>
-
-        <!-- Payment Instructions (hidden by default) -->
-        <div class="payment-instructions" id="paymentInstructions" style="display:none;">
-          <div class="payment-instructions-header">
-            <h3 id="paymentInstructionsTitle">Instructions</h3>
-            <button class="btn btn--ghost btn--sm" onclick="document.getElementById('paymentInstructions').style.display='none'">✕ Fermer</button>
-          </div>
-          <div id="paymentInstructionsContent"></div>
-        </div>
-
-        <!-- Payment History -->
-        <div class="card" style="margin-top:24px;">
-          <div class="card__header">
-            <h3 class="card__title">Historique des paiements</h3>
-          </div>
-          <div id="paymentHistory"></div>
-        </div>
-      </section>
-
     </main>
   </div>
 
@@ -711,7 +650,7 @@
         <i data-lucide="gift"></i>
         <span>+100 XP bonus</span>
       </div>
-      <button class="btn btn--accent btn--lg" onclick="closeModal()">Continuer</button>
+      <button class="btn btn--accent btn--lg" onclick="closeLevelUpModal()">Continuer</button>
     </div>
   </div>
 
