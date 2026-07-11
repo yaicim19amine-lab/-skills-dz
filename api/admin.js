@@ -145,6 +145,31 @@ export default async function handler(req, res) {
         return jsonResponse(res, 200, { success: true, task: data, message: 'Tâche créée' });
       }
 
+      if (body.action === 'saveSettings') {
+        const settings = body.settings || {};
+        const allowedKeys = [
+          'notif_new_signups', 'notif_pending_payments', 'notif_weekly_report', 'notif_live_sessions',
+          'appearance_dark_mode', 'appearance_reduced_animations', 'appearance_compact_mode',
+          'security_2fa', 'security_email_only', 'security_login_history',
+          'platform_registration_open', 'platform_ai_agents', 'platform_mini_games',
+          'platform_referral_system', 'platform_xp_shop',
+          'gamification_show_badges', 'gamification_leaderboard', 'gamification_xp_notifications', 'gamification_streak',
+        ];
+        const cleanSettings = {};
+        for (const key of allowedKeys) {
+          if (key in settings) cleanSettings[key] = !!settings[key];
+        }
+        const { error } = await supabase.from('profiles').update({ settings: cleanSettings }).eq('id', user.userId);
+        if (error) return jsonError(res, 500, error.message);
+        await audit(supabase, user.userId, 'saveSettings', 'settings', user.userId, cleanSettings);
+        return jsonResponse(res, 200, { success: true, message: 'Paramètres sauvegardés' });
+      }
+
+      if (body.action === 'getSettings') {
+        const { data } = await supabase.from('profiles').select('settings').eq('id', user.userId).single();
+        return jsonResponse(res, 200, { settings: data?.settings || {} });
+      }
+
       return jsonError(res, 400, 'Action inconnue');
     }
 

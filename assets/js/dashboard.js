@@ -121,6 +121,22 @@ function loadUserData() {
       }
     }).catch(() => {});
   }
+
+  // Sync profile from server
+  api.get('/profile').then(result => {
+    if (result?.user) {
+      const srv = result.user;
+      const local = JSON.parse(localStorage.getItem('skillsdz_user') || '{}');
+      const merged = { ...local, ...srv, referralCode: srv.referralCode || local.referralCode };
+      localStorage.setItem('skillsdz_user', JSON.stringify(merged));
+
+      setText('profileLevel', `Niveau ${srv.level || lvlData.level} — ${lvlData.name}`);
+      setText('profileXP', srv.xp || lvlData.currentXP);
+      setText('profileStreak', srv.streak || Gamification.getState().streak);
+      setText('profileBadges', (srv.badges || []).length);
+    }
+  }).catch(() => {});
+
   } catch {}
 }
 
@@ -477,20 +493,32 @@ function generateReferralCode() {
   if (!codeEl) return;
   try {
     const user = JSON.parse(localStorage.getItem('skillsdz_user'));
-    // Reuse existing code if present
     if (user?.referralCode) {
       codeEl.textContent = user.referralCode;
       return;
     }
-    const base = (user?.firstName || 'USER').toUpperCase().slice(0, 4);
-    const hash = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const code = `SKDZ-${base}${hash}`;
-    // Persist referral code in user object
-    if (user) {
-      user.referralCode = code;
-      localStorage.setItem('skillsdz_user', JSON.stringify(user));
-    }
-    codeEl.textContent = code;
+    api.get('/profile').then(result => {
+      if (result?.user?.referralCode) {
+        codeEl.textContent = result.user.referralCode;
+        if (user) {
+          user.referralCode = result.user.referralCode;
+          localStorage.setItem('skillsdz_user', JSON.stringify(user));
+        }
+      } else {
+        const base = (user?.firstName || 'USER').toUpperCase().slice(0, 4);
+        const hash = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const code = `SKDZ-${base}${hash}`;
+        if (user) {
+          user.referralCode = code;
+          localStorage.setItem('skillsdz_user', JSON.stringify(user));
+        }
+        codeEl.textContent = code;
+      }
+    }).catch(() => {
+      const base = (user?.firstName || 'USER').toUpperCase().slice(0, 4);
+      const hash = Math.random().toString(36).substring(2, 6).toUpperCase();
+      codeEl.textContent = `SKDZ-${base}${hash}`;
+    });
   } catch {
     codeEl.textContent = `SKDZ-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   }

@@ -8,8 +8,22 @@ let _searchTerm = '';
 
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof Auth !== 'undefined' && !Auth.isLoggedIn()) { window.location.href = 'login.html'; return; }
+
+  api.getAdminData().then(() => {
+    initAdminPage();
+  }).catch(err => {
+    if (err.message && err.message.includes('403')) {
+      alert('Accès réservé aux administrateurs.');
+      window.location.href = 'dashboard.html';
+    } else {
+      alert('Erreur de connexion. Veuillez vous reconnecter.');
+      window.location.href = 'login.html';
+    }
+  });
+});
+
+function initAdminPage() {
   const user = JSON.parse(localStorage.getItem('skillsdz_user'));
-  if (user && !user.isAdmin) { alert('Accès réservé aux administrateurs.'); window.location.href = 'dashboard.html'; return; }
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
   initNavigation();
@@ -18,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAdminProfile(user);
   loadAdminData();
   initJournal();
-});
+  loadSettings();
+}
 
 /* ========================================
    UTILS
@@ -105,6 +120,7 @@ function initEventListeners() {
     toggle.addEventListener('click', () => {
       const active = toggle.classList.toggle('active');
       toggle.setAttribute('aria-checked', active);
+      saveSettings();
     });
     toggle.addEventListener('keydown', (e) => {
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle.click(); }
@@ -784,6 +800,48 @@ function loadNotifications(count) {
     <li class="notif-item notif-item--unread"><div class="notif-icon notif-icon--cyan"><i data-lucide="radio"></i></div><div class="notif-body"><p><strong>${adminData.liveSessions.length} sessions live</strong> programmées</p><time>maintenant</time></div></li>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+/* ========================================
+   SETTINGS PERSISTENCE
+   ======================================== */
+const SETTINGS_KEY = 'skillsdz_admin_settings';
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    document.querySelectorAll('.toggle[data-key]').forEach(toggle => {
+      const key = toggle.dataset.key;
+      if (key in saved) {
+        const isActive = saved[key];
+        toggle.classList.toggle('active', isActive);
+        toggle.setAttribute('aria-checked', isActive);
+      }
+    });
+  } catch {}
+
+  api.updateAdminAction({ action: 'getSettings' }).then(result => {
+    if (result?.settings) {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(result.settings));
+      document.querySelectorAll('.toggle[data-key]').forEach(toggle => {
+        const key = toggle.dataset.key;
+        if (key in result.settings) {
+          const isActive = result.settings[key];
+          toggle.classList.toggle('active', isActive);
+          toggle.setAttribute('aria-checked', isActive);
+        }
+      });
+    }
+  }).catch(() => {});
+}
+
+function saveSettings() {
+  const settings = {};
+  document.querySelectorAll('.toggle[data-key]').forEach(toggle => {
+    settings[toggle.dataset.key] = toggle.classList.contains('active');
+  });
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  api.updateAdminAction({ action: 'saveSettings', settings }).catch(() => {});
 }
 
 /* ========================================
