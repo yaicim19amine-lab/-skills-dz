@@ -22,6 +22,37 @@ async function callGroq(messages) {
   return data.choices[0].message.content;
 }
 
+async function callGemini(messages) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY not configured');
+
+  const systemMsg = messages.find(m => m.role === 'system');
+  const chatMsgs = messages.filter(m => m.role !== 'system');
+
+  const contents = chatMsgs.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }));
+
+  const url = AI_PROVIDERS.gemini.url.replace('{model}', AI_PROVIDERS.gemini.model) + `?key=${apiKey}`;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      systemInstruction: systemMsg ? { parts: [{ text: systemMsg.content }] } : undefined,
+      contents,
+      generationConfig: {
+        maxOutputTokens: AI_PROVIDERS.gemini.maxTokens,
+        temperature: 0.7,
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`Gemini ${res.status}`);
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Je n'ai pas pu générer une réponse.";
+}
+
 async function callHuggingFace(messages) {
   const prompt = messages.map(m =>
     m.role === 'system' ? `<s>[INST] ${m.content}\n\n` :
@@ -71,41 +102,47 @@ async function callOpenRouter(messages) {
 }
 
 async function getAIResponse(messages) {
-  // Try providers in order: Groq → HuggingFace → OpenRouter
-  try {
-    return await callGroq(messages);
-  } catch (e) {
-    console.warn('Groq failed, trying HuggingFace:', e.message);
+  const providers = [
+    { name: 'Groq', fn: callGroq },
+    { name: 'Gemini', fn: callGemini },
+    { name: 'HuggingFace', fn: callHuggingFace },
+    { name: 'OpenRouter', fn: callOpenRouter },
+  ];
+
+  for (const provider of providers) {
+    try {
+      return await provider.fn(messages);
+    } catch (e) {
+      console.warn(`${provider.name} failed:`, e.message);
+    }
   }
-  try {
-    return await callHuggingFace(messages);
-  } catch (e) {
-    console.warn('HuggingFace failed, trying OpenRouter:', e.message);
-  }
-  try {
-    return await callOpenRouter(messages);
-  } catch (e) {
-    console.warn('OpenRouter failed:', e.message);
-  }
-  // Fallback to local responses
   return null;
 }
 
 const LOCAL_RESPONSES = {
   coach: [
-    "En tant que Coach Digital, je vous guide pour maîtriser le marketing en Algérie. Facebook et Instagram sont vos meilleurs alliés. Quel domaine vous intéresse ?",
-    "Le digital est en plein essor en Algérie ! Avec 20M+ utilisateurs Facebook, c'est le canal roi. Parlez-moi de votre projet.",
-    "Chaque marque a une histoire à raconter. Quelle est la vôtre ? Je vous aide à la transmettre efficacement.",
+    "Bien sûr ! En tant que Coach Digital chez Skills DZ, je suis là pour vous guider dans le marketing digital. Qu'est-ce que vous aimeriez apprendre en premier ? Réseaux sociaux, SEO, publicité Facebook ?",
+    "Excellente question ! Pour percer sur le marché algérien, concentrez-vous d'abord sur Facebook et Instagram — c'est là que se trouve votre audience. Vous avez déjà une page business ?",
+    "Je comprends votre défi. En Algérie, le marketing de contenu est sous-exploité — c'est votre avantage ! Commencez par publier régulièrement (3-5 fois/semaine) avec du contenu local. Voulez-vous que je vous explique comment créer un calendrier éditorial ?",
+    "Pour booster vos ventes en ligne, la formule est simple : contenu engageant + publicité ciblée + WhatsApp pour les conversions. Budget conseillé pour débuter : 3000-5000 DA/mois sur Facebook. Vous voulez que je détaille chaque étape ?",
+    "Le community management est la clé en Algérie. Répondez à chaque commentaire, créez des sondages, faites des live. L'algo Facebook adore l'engagement ! Skills DZ propose une formation complète là-dessus.",
+    "Avec +500 diplômés et un taux de satisfaction de 95%, Skills DZ est le meilleur choix pour apprendre le marketing digital en Algérie. Nos formations combinent théorie et pratique avec gamification intégrée !",
   ],
   dev: [
-    "Hey ! Dev Mentor ici. Frontend, backend, mobile — je vous accompagne. Qu'est-ce qu'on construit aujourd'hui ?",
-    "Que vous soyez débutant ou confirmé, chaque ligne de code compte. Vous voulez apprendre quoi en premier ?",
-    "Le web évolue chaque jour. Je vous apprends les bonnes pratiques actuelles, pas les techniques dépassées.",
+    "Salut ! Dev Mentor à votre service. Que voulez-vous construire aujourd'hui ? Un site web, une app mobile, une API ? Dites-moi votre projet et on commence.",
+    "Bonne question technique ! En 2026, la stack recommandée est : React/TypeScript pour le frontend, Node.js ou Python pour le backend, PostgreSQL pour la base de données. Vous voulez que je vous montre comment démarrer ?",
+    "Pour débuter en développement web, je recommande : HTML/CSS → JavaScript → React → Node.js → PostgreSQL. C'est le parcours de la formation Skills DZ, et c'est le plus efficace pour être opérationnel en 3-6 mois.",
+    "Le clean code, c'est pas du luxe — c'est de la survie. Une variable bien nommée vaut mieux qu'une page de commentaires. Commencez par ces règles : noms explicites, fonctions courtes, un seul rôle par fonction.",
+    "Pour déployer gratuitement, utilisez Vercel (frontend + API serverless) et Supabase (base de données + auth). C'est la stack gratuite la plus puissante en 2026 pour les startups.",
+    "La formation Développement Web Full Stack de Skills DZ couvre HTML, CSS, JavaScript, React, Node.js et bases de données. 12 semaines intensives pour devenir développeur全栈. Vous êtes intéressé ?",
   ],
   explorer: [
-    "Bienvenue dans le futur ! L'IA n'est plus de la science-fiction. Comment puis-je vous aider à l'intégrer dans votre workflow ?",
-    "L'IA est un outil, pas un remplacement. Elle amplifie votre créativité. Qu'est-ce qui vous intrigue le plus ?",
-    "De ChatGPT aux algorithms de recommandation, l'IA est partout. Explorons ensemble comment l'utiliser à votre avantage.",
+    "Bienvenue dans le monde de l'IA ! Je suis IA Explorer. Qu'est-ce qui vous intéresse ? ChatGPT, la génération d'images, l'automatisation, ou autre chose ?",
+    "L'IA en 2026, c'est accessible à tous ! Voici mes recommandations gratuites : ChatGPT pour l'écriture, Claude pour l'analyse, Gemini pour la recherche, Midjourney/DALL-E pour les images. Vous voulez que je vous apprenne à les utiliser ?",
+    "L'IA ne remplace pas les humains — elle les amplifie. Un bon prompt = un bon résultat. La formation IA de Skills DZ vous apprend à maîtriser ces outils pour gagner en productivité.",
+    "Pour automatiser vos tâches sans code, essayez Zapier ou n8n (open source). Connectez Gmail + Sheets + WhatsApp en quelques clics. C'est l'avenir du travail en Algérie !",
+    "Le machine learning, c'est plus aussi compliqué qu'avant. Vous pouvez entraîner un modèle avec Google Colab (gratuit) en quelques heures. Skills DZ propose une formation complète en IA.",
+    "L'avenir appartient à ceux qui comprennent l'IA. Que vous soyez marketeur, développeur ou entrepreneur, maîtriser l'IA est devenu indispensable. Skills DZ vous forme pour être prêt.",
   ],
 };
 
