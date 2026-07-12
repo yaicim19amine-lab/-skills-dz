@@ -89,7 +89,7 @@ const MiniGames = (() => {
     document.querySelectorAll('[data-xp]').forEach(el => el.textContent = state.xp);
     document.querySelectorAll('[data-level]').forEach(el => el.textContent = getLevelName());
     document.querySelectorAll('[data-level-icon]').forEach(el => el.textContent = getLevelIcon());
-    const bar = document.querySelector('.level-progress__fill');
+    const bar = document.querySelector('.level-progress__bar-fill');
     if (bar) bar.style.width = getXPProgress() + '%';
     const lvlNum = document.querySelector('.level-progress__num');
     if (lvlNum) lvlNum.textContent = getLevel();
@@ -126,7 +126,7 @@ const MiniGames = (() => {
     document.querySelectorAll('[data-xp]').forEach(el => el.textContent = state.xp);
     document.querySelectorAll('[data-level]').forEach(el => el.textContent = getLevelName());
     document.querySelectorAll('[data-level-icon]').forEach(el => el.textContent = getLevelIcon());
-    const bar = document.querySelector('.level-progress__fill');
+    const bar = document.querySelector('.level-progress__bar-fill');
     if (bar) bar.style.width = getXPProgress() + '%';
     const lvlNum = document.querySelector('.level-progress__num');
     if (lvlNum) lvlNum.textContent = getLevel();
@@ -135,9 +135,10 @@ const MiniGames = (() => {
   function showLevelUp(level) {
     const overlay = document.getElementById('levelUpModal');
     if (!overlay) return;
-    overlay.querySelector('.modal__icon').textContent = LEVELS[level].icon;
-    overlay.querySelector('.modal__title').textContent = `Niveau ${level} — ${LEVELS[level].name}`;
-    overlay.querySelector('.modal__text strong').textContent = LEVELS[level].name;
+    const lvlData = LEVELS[Math.min(level, LEVELS.length - 1)];
+    overlay.querySelector('.modal__icon').textContent = lvlData.icon;
+    overlay.querySelector('.modal__title').textContent = `Niveau ${level} — ${lvlData.name}`;
+    overlay.querySelector('.modal__text strong').textContent = lvlData.name;
     overlay.classList.add('open');
     overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('open'); };
     setTimeout(() => overlay.classList.remove('open'), 4000);

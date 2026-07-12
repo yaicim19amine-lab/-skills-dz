@@ -102,7 +102,9 @@ function loadUserData() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
   const welcomeEl = document.getElementById('welcomeName');
-  if (welcomeEl) welcomeEl.parentElement.innerHTML = `${greeting}, <span id="welcomeName">${esc(name)}</span> !`;
+  if (welcomeEl) {
+    welcomeEl.textContent = `${greeting}, ${esc(name)} !`;
+  }
 
   const continueCard = document.getElementById('continueCard');
   const continueDesc = document.getElementById('continueDesc');
@@ -681,6 +683,7 @@ function loadCours() {
   api.getMyFormations().then(data => {
     const courses = (data.courses || []).map(f => ({
       id: f.id,
+      enrollmentId: f.enrollmentId,
       title: f.title,
       emoji: f.emoji || '📚',
       description: f.description || '',
@@ -704,7 +707,13 @@ function loadCours() {
 }
 
 function markCoursPresence(coursId) {
-  api.put('/profile', { action: 'markCoursPresence', coursId }).then(data => {
+  const course = _coursData.find(c => c.id === coursId);
+  const enrollmentId = course?.enrollmentId;
+  if (!enrollmentId) {
+    showNotification('ID d\'inscription introuvable', 'error');
+    return;
+  }
+  api.put('/formations', { enrollmentId, action: 'mark_attendance' }).then(data => {
     showNotification(`Présence enregistrée ! +${data.awarded || 20} XP`, 'success');
     if (typeof data.xp === 'number') {
       updateCachedUserProgress(data);
@@ -720,25 +729,12 @@ function openCoursOnline(coursId) {
   if (course) {
     navigateTo('videos');
     showNotification(`Cours en ligne : ${course.title}`, 'info');
-    return;
   }
-
-  api.watchVideo(coursId).then(data => {
-    showNotification(`Progression vidéo enregistrée : +${data.awarded || 30} XP`, 'success');
-    if (typeof data.xp === 'number') {
-      updateCachedUserProgress(data);
-    }
-    loadCours();
-  }).catch(err => {
-    showNotification(err.message || 'Erreur vidéo', 'error');
-  });
 }
 
 function payCoursRemaining(coursId) {
   const course = _coursData.find(c => c.id === coursId);
   if (!course) return;
-
-  navigateTo('paiements');
   showNotification(`Paiement pour "${course.title}" — ${course.priceTotal - course.pricePaid} DA restants`, 'info');
 }
 

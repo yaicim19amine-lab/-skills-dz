@@ -118,7 +118,7 @@ async function handleSignup(req, res) {
 
     const token = signToken({ userId, email });
     jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, lastName: cleanLastName, xp: 100, level: 2, badges: ['newcomer'], referralCode: userReferralCode }, token });
-  } catch (err) { jsonError(res, 500, err.message); }
+  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleLogin(req, res) {
@@ -134,9 +134,11 @@ async function handleLogin(req, res) {
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
     if (!profile) return jsonError(res, 404, 'Profil non trouvé');
 
+    if (profile.is_banned) return jsonError(res, 403, 'Compte suspendu. Contactez le support.');
+
     const token = signToken({ userId: authData.user.id, email });
     jsonResponse(res, 200, { user: { id: authData.user.id, email: profile.email, firstName: profile.first_name, lastName: profile.last_name, phone: profile.phone, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, referralCode: profile.referral_code, isAdmin: profile.is_admin }, token });
-  } catch (err) { jsonError(res, 500, err.message); }
+  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleForgotPassword(req, res) {
@@ -156,7 +158,7 @@ async function handleForgotPassword(req, res) {
 
     // Always return success to prevent email enumeration
     jsonResponse(res, 200, { success: true, message: 'Si cet email existe, un lien de réinitialisation a été envoyé' });
-  } catch (err) { jsonError(res, 500, err.message); }
+  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleGoogle(req, res) {
@@ -210,7 +212,7 @@ async function handleGoogle(req, res) {
 
     const token = signToken({ userId: authData.user.id, email });
     jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName, lastName, xp: 100, level: 2, badges: ['newcomer'], referralCode: userReferralCode }, token });
-  } catch (err) { jsonError(res, 500, err.message); }
+  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleMe(req, res) {
@@ -222,5 +224,5 @@ async function handleMe(req, res) {
     if (!profile) return jsonError(res, 404, 'Profil non trouvé');
 
     jsonResponse(res, 200, { user: { id: profile.id, email: profile.email, firstName: profile.first_name, lastName: profile.last_name, phone: profile.phone, avatarUrl: profile.avatar_url, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, totalXp: profile.total_xp, isAdmin: profile.is_admin, referralCode: profile.referral_code, createdAt: profile.created_at } });
-  } catch (err) { jsonError(res, 500, err.message); }
+  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
 }

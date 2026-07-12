@@ -1,9 +1,11 @@
 export function setCorsHeaders(res, origin) {
   const allowedOrigins = [
     'https://skills-dz.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:8080',
   ];
+  const isDev = process.env.VERCEL_ENV !== 'production';
+  if (isDev) {
+    allowedOrigins.push('http://localhost:3000', 'http://localhost:8080');
+  }
   const reqOrigin = origin || '*';
   const allowed = allowedOrigins.includes(reqOrigin) ? reqOrigin : allowedOrigins[0];
 
@@ -11,6 +13,7 @@ export function setCorsHeaders(res, origin) {
   res.setHeader('Access-Control-Allow-Origin', allowed);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400');
 }
 
 export function handleOptions(req, res) {

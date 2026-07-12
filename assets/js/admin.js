@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initAdminPage() {
-  const user = JSON.parse(localStorage.getItem('skillsdz_user'));
+  const user = (() => { try { return JSON.parse(localStorage.getItem('skillsdz_user')); } catch { return null; } })();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
   initNavigation();
@@ -103,6 +103,16 @@ function initEventListeners() {
   document.getElementById('addSessionBtn')?.addEventListener('click', () => openLiveModal());
   document.getElementById('addTaskBtn')?.addEventListener('click', () => openTaskModal());
   document.getElementById('exportFinanceBtn')?.addEventListener('click', exportFinanceCSV);
+
+  document.getElementById('usersTableBody')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const userId = btn.dataset.userId;
+    if (action === 'view-user') viewUser(userId);
+    else if (action === 'toggle-admin') toggleAdmin(userId, btn.dataset.admin === 'true');
+    else if (action === 'toggle-ban') toggleBanUser(userId, btn.dataset.banAction);
+  });
 
   document.getElementById('adminProfileForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -256,11 +266,11 @@ function renderUsers() {
       <td>${(u.xp || 0).toLocaleString()}</td>
       <td>${u.is_admin ? '<span class="badge badge--blue">Admin</span>' : isBanned ? '<span class="badge badge--red">Banni</span>' : '<span class="badge badge--green">Actif</span>'}</td>
       <td><div class="action-btns">
-        <button class="icon-btn" title="Voir" onclick="viewUser('${u.id}')"><i data-lucide="eye"></i></button>
+        <button class="icon-btn" title="Voir" data-action="view-user" data-user-id="${esc(u.id)}"><i data-lucide="eye"></i></button>
         ${isMe ? '' : u.is_admin
-          ? `<button class="icon-btn" title="Retirer admin" onclick="toggleAdmin('${u.id}',false)"><i data-lucide="shield-off"></i></button>`
-          : `<button class="icon-btn" title="Rendre admin" onclick="toggleAdmin('${u.id}',true)"><i data-lucide="shield-plus"></i></button>
-             <button class="icon-btn ${isBanned ? 'icon-btn--success' : 'icon-btn--danger'}" title="${isBanned ? 'Débannir' : 'Bannir'}" onclick="toggleBanUser('${u.id}','${isBanned ? 'unban' : 'ban'}')"><i data-lucide="${isBanned ? 'check-circle' : 'ban'}"></i></button>`}
+          ? `<button class="icon-btn" title="Retirer admin" data-action="toggle-admin" data-user-id="${esc(u.id)}" data-admin="false"><i data-lucide="shield-off"></i></button>`
+          : `<button class="icon-btn" title="Rendre admin" data-action="toggle-admin" data-user-id="${esc(u.id)}" data-admin="true"><i data-lucide="shield-plus"></i></button>
+             <button class="icon-btn ${isBanned ? 'icon-btn--success' : 'icon-btn--danger'}" title="${isBanned ? 'Débannir' : 'Bannir'}" data-action="toggle-ban" data-user-id="${esc(u.id)}" data-ban-action="${isBanned ? 'unban' : 'ban'}"><i data-lucide="${isBanned ? 'check-circle' : 'ban'}"></i></button>`}
       </div></td></tr>`;
   }).join('');
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -299,6 +309,8 @@ function openUserModal() {
 }
 
 function toggleBanUser(userId, action) {
+  const myId = JSON.parse(localStorage.getItem('skillsdz_user'))?.id;
+  if (userId === myId) return showToast('Vous ne pouvez pas vous bannir vous-même', 'error');
   const msg = action === 'ban' ? 'Bannir cet utilisateur ?' : 'Débannir cet utilisateur ?';
   if (!confirm(msg)) return;
   api.updateUser({ userId, action }).then(data => {
@@ -813,7 +825,7 @@ function showToast(message, type = 'info') {
    NOTIFICATIONS
    ======================================== */
 function updateNotifBadge() {
-  const count = adminData.users.length;
+  const count = (adminData.payments || []).filter(p => p.status === 'pending').length;
   const badge = document.getElementById('notifBadge');
   if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
   loadNotifications(count);
@@ -889,7 +901,7 @@ const JOURNAL_SOURCES = [
 
 let _fetchedInsights = [];
 let _journalFilter = 'all';
-let _journalCustomIdeas = JSON.parse(localStorage.getItem('skillsdz_journal_ideas') || '[]');
+let _journalCustomIdeas = (() => { try { return JSON.parse(localStorage.getItem('skillsdz_journal_ideas') || '[]'); } catch { return []; } })();
 let _journalTimer = null;
 let _journalCountdownInterval = null;
 

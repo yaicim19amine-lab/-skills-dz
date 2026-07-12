@@ -34,9 +34,8 @@ const PlatformSettings = (() => {
       Object.assign(_settings, DEFAULTS, local);
     } catch { Object.assign(_settings, DEFAULTS); }
     try {
-      api.getAdminData().then(() => {
-        return api.updateAdminAction({ action: 'getSettings' });
-      }).then(result => {
+      if (typeof api === 'undefined') return;
+      api.get('/admin?action=publicSettings').then(result => {
         if (result?.settings) {
           Object.assign(_settings, DEFAULTS, result.settings);
           localStorage.setItem(LS_KEY, JSON.stringify(_settings));

@@ -52,6 +52,16 @@ async function requireAdmin(req) {
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
+  const url = new URL(req.url, `https://${req.headers.host}`);
+
+  if (req.method === 'GET' && url.searchParams.get('action') === 'publicSettings') {
+    try {
+      const supabase = getSupabaseAdmin();
+      const { data } = await supabase.from('profiles').select('settings').eq('is_admin', true).limit(1).maybeSingle();
+      return jsonResponse(res, 200, { settings: data?.settings || {} });
+    } catch { return jsonResponse(res, 200, { settings: {} }); }
+  }
+
   const user = await requireAdmin(req);
   if (!user) return jsonError(res, 403, 'Accès réservé aux administrateurs');
 
