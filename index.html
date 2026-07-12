@@ -26,6 +26,20 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="assets/css/main.css"/>
 
+  <!-- Facebook Pixel -->
+  <script>
+    if (window.FB_PIXEL_ID) {
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+      document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', window.FB_PIXEL_ID);
+      fbq('track', 'PageView');
+    }
+  </script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id='+window.FB_PIXEL_ID+'&ev=PageView&noscript=1"/></noscript>
+
   <!-- JSON-LD -->
   <script type="application/ld+json">
   {
@@ -407,7 +421,7 @@
             <div class="formation-card__price">
               <span class="price">25 000</span> DA
             </div>
-            <a class="btn btn--accent btn--block" href="pages/register.html">S'inscrire</a>
+            <button class="btn btn--accent btn--block" onclick="openLeadModal('Marketing Digital & Meta Ads')">S'inscrire</button>
           </article>
 
           <article class="formation-card">
@@ -419,17 +433,17 @@
             <h3 class="formation-card__title">Développement Web Full Stack</h3>
             <p class="formation-card__desc">HTML, CSS, JavaScript, React, Node.js. Créez des applications complètes.</p>
             <div class="formation-card__meta">
-              <span><i data-lucide="clock"></i> 12 semaines</span>
+              <span><i data-lucide="clock"></i> 10 semaines</span>
               <span><i data-lucide="signal"></i> Intermédiaire</span>
             </div>
             <div class="formation-card__slots">
-              <div class="slots-bar slots-bar--full"><div class="slots-fill slots-fill--full" style="width:100%"></div></div>
-              <span class="slots-text slots-text--full">20 / 20 — Complet</span>
+              <div class="slots-bar"><div class="slots-fill" style="width:100%"></div></div>
+              <span class="slots-text">20 / 20 places</span>
             </div>
             <div class="formation-card__price">
-              <span class="price">45 000</span> DA
+              <span class="price">40 000</span> DA
             </div>
-            <a class="btn btn--outline btn--block" href="pages/register.html">Liste d'attente</a>
+            <button class="btn btn--ghost btn--block" disabled style="opacity:0.5;cursor:not-allowed">Complet</button>
           </article>
 
           <article class="formation-card">
@@ -446,7 +460,7 @@
             <div class="formation-card__price">
               <span class="price">55 000</span> DA
             </div>
-            <a class="btn btn--accent btn--block" href="pages/register.html">S'inscrire</a>
+            <a class="btn btn--accent btn--block" onclick="openLeadModal('Intelligence Artificielle')">S'inscrire</a>
           </article>
         </div>
       </div>
@@ -599,6 +613,65 @@
         }, 280);
       }, 3500);
     })();
+  </script>
+
+  <!-- Lead Inscription Modal -->
+  <div id="leadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#0f1117;border:1px solid #232840;border-radius:20px;padding:40px;max-width:440px;width:90%;position:relative;">
+      <button onclick="closeLeadModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#8892b0;font-size:24px;cursor:pointer">&times;</button>
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:48px;margin-bottom:8px">📚</div>
+        <h3 style="font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:white;margin-bottom:4px">Inscription Formation</h3>
+        <p style="font-size:13px;color:#8892b0" id="leadFormationName">Remplissez le formulaire et nous vous contacterons sous 24h.</p>
+      </div>
+      <form id="leadForm" style="display:flex;flex-direction:column;gap:14px">
+        <input type="text" id="leadName" placeholder="Votre nom complet" required style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
+        <input type="email" id="leadEmail" placeholder="votre@email.com" required style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
+        <input type="tel" id="leadPhone" placeholder="0555 123 456" required style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
+        <button type="submit" class="btn btn--accent btn--block" style="padding:14px;font-size:15px;font-weight:600">
+          Envoyer ma demande
+        </button>
+      </form>
+      <p id="leadSuccess" style="display:none;text-align:center;font-size:13px;color:#00d68f;margin-top:16px">Merci ! Nous vous contacterons sous 24h.</p>
+    </div>
+  </div>
+
+  <script>
+    let _leadFormation = '';
+    function openLeadModal(formation) {
+      _leadFormation = formation || '';
+      document.getElementById('leadFormationName').textContent = 'Formation : ' + _leadFormation;
+      document.getElementById('leadModal').style.display = 'flex';
+      document.getElementById('leadForm').reset();
+      document.getElementById('leadForm').style.display = 'flex';
+      document.getElementById('leadSuccess').style.display = 'none';
+    }
+    function closeLeadModal() {
+      document.getElementById('leadModal').style.display = 'none';
+    }
+    document.getElementById('leadForm')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('leadName').value;
+      const email = document.getElementById('leadEmail').value;
+      const phone = document.getElementById('leadPhone').value;
+      if (!name || !email || !phone) return;
+      const btn = this.querySelector('button[type="submit"]');
+      btn.textContent = 'Envoi en cours...';
+      btn.disabled = true;
+      fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, formation: _leadFormation })
+      }).then(r => r.json()).then(data => {
+        document.getElementById('leadForm').style.display = 'none';
+        document.getElementById('leadSuccess').style.display = 'block';
+        if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: _leadFormation });
+      }).catch(() => {
+        btn.textContent = 'Envoyer ma demande';
+        btn.disabled = false;
+        alert('Erreur. Réessayez ou contactez-nous directement.');
+      });
+    });
   </script>
 </body>
 </html>

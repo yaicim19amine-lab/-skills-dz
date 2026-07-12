@@ -54,6 +54,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST' && action === 'signup') return handleSignup(req, res);
   if (req.method === 'POST' && action === 'login') return handleLogin(req, res);
   if (req.method === 'POST' && action === 'google') return handleGoogle(req, res);
+  if (req.method === 'POST' && action === 'facebook') return handleFacebook(req, res);
   if (req.method === 'POST' && action === 'forgot-password') return handleForgotPassword(req, res);
   if (req.method === 'GET' && action === 'me') return handleMe(req, res);
 
@@ -212,6 +213,44 @@ async function handleGoogle(req, res) {
 
     const token = signToken({ userId: authData.user.id, email });
     jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName, lastName, xp: 100, level: 2, streak: 0, badges: ['newcomer'], isAdmin: false, referralCode: userReferralCode }, token });
+  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
+}
+
+async function handleFacebook(req, res) {
+  try {
+    const { firstName, lastName, email, accessToken } = req.body;
+    if (!email) return jsonError(res, 400, 'Email requis');
+    if (!accessToken) return jsonError(res, 400, 'Token Facebook requis');
+
+    const supabase = getSupabaseAdmin();
+
+    const { data: existing } = await supabase.from('profiles').select('*').eq('email', email).maybeSingle();
+    if (existing) {
+      const token = signToken({ userId: existing.id, email });
+      return jsonResponse(res, 200, { user: { id: existing.id, email: existing.email, firstName: existing.first_name, lastName: existing.last_name, xp: existing.xp, level: existing.level, streak: existing.streak, badges: existing.badges, referralCode: existing.referral_code, isAdmin: existing.is_admin }, token });
+    }
+
+    const randomPassword = generateSecurePassword();
+    const cleanFirstName = sanitizeText(firstName || email.split('@')[0], 100);
+    const cleanLastName = sanitizeText(lastName || '', 100);
+
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({ email, password: randomPassword, email_confirm: true });
+    if (authError) return jsonError(res, 500, 'Erreur création compte');
+
+    const userReferralCode = await generateReferralCode(supabase, cleanFirstName);
+    const { error: profileError } = await supabase.from('profiles').insert({
+      id: authData.user.id, email, first_name: cleanFirstName, last_name: cleanLastName,
+      xp: 100, level: 2, streak: 0, badges: ['newcomer'], total_xp: 100, referral_code: userReferralCode,
+    });
+    if (profileError) {
+      await supabase.auth.admin.deleteUser(authData.user.id).catch(() => {});
+      return jsonError(res, 500, 'Erreur profil');
+    }
+
+    await supabase.from('xp_transactions').insert({ user_id: authData.user.id, amount: 100, reason: 'Bienvenue sur Skills DZ !', source: 'bonus' });
+
+    const token = signToken({ userId: authData.user.id, email });
+    jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName: cleanFirstName, lastName: cleanLastName, xp: 100, level: 2, streak: 0, badges: ['newcomer'], isAdmin: false, referralCode: userReferralCode }, token });
   } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
 }
 

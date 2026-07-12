@@ -86,7 +86,11 @@ class ApiClient {
   signup(data) { return this.post('/auth?action=signup', data); }
   login(data) { return this.post('/auth?action=login', data); }
   googleAuth(data) { return this.post('/auth?action=google', data); }
+  facebookAuth(data) { return this.post('/auth?action=facebook', data); }
   getMe() { return this.get('/auth?action=me'); }
+
+  // Leads (inscription sans connexion)
+  submitLead(data) { return this.post('/leads', data); }
 
   // Profile
   getProfile() { return this.get('/profile'); }

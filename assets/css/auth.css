@@ -351,6 +351,32 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   margin-bottom: 12px;
 }
 
+.btn--facebook {
+  background: #1877F2;
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+.btn--facebook:hover {
+  background: #166fe5;
+  box-shadow: 0 2px 8px rgba(24,119,242,0.3);
+}
+.btn--facebook:active { transform: scale(0.98); }
+.btn--facebook svg {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+}
+
 .auth-alt-divider {
   display: flex; align-items: center; gap: 16px;
   margin: 20px 0;
