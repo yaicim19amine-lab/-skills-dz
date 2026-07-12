@@ -1,5 +1,5 @@
 import { handleOptions, jsonError, jsonResponse } from './_lib/cors.js';
-import { getSupabaseAdmin } from './_lib/supabase.js';
+import { getSupabaseForUser } from './_lib/supabase.js';
 import { getUserFromRequest } from './_lib/auth.js';
 import { rateLimit, getClientIp } from './_lib/rateLimit.js';
 
@@ -9,7 +9,8 @@ export default async function handler(req, res) {
   const user = getUserFromRequest(req);
 
   try {
-    const supabase = getSupabaseAdmin();
+    const token = req.headers.authorization?.split(' ')[1];
+    const supabase = getSupabaseForUser(token);
 
     if (req.method === 'GET') {
       if (!user) return jsonError(res, 401, 'Non autorisé');

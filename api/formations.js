@@ -1,5 +1,5 @@
 import { handleOptions, jsonError, jsonResponse } from './_lib/cors.js';
-import { getSupabaseAdmin } from './_lib/supabase.js';
+import { getSupabaseForUser, getSupabaseAdmin } from './_lib/supabase.js';
 import { getUserFromRequest } from './_lib/auth.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -10,7 +10,8 @@ export default async function handler(req, res) {
   const user = getUserFromRequest(req);
 
   try {
-    const supabase = getSupabaseAdmin();
+    const token = req.headers.authorization?.split(' ')[1];
+    const supabase = getSupabaseForUser(token);
 
     if (req.method === 'GET') {
       if (req.query?.mine === '1') {

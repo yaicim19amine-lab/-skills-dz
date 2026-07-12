@@ -1,5 +1,5 @@
 import { handleOptions, jsonError, jsonResponse } from './_lib/cors.js';
-import { getSupabaseAdmin } from './_lib/supabase.js';
+import { getSupabaseForUser } from './_lib/supabase.js';
 import { getUserFromRequest } from './_lib/auth.js';
 import { rateLimit } from './_lib/rateLimit.js';
 
@@ -10,7 +10,8 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const supabase = getSupabaseAdmin();
+      const token = req.headers.authorization?.split(' ')[1];
+      const supabase = getSupabaseForUser(token);
       const { data, error } = await supabase
         .from('referrals')
         .select('referrer_id, count:id')
@@ -52,7 +53,8 @@ export default async function handler(req, res) {
   if (!user) return jsonError(res, 401, 'Non autorisé');
 
   try {
-    const supabase = getSupabaseAdmin();
+    const token = req.headers.authorization?.split(' ')[1];
+    const supabase = getSupabaseForUser(token);
     const code = String(req.body?.code || '').trim().toUpperCase();
 
     if (!code) return jsonError(res, 400, 'Code de parrainage requis');
