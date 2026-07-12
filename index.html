@@ -14,6 +14,7 @@
   <meta content="Formations professionnelles avec gamification et agents IA. Apprenez, gagnez des points, montez de niveau." property="og:description"/>
   <meta content="https://skills-dz.vercel.app/" property="og:url"/>
   <meta content="website" property="og:type"/>
+  <meta content="https://skills-dz.vercel.app/assets/img/logo.jpeg" property="og:image"/>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -618,18 +619,27 @@
   </script>
 
   <!-- Lead Inscription Modal -->
-  <div id="leadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;">
-    <div style="background:#0f1117;border:1px solid #232840;border-radius:20px;padding:40px;max-width:440px;width:90%;position:relative;">
-      <button onclick="closeLeadModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#8892b0;font-size:24px;cursor:pointer">&times;</button>
+  <div id="leadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;" onclick="if(event.target===this)closeLeadModal()">
+    <div style="background:#0f1117;border:1px solid #232840;border-radius:20px;padding:40px;max-width:440px;width:90%;position:relative;" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+      <button onclick="closeLeadModal()" aria-label="Fermer" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#8892b0;font-size:24px;cursor:pointer">&times;</button>
       <div style="text-align:center;margin-bottom:24px">
-        <div style="font-size:48px;margin-bottom:8px">📚</div>
-        <h3 style="font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:white;margin-bottom:4px">Inscription Formation</h3>
+        <div style="font-size:48px;margin-bottom:8px" aria-hidden="true">📚</div>
+        <h3 id="leadModalTitle" style="font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:white;margin-bottom:4px">Inscription Formation</h3>
         <p style="font-size:13px;color:#8892b0" id="leadFormationName">Remplissez le formulaire et nous vous contacterons sous 24h.</p>
       </div>
-      <form id="leadForm" style="display:flex;flex-direction:column;gap:14px">
-        <input type="text" id="leadName" placeholder="Votre nom complet" required style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
-        <input type="email" id="leadEmail" placeholder="votre@email.com" required style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
-        <input type="tel" id="leadPhone" placeholder="0555 123 456" required style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
+      <form id="leadForm" style="display:flex;flex-direction:column;gap:14px" novalidate>
+        <div>
+          <label for="leadName" style="display:block;font-size:12px;font-weight:600;color:#8892b0;margin-bottom:6px">Nom complet</label>
+          <input type="text" id="leadName" placeholder="Votre nom complet" required autocomplete="name" style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
+        </div>
+        <div>
+          <label for="leadEmail" style="display:block;font-size:12px;font-weight:600;color:#8892b0;margin-bottom:6px">Email</label>
+          <input type="email" id="leadEmail" placeholder="votre@email.com" required autocomplete="email" style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
+        </div>
+        <div>
+          <label for="leadPhone" style="display:block;font-size:12px;font-weight:600;color:#8892b0;margin-bottom:6px">Téléphone</label>
+          <input type="tel" id="leadPhone" placeholder="0555 123 456" required autocomplete="tel" style="width:100%;padding:14px 16px;background:#0B1331;border:1px solid #1c2035;border-radius:10px;color:white;font-size:14px;outline:none"/>
+        </div>
         <button type="submit" class="btn btn--accent btn--block" style="padding:14px;font-size:15px;font-weight:600">
           Envoyer ma demande
         </button>

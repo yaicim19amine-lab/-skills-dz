@@ -119,7 +119,7 @@ function initEventListeners() {
     const name = document.getElementById('adminName')?.value?.trim();
     if (!name) return showToast('Le nom est requis', 'error');
     api.updateProfile({ firstName: name }).then(() => {
-      const u = JSON.parse(localStorage.getItem('skillsdz_user'));
+      let u; try { u = JSON.parse(localStorage.getItem('skillsdz_user')); } catch { u = null; }
       if (u) { u.firstName = name; u.name = name; localStorage.setItem('skillsdz_user', JSON.stringify(u)); }
       loadAdminProfile(u);
       showToast('Profil mis à jour', 'success');
@@ -251,7 +251,7 @@ function renderUsers() {
 
   if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8892b0;padding:2rem">Aucun utilisateur trouvé</td></tr>'; return; }
 
-  const myId = JSON.parse(localStorage.getItem('skillsdz_user'))?.id;
+  let myId; try { myId = JSON.parse(localStorage.getItem('skillsdz_user'))?.id; } catch { myId = null; }
   tbody.innerHTML = users.map(u => {
     const name = esc(`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email);
     const initials = (u.first_name || u.last_name || u.email || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -309,7 +309,7 @@ function openUserModal() {
 }
 
 function toggleBanUser(userId, action) {
-  const myId = JSON.parse(localStorage.getItem('skillsdz_user'))?.id;
+  let myId; try { myId = JSON.parse(localStorage.getItem('skillsdz_user'))?.id; } catch { myId = null; }
   if (userId === myId) return showToast('Vous ne pouvez pas vous bannir vous-même', 'error');
   const msg = action === 'ban' ? 'Bannir cet utilisateur ?' : 'Débannir cet utilisateur ?';
   if (!confirm(msg)) return;

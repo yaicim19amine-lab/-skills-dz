@@ -8,85 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
   }
 
-  // ========================================
-  // STICKY HEADER
-  // ========================================
-  const header = document.getElementById('header');
-  if (header) {
-    window.addEventListener('scroll', () => {
-      header.classList.toggle('is-scrolled', window.scrollY > 50);
-    });
-  }
-
-  // ========================================
-  // HAMBURGER MENU
-  // ========================================
-  const hamburger = document.getElementById('hamburger');
-  const nav = document.getElementById('nav');
-  if (hamburger && nav) {
-    hamburger.addEventListener('click', () => {
-      nav.classList.toggle('is-open');
-      hamburger.classList.toggle('is-active');
-    });
-  }
-
-  // ========================================
-  // SMOOTH SCROLL
-  // ========================================
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        const headerHeight = header ? header.offsetHeight : 0;
-        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-        // Close mobile menu if open
-        if (nav) nav.classList.remove('is-open');
-        if (hamburger) hamburger.classList.remove('is-active');
-      }
-    });
-  });
-
-  // ========================================
-  // ANIMATED COUNTERS
-  // ========================================
-  const counters = document.querySelectorAll('[data-count]');
-  if (counters.length > 0) {
-    const animateCounter = (el) => {
-      const target = parseInt(el.getAttribute('data-count'));
-      const duration = 2000;
-      const start = 0;
-      const startTime = performance.now();
-
-      const update = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const current = Math.floor(start + (target - start) * easeOut);
-        el.textContent = current.toLocaleString('fr-DZ') + (target >= 100 ? '+' : '');
-        if (progress < 1) {
-          requestAnimationFrame(update);
-        }
-      };
-      requestAnimationFrame(update);
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateCounter(entry.target);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.5 });
-
-    counters.forEach(counter => observer.observe(counter));
-  }
-
   function showStatus(el, message, type) {
     if (!el) return;
     el.textContent = message;
@@ -156,23 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
       img.src = img.src;
     });
   }
-
-  // ========================================
-  // FORM FIELD FOCUS TRACKING
-  // ========================================
-  let formStarted = false;
-  document.querySelectorAll('#inscription-form input, #inscription-form select').forEach(field => {
-    field.addEventListener('focus', () => {
-      if (!formStarted) {
-        formStarted = true;
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'form_start', {
-            form_name: 'inscription_form'
-          });
-        }
-      }
-    });
-  });
 
   // ========================================
   // FOCUS VISIBLE (Accessibility)

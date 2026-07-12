@@ -30,11 +30,6 @@
 }
 .reveal--right.is-visible { transform: translateX(0); }
 
-.reveal--scale {
-  transform: scale(0.92);
-}
-.reveal--scale.is-visible { transform: scale(1); }
-
 /* ── 3D Tilt Cards ── */
 .tilt-3d {
   transform-style: preserve-3d;
@@ -133,13 +128,7 @@
   100% { transform: translateY(-600px) translateX(40px) scale(0.3); opacity: 0; }
 }
 
-/* ── Hero Parallax Depth ── */
-.parallax-layer {
-  will-change: transform;
-  transition: transform 0.1s linear;
-}
-
-/* ── Stat Counter Glow ── */
+/* ── Smooth Section Transitions ── */
 .hero__stat-num {
   text-shadow: 0 0 30px rgba(0, 196, 255, 0.3);
 }
@@ -186,18 +175,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Loading Shimmer ── */
-.shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ── Mobile nav slide ── */
+/* ── FAQ Smooth Open ── */
 .nav--mobile-open {
   display: flex !important;
   flex-direction: column;
