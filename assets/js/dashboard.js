@@ -80,8 +80,14 @@ function loadUserData() {
 
     const avatar = document.getElementById('userAvatar');
     const profileAvatar = document.getElementById('profileAvatar');
-    if (avatar) avatar.textContent = initials;
-    if (profileAvatar) profileAvatar.textContent = initials;
+    const avatarUrl = user.avatarUrl || user.avatar_url || '';
+    if (avatarUrl) {
+      if (avatar) { avatar.textContent = ''; avatar.style.backgroundImage = `url(${avatarUrl})`; avatar.style.backgroundSize = 'cover'; avatar.style.backgroundPosition = 'center'; }
+      if (profileAvatar) { profileAvatar.textContent = ''; profileAvatar.style.backgroundImage = `url(${avatarUrl})`; profileAvatar.style.backgroundSize = 'cover'; profileAvatar.style.backgroundPosition = 'center'; }
+    } else {
+      if (avatar) { avatar.textContent = initials; avatar.style.backgroundImage = 'none'; }
+      if (profileAvatar) { profileAvatar.textContent = initials; profileAvatar.style.backgroundImage = 'none'; }
+    }
 
     setText('profileName', name);
     setText('profileEmail', user.email || '');
@@ -149,6 +155,23 @@ function loadUserData() {
       setText('profileXP', srv.xp || lvlData.currentXP);
       setText('profileStreak', srv.streak || Gamification.getState().streak);
       setText('profileBadges', (srv.badges || []).length);
+
+      // Avatar from server
+      const srvAvatar = srv.avatarUrl || '';
+      const av = document.getElementById('userAvatar');
+      const pa = document.getElementById('profileAvatar');
+      if (srvAvatar) {
+        if (av) { av.textContent = ''; av.style.backgroundImage = `url(${srvAvatar})`; av.style.backgroundSize = 'cover'; av.style.backgroundPosition = 'center'; }
+        if (pa) { pa.textContent = ''; pa.style.backgroundImage = `url(${srvAvatar})`; pa.style.backgroundSize = 'cover'; pa.style.backgroundPosition = 'center'; }
+      }
+
+      // Social links from server
+      const socials = srv.socials || {};
+      setVal('socialInstagram', socials.instagram || '');
+      setVal('socialLinkedin', socials.linkedin || '');
+      setVal('socialYoutube', socials.youtube || '');
+      setVal('socialTwitter', socials.twitter || '');
+      setVal('socialTiktok', socials.tiktok || '');
     }
   }).catch(() => {});
 
@@ -158,6 +181,11 @@ function loadUserData() {
 function setText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
 }
 
 function animateValue(el, start, end, duration) {
@@ -875,3 +903,70 @@ function initCoursFilters() {
     });
   });
 }
+
+/* ========================================
+   AVATAR UPLOAD
+   ======================================== */
+(function initAvatarUpload() {
+  const editBtn = document.getElementById('avatarEditBtn');
+  const fileInput = document.getElementById('avatarFileInput');
+  if (!editBtn || !fileInput) return;
+
+  editBtn.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Image trop lourde (max 2 Mo)'); return; }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result;
+      const av = document.getElementById('userAvatar');
+      const pa = document.getElementById('profileAvatar');
+      if (av) { av.textContent = ''; av.style.backgroundImage = `url(${dataUrl})`; av.style.backgroundSize = 'cover'; av.style.backgroundPosition = 'center'; }
+      if (pa) { pa.textContent = ''; pa.style.backgroundImage = `url(${dataUrl})`; pa.style.backgroundSize = 'cover'; pa.style.backgroundPosition = 'center'; }
+
+      try {
+        await api.put('/profile', { avatarUrl: dataUrl });
+        const user = JSON.parse(localStorage.getItem('skillsdz_user') || '{}');
+        user.avatarUrl = dataUrl;
+        localStorage.setItem('skillsdz_user', JSON.stringify(user));
+      } catch {}
+    };
+    reader.readAsDataURL(file);
+  });
+})();
+
+/* ========================================
+   SAVE SOCIALS
+   ======================================== */
+(function initSocialsSave() {
+  const saveBtn = document.getElementById('saveSocialsBtn');
+  if (!saveBtn) return;
+
+  saveBtn.addEventListener('click', async () => {
+    const socials = {
+      instagram: document.getElementById('socialInstagram')?.value?.trim() || '',
+      linkedin: document.getElementById('socialLinkedin')?.value?.trim() || '',
+      youtube: document.getElementById('socialYoutube')?.value?.trim() || '',
+      twitter: document.getElementById('socialTwitter')?.value?.trim() || '',
+      tiktok: document.getElementById('socialTiktok')?.value?.trim() || '',
+    };
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Enregistrement...';
+    try {
+      await api.put('/profile', { socials });
+      const user = JSON.parse(localStorage.getItem('skillsdz_user') || '{}');
+      user.socials = socials;
+      localStorage.setItem('skillsdz_user', JSON.stringify(user));
+      saveBtn.textContent = '✓ Enregistré';
+      setTimeout(() => { saveBtn.textContent = 'Enregistrer'; saveBtn.disabled = false; }, 2000);
+    } catch {
+      saveBtn.textContent = 'Erreur — réessayer';
+      saveBtn.disabled = false;
+    }
+  });
+})();

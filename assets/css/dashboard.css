@@ -530,6 +530,46 @@ body {
 }
 .profile-stat span:last-child { font-size: 12px; color: #8892b0; }
 
+/* Avatar avec image + bouton édition */
+.profile-avatar-wrap { position: relative; display: inline-block; margin-bottom: 16px; }
+.profile-avatar { background-size: cover !important; background-position: center !important; }
+.profile-avatar-edit {
+  position: absolute; bottom: 0; right: 0;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: white; color: #1E5BFF; border: 2px solid #1E5BFF;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+}
+.profile-avatar-edit:hover { background: #1E5BFF; color: white; transform: scale(1.1); }
+
+/* Section réseaux sociaux */
+.profile-section {
+  margin-top: 24px; background: #0f1117; border: 1px solid #1c2035;
+  border-radius: 16px; padding: 24px;
+}
+.profile-section__title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 16px; font-weight: 600; color: white; margin-bottom: 20px;
+}
+.profile-socials { display: flex; flex-direction: column; gap: 14px; }
+.social-field { display: flex; flex-direction: column; gap: 6px; }
+.social-field label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500; color: #8892b0;
+}
+.social-field input {
+  width: 100%; padding: 12px 14px; border-radius: 10px;
+  background: #14162b; border: 1px solid #1c2035;
+  color: white; font-size: 14px; font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s;
+}
+.social-field input:focus { outline: none; border-color: #1E5BFF; }
+.social-field input::placeholder { color: #4a5078; }
+.profile-save-btn {
+  margin-top: 20px; width: 100%; display: flex;
+  align-items: center; justify-content: center; gap: 8px;
+}
+
 /* ========================================
    RÉCOMPENSES
    ======================================== */

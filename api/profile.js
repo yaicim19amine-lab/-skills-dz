@@ -26,14 +26,19 @@ export default async function handler(req, res) {
     const supabase = getSupabaseForUser(token);
 
     if (req.method === 'GET') {
-      const { data: profile } = await supabase.from('profiles').select('id, email, first_name, last_name, phone, xp, level, streak, badges, total_xp, referral_code').eq('id', user.userId).maybeSingle();
+      const { data: profile } = await supabase.from('profiles').select('id, email, first_name, last_name, phone, avatar_url, social_instagram, social_linkedin, social_youtube, social_twitter, social_tiktok, xp, level, streak, badges, total_xp, referral_code').eq('id', user.userId).maybeSingle();
       if (!profile) return jsonError(res, 404, 'Profil non trouvé');
       const { count: referralCount } = await supabase.from('referrals').select('id', { count: 'exact', head: true }).eq('referrer_id', user.userId);
-      return jsonResponse(res, 200, { user: { id: profile.id, firstName: profile.first_name, lastName: profile.last_name, phone: profile.phone, email: profile.email, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, totalXp: profile.total_xp, referralCode: profile.referral_code, referralCount: referralCount || 0 } });
+      return jsonResponse(res, 200, { user: {
+        id: profile.id, firstName: profile.first_name, lastName: profile.last_name,
+        phone: profile.phone, email: profile.email, avatarUrl: profile.avatar_url,
+        socials: { instagram: profile.social_instagram, linkedin: profile.social_linkedin, youtube: profile.social_youtube, twitter: profile.social_twitter, tiktok: profile.social_tiktok },
+        xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, totalXp: profile.total_xp, referralCode: profile.referral_code, referralCount: referralCount || 0
+      } });
     }
 
     if (req.method === 'PUT') {
-      const { firstName, lastName, phone } = req.body;
+      const { firstName, lastName, phone, avatarUrl, socials } = req.body;
       const updates = {};
       if (firstName !== undefined) {
         const val = sanitize(firstName);
@@ -49,6 +54,21 @@ export default async function handler(req, res) {
         const val = sanitize(phone);
         if (val && !/^[\d\s+\-()]{8,20}$/.test(val)) return jsonError(res, 400, 'Format téléphone invalide');
         updates.phone = val;
+      }
+      if (avatarUrl !== undefined) {
+        const val = sanitize(avatarUrl);
+        if (val && !/^https?:\/\/.+(\.(jpg|jpeg|png|gif|webp|svg)|\/.+)$/.test(val)) return jsonError(res, 400, 'URL image invalide');
+        updates.avatar_url = val || null;
+      }
+      if (socials && typeof socials === 'object') {
+        const platforms = ['instagram', 'linkedin', 'youtube', 'twitter', 'tiktok'];
+        for (const p of platforms) {
+          if (socials[p] !== undefined) {
+            const val = sanitize(socials[p]);
+            if (val && !/^https?:\/\/(www\.)?.+\..+/.test(val)) return jsonError(res, 400, `URL ${p} invalide`);
+            updates[`social_${p}`] = val || null;
+          }
+        }
       }
       if (Object.keys(updates).length === 0) return jsonError(res, 400, 'Aucune donnée à modifier');
       await supabase.from('profiles').update(updates).eq('id', user.userId);

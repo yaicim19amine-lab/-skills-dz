@@ -559,7 +559,13 @@
         </header>
         <div class="profile-card">
           <div class="profile-card__header">
-            <div class="profile-avatar" id="profileAvatar">KB</div>
+            <div class="profile-avatar-wrap" id="profileAvatarWrap">
+              <div class="profile-avatar" id="profileAvatar">KB</div>
+              <button class="profile-avatar-edit" id="avatarEditBtn" title="Changer la photo">
+                <i data-lucide="camera" style="width:16px;height:16px"></i>
+              </button>
+              <input type="file" id="avatarFileInput" accept="image/*" hidden/>
+            </div>
             <h2 id="profileName">Karim B.</h2>
             <p id="profileEmail">karim@example.com</p>
             <span class="profile-level-badge" id="profileLevel">Niveau 1 — Débutant</span>
@@ -570,6 +576,35 @@
             <div class="profile-stat"><span class="profile-stat__num" id="profileBadges">0</span><span>Badges</span></div>
             <div class="profile-stat"><span class="profile-stat__num" id="profileCourses">0</span><span>Cours</span></div>
           </div>
+        </div>
+
+        <div class="profile-section">
+          <h3 class="profile-section__title"><i data-lucide="link" style="width:18px;height:18px"></i> Réseaux Sociaux</h3>
+          <div class="profile-socials" id="profileSocials">
+            <div class="social-field">
+              <label><i data-lucide="instagram" style="width:16px;height:16px"></i> Instagram</label>
+              <input type="url" id="socialInstagram" placeholder="https://instagram.com/votre-profil" autocomplete="url"/>
+            </div>
+            <div class="social-field">
+              <label><i data-lucide="linkedin" style="width:16px;height:16px"></i> LinkedIn</label>
+              <input type="url" id="socialLinkedin" placeholder="https://linkedin.com/in/votre-profil" autocomplete="url"/>
+            </div>
+            <div class="social-field">
+              <label><i data-lucide="youtube" style="width:16px;height:16px"></i> YouTube</label>
+              <input type="url" id="socialYoutube" placeholder="https://youtube.com/@votre-chaine" autocomplete="url"/>
+            </div>
+            <div class="social-field">
+              <label><i data-lucide="twitter" style="width:16px;height:16px"></i> Twitter / X</label>
+              <input type="url" id="socialTwitter" placeholder="https://x.com/votre-profil" autocomplete="url"/>
+            </div>
+            <div class="social-field">
+              <label><i data-lucide="music" style="width:16px;height:16px"></i> TikTok</label>
+              <input type="url" id="socialTiktok" placeholder="https://tiktok.com/@votre-profil" autocomplete="url"/>
+            </div>
+          </div>
+          <button class="btn-primary profile-save-btn" id="saveSocialsBtn">
+            <i data-lucide="save" style="width:16px;height:16px"></i> Enregistrer
+          </button>
         </div>
       </section>
 
