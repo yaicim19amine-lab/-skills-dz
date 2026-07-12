@@ -118,7 +118,7 @@ function initEventListeners() {
     e.preventDefault();
     const name = document.getElementById('adminName')?.value?.trim();
     if (!name) return showToast('Le nom est requis', 'error');
-    api.updateProfile({ first_name: name }).then(() => {
+    api.updateProfile({ firstName: name }).then(() => {
       const u = JSON.parse(localStorage.getItem('skillsdz_user'));
       if (u) { u.firstName = name; u.name = name; localStorage.setItem('skillsdz_user', JSON.stringify(u)); }
       loadAdminProfile(u);

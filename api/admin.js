@@ -162,6 +162,13 @@ export default async function handler(req, res) {
         return jsonResponse(res, 200, { success: true, task: data, message: 'Tâche créée' });
       }
 
+      return jsonError(res, 400, 'Action inconnue');
+    }
+
+    // ─── PUT: Update ───
+    if (req.method === 'PUT') {
+      const body = req.body;
+
       if (body.action === 'saveSettings') {
         const settings = body.settings || {};
         const allowedKeys = [
@@ -186,13 +193,6 @@ export default async function handler(req, res) {
         const { data } = await supabase.from('profiles').select('settings').eq('id', user.userId).single();
         return jsonResponse(res, 200, { settings: data?.settings || {} });
       }
-
-      return jsonError(res, 400, 'Action inconnue');
-    }
-
-    // ─── PUT: Update ───
-    if (req.method === 'PUT') {
-      const body = req.body;
 
       if (body.action === 'ban' || body.action === 'unban') {
         if (!UUID_RE.test(body.userId || '')) return jsonError(res, 400, 'ID utilisateur invalide');
