@@ -194,6 +194,10 @@ const AIAgents = (() => {
   function renderAgentCards(containerId) {
     const c = document.getElementById(containerId);
     if (!c) return;
+    if (typeof PlatformSettings !== 'undefined' && !PlatformSettings.get('platform_ai_agents')) {
+      c.innerHTML = '<p style="color:#8892b0;text-align:center;padding:2rem">Les agents IA sont temporairement désactivés.</p>';
+      return;
+    }
     c.innerHTML = agents.map(a => `
       <div class="agent-card" data-agent="${a.id}" style="background:#0f1117;border:1px solid #1c2035;border-radius:16px;padding:24px;cursor:pointer;transition:all .2s ease;position:relative;overflow:hidden;">
         <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${a.gradient};"></div>

@@ -491,6 +491,11 @@ function renderRewards() {
 function generateReferralCode() {
   const codeEl = document.getElementById('referralCodeDisplay');
   if (!codeEl) return;
+  if (typeof PlatformSettings !== 'undefined' && !PlatformSettings.get('platform_referral_system')) {
+    codeEl.closest('.card, section')?.querySelectorAll('button, input').forEach(el => el.disabled = true);
+    codeEl.textContent = 'Système désactivé';
+    return;
+  }
   try {
     const user = JSON.parse(localStorage.getItem('skillsdz_user'));
     if (user?.referralCode) {
@@ -538,6 +543,10 @@ function loadShop() {
   const grid = document.getElementById('shopGrid');
   const balanceEl = document.getElementById('shopXpBalance');
   if (!grid) return;
+  if (typeof PlatformSettings !== 'undefined' && !PlatformSettings.get('platform_xp_shop')) {
+    grid.innerHTML = '<p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">La boutique XP est temporairement désactivée.</p>';
+    return;
+  }
 
   window._serverXp = null;
   if (balanceEl) balanceEl.textContent = 'Chargement...';

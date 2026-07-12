@@ -366,6 +366,9 @@ function openFormationModal() {
         <div class="form-group"><label>XP récompense</label><input type="number" id="fXP" class="form-input" value="100" min="0"></div>
         <div class="form-group"><label>Places max</label><input type="number" id="fSlots" class="form-input" value="20" min="1"></div>
       </div>
+      <div class="form-group"><label>Photo de couverture (URL)</label><input type="url" id="fCoverUrl" class="form-input" placeholder="https://..."></div>
+      <div class="form-group"><label>Vidéo de présentation (URL)</label><input type="url" id="fVideoUrl" class="form-input" placeholder="https://youtube.com/watch?v=..."></div>
+      <div class="form-group"><label>Avis clients (un par ligne)</label><textarea id="fTestimonials" class="form-input" rows="3" placeholder="Ali B. — Formation top !&#10;Sara K. — Très pratique"></textarea></div>
       <div class="form-group"><label>Statut</label><select id="fStatus" class="filter-select" style="width:100%"><option value="active">Active</option><option value="upcoming">À venir</option><option value="full">Complet</option></select></div>
       <div class="modal-footer"><button type="button" class="btn btn--ghost" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn--primary">Créer</button></div>
     </form>
@@ -385,6 +388,9 @@ function submitFormation(e) {
     price_dzd: parseInt(document.getElementById('fPrice')?.value) || 0,
     xp_reward: parseInt(document.getElementById('fXP')?.value) || 100,
     max_slots: parseInt(document.getElementById('fSlots')?.value) || 20,
+    cover_url: document.getElementById('fCoverUrl')?.value?.trim() || '',
+    video_url: document.getElementById('fVideoUrl')?.value?.trim() || '',
+    testimonials: document.getElementById('fTestimonials')?.value?.trim() || '',
     status: document.getElementById('fStatus')?.value || 'active',
   };
   if (!data.title) return showToast('Le titre est requis', 'error');
@@ -396,6 +402,8 @@ function submitFormation(e) {
 function openEditFormationModal(formationId) {
   const f = adminData.formations.find(f => f.id === formationId);
   if (!f) return;
+  const daysOptions = [1,2,3,4,5,6,7].map(d => `<option value="${d}" ${(f.days_per_week||5)===d?'selected':''}>${d} jour${d>1?'s':''}</option>`).join('');
+  const hoursOptions = [1,2,3,4,5,6].map(h => `<option value="${h}" ${(f.hours_per_day||3)===h?'selected':''}>${h}h</option>`).join('');
   openModal('Modifier la formation', `
     <form id="editFormationForm" style="display:flex;flex-direction:column;gap:12px">
       <div class="form-group"><label>Emoji</label><input type="text" id="eEmoji" class="form-input" value="${esc(f.emoji || '📘')}" maxlength="4"></div>
@@ -403,12 +411,19 @@ function openEditFormationModal(formationId) {
       <div class="form-group"><label>Description</label><input type="text" id="eDesc" class="form-input" value="${esc(f.description || '')}"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="form-group"><label>Durée (semaines)</label><input type="number" id="eDuration" class="form-input" value="${f.duration_weeks || 8}" min="1"></div>
+        <div class="form-group"><label>Jours / semaine</label><select id="eDaysPerWeek" class="filter-select" style="width:100%">${daysOptions}</select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group"><label>Heures / jour</label><select id="eHoursPerDay" class="filter-select" style="width:100%">${hoursOptions}</select></div>
         <div class="form-group"><label>Prix (DA)</label><input type="number" id="ePrice" class="form-input" value="${f.price_dzd || 0}" min="0"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="form-group"><label>XP récompense</label><input type="number" id="eXP" class="form-input" value="${f.xp_reward || 100}" min="0"></div>
         <div class="form-group"><label>Places max</label><input type="number" id="eSlots" class="form-input" value="${f.max_slots || 20}" min="1"></div>
       </div>
+      <div class="form-group"><label>Photo de couverture (URL)</label><input type="url" id="eCoverUrl" class="form-input" value="${esc(f.cover_url || '')}" placeholder="https://..."></div>
+      <div class="form-group"><label>Vidéo de présentation (URL)</label><input type="url" id="eVideoUrl" class="form-input" value="${esc(f.video_url || '')}" placeholder="https://youtube.com/watch?v=..."></div>
+      <div class="form-group"><label>Avis clients (un par ligne)</label><textarea id="eTestimonials" class="form-input" rows="3" placeholder="Ali B. — Formation top !&#10;Sara K. — Très pratique">${esc(f.testimonials || '')}</textarea></div>
       <div class="form-group"><label>Statut</label><select id="eStatus" class="filter-select" style="width:100%"><option value="active" ${f.status==='active'?'selected':''}>Active</option><option value="upcoming" ${f.status==='upcoming'?'selected':''}>À venir</option><option value="full" ${f.status==='full'?'selected':''}>Complet</option></select></div>
       <div class="modal-footer"><button type="button" class="btn btn--ghost" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn--primary">Sauvegarder</button></div>
     </form>
@@ -421,13 +436,18 @@ function openEditFormationModal(formationId) {
       description: document.getElementById('eDesc')?.value?.trim(),
       emoji: document.getElementById('eEmoji')?.value?.trim(),
       duration_weeks: parseInt(document.getElementById('eDuration')?.value),
+      days_per_week: parseInt(document.getElementById('eDaysPerWeek')?.value),
+      hours_per_day: parseInt(document.getElementById('eHoursPerDay')?.value),
       price_dzd: parseInt(document.getElementById('ePrice')?.value),
       xp_reward: parseInt(document.getElementById('eXP')?.value),
       max_slots: parseInt(document.getElementById('eSlots')?.value),
+      cover_url: document.getElementById('eCoverUrl')?.value?.trim(),
+      video_url: document.getElementById('eVideoUrl')?.value?.trim(),
+      testimonials: document.getElementById('eTestimonials')?.value?.trim(),
       status: document.getElementById('eStatus')?.value,
     };
     if (!updates.title) return showToast('Le titre est requis', 'error');
-    api.updateUser(updates).then(() => { closeModal(); loadAdminData(); showToast('Formation mise à jour', 'success'); })
+    api.updateAdminAction(updates).then(() => { closeModal(); loadAdminData(); showToast('Formation mise à jour', 'success'); })
       .catch(err => showToast('Erreur: ' + err.message, 'error'));
   });
 }
@@ -484,7 +504,8 @@ function openLiveModal() {
         <div class="form-group"><label>Heure</label><input type="time" id="sTime" class="form-input" value="20:00"></div>
         <div class="form-group"><label>Statut</label><select id="sStatus" class="filter-select" style="width:100%"><option value="scheduled">Programmée</option><option value="live">En direct</option><option value="ended">Terminée</option></select></div>
       </div>
-      <div class="form-group"><label>Lien YouTube</label><input type="url" id="sYoutube" class="form-input" placeholder="https://youtube.com/watch?v=..."></div>
+      <div class="form-group"><label>Plateforme</label><select id="sPlatform" class="filter-select" style="width:100%"><option value="youtube">YouTube</option><option value="zoom">Zoom</option><option value="meet">Google Meet</option><option value="whatsapp">WhatsApp</option></select></div>
+      <div class="form-group"><label>Lien de la session</label><input type="url" id="sSessionUrl" class="form-input" placeholder="https://..."></div>
       <div class="modal-footer"><button type="button" class="btn btn--ghost" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn--primary">Créer</button></div>
     </form>
   `);
@@ -501,7 +522,9 @@ function submitLive(e) {
     title: document.getElementById('sTitle')?.value?.trim(),
     date: datetime.toISOString(),
     status: document.getElementById('sStatus')?.value || 'scheduled',
-    youtube_url: document.getElementById('sYoutube')?.value?.trim() || '',
+    platform: document.getElementById('sPlatform')?.value || 'youtube',
+    session_url: document.getElementById('sSessionUrl')?.value?.trim() || '',
+    youtube_url: document.getElementById('sSessionUrl')?.value?.trim() || '',
   };
   if (!data.title) return showToast('Le titre est requis', 'error');
   api.request('/admin', { method: 'POST', body: JSON.stringify({ action: 'createLive', ...data }) })
@@ -515,6 +538,8 @@ function openEditLiveModal(sessionId) {
   const d = new Date(s.date);
   const dateStr = d.toISOString().split('T')[0];
   const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const currentUrl = s.session_url || s.youtube_url || s.youtubeUrl || '';
+  const platformOptions = ['youtube','zoom','meet','whatsapp'].map(p => `<option value="${p}" ${(s.platform||'youtube')===p?'selected':''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join('');
   openModal('Modifier la session', `
     <form id="editLiveForm" style="display:flex;flex-direction:column;gap:12px">
       <div class="form-group"><label>Titre *</label><input type="text" id="esTitle" class="form-input" value="${esc(s.title)}" required></div>
@@ -523,7 +548,8 @@ function openEditLiveModal(sessionId) {
         <div class="form-group"><label>Heure</label><input type="time" id="esTime" class="form-input" value="${timeStr}"></div>
         <div class="form-group"><label>Statut</label><select id="esStatus" class="filter-select" style="width:100%"><option value="scheduled" ${s.status==='scheduled'?'selected':''}>Programmée</option><option value="live" ${s.status==='live'?'selected':''}>En direct</option><option value="ended" ${s.status==='ended'?'selected':''}>Terminée</option></select></div>
       </div>
-      <div class="form-group"><label>Lien YouTube</label><input type="url" id="esYoutube" class="form-input" value="${esc(s.youtube_url || s.youtubeUrl || '')}"></div>
+      <div class="form-group"><label>Plateforme</label><select id="esPlatform" class="filter-select" style="width:100%">${platformOptions}</select></div>
+      <div class="form-group"><label>Lien de la session</label><input type="url" id="esSessionUrl" class="form-input" value="${esc(currentUrl)}"></div>
       <div class="modal-footer"><button type="button" class="btn btn--ghost" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn--primary">Sauvegarder</button></div>
     </form>
   `);
@@ -537,7 +563,9 @@ function openEditLiveModal(sessionId) {
       title: document.getElementById('esTitle')?.value?.trim(),
       date: datetime.toISOString(),
       status: document.getElementById('esStatus')?.value,
-      youtube_url: document.getElementById('esYoutube')?.value?.trim(),
+      platform: document.getElementById('esPlatform')?.value,
+      session_url: document.getElementById('esSessionUrl')?.value?.trim(),
+      youtube_url: document.getElementById('esSessionUrl')?.value?.trim(),
     };
     api.request('/admin', { method: 'PUT', body: JSON.stringify({ action: 'updateLive', ...updates }) })
       .then(() => { closeModal(); loadAdminData(); showToast('Session mise à jour', 'success'); })

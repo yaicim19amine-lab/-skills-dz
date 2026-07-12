@@ -67,6 +67,14 @@ async function handleSignup(req, res) {
     if (!validateEmail(email)) return jsonError(res, 400, 'Format email invalide');
     const pwdError = validatePassword(password);
     if (pwdError) return jsonError(res, 400, pwdError);
+
+    const supabase = getSupabaseAdmin();
+    const { data: adminProfile } = await supabase.from('profiles').select('settings').eq('is_admin', true).limit(1).maybeSingle();
+    const settings = adminProfile?.settings || {};
+    if (settings.platform_registration_open === false) {
+      return jsonError(res, 403, 'Les inscriptions sont temporairement fermées');
+    }
+
     const cleanFirstName = sanitizeText(firstName || email.split('@')[0], 100);
     const cleanLastName = sanitizeText(lastName || '', 100);
     const cleanPhone = sanitizeText(phone || '', 20);
@@ -74,7 +82,6 @@ async function handleSignup(req, res) {
     if (!cleanFirstName) return jsonError(res, 400, 'Prénom invalide');
     if (cleanPhone && !/^[\d\s+\-()]{8,20}$/.test(cleanPhone)) return jsonError(res, 400, 'Format téléphone invalide');
 
-    const supabase = getSupabaseAdmin();
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email, password, email_confirm: true,
     });

@@ -101,6 +101,9 @@ export default async function handler(req, res) {
           price_dzd: cleanMoney(body.price_dzd, 0),
           xp_reward: cleanPositiveInt(body.xp_reward, 100, 10000),
           max_slots: cleanPositiveInt(body.max_slots, 20, 1000),
+          cover_url: cleanText(body.cover_url || '', 500),
+          video_url: cleanText(body.video_url || '', 500),
+          testimonials: cleanText(body.testimonials || '', 2000),
           status,
         });
         if (error) return jsonError(res, 500, error.message);
@@ -112,14 +115,18 @@ export default async function handler(req, res) {
         const title = cleanText(body.title, 120);
         if (!title) return jsonError(res, 400, 'Titre requis');
         const status = LIVE_STATUSES.has(body.status) ? body.status : 'scheduled';
+        const platform = ['youtube', 'zoom', 'meet', 'whatsapp'].includes(body.platform) ? body.platform : 'youtube';
+        const sessionUrl = cleanText(body.session_url || body.youtube_url || '', 500);
         const { error } = await supabase.from('live_sessions').insert({
           title,
           scheduled_at: body.date,
           status,
-          youtube_url: cleanText(body.youtube_url || '', 500),
+          platform,
+          session_url: sessionUrl,
+          youtube_url: sessionUrl,
         });
         if (error) return jsonError(res, 500, error.message);
-        await audit(supabase, user.userId, 'create', 'live_session', null, { title, status });
+        await audit(supabase, user.userId, 'create', 'live_session', null, { title, status, platform });
         return jsonResponse(res, 200, { success: true, message: 'Session créée' });
       }
 
@@ -240,7 +247,7 @@ export default async function handler(req, res) {
       }
 
       if (body.action === 'updateLive') {
-        const ALLOWED_LIVE_FIELDS = ['title', 'speaker', 'youtube_url', 'status', 'scheduled_at'];
+        const ALLOWED_LIVE_FIELDS = ['title', 'speaker', 'youtube_url', 'status', 'scheduled_at', 'platform', 'session_url'];
         const { id, date, ...rest } = body;
         if (!UUID_RE.test(id || '')) return jsonError(res, 400, 'ID session invalide');
         const updates = {};
@@ -263,7 +270,7 @@ export default async function handler(req, res) {
 
       // Default: update formation (by id)
       if (body.id) {
-        const ALLOWED_FORMATION_FIELDS = ['title', 'description', 'emoji', 'duration_weeks', 'days_per_week', 'hours_per_day', 'max_slots', 'price_dzd', 'xp_reward', 'status'];
+        const ALLOWED_FORMATION_FIELDS = ['title', 'description', 'emoji', 'duration_weeks', 'days_per_week', 'hours_per_day', 'max_slots', 'price_dzd', 'xp_reward', 'status', 'cover_url', 'video_url', 'testimonials'];
         const { id, ...rest } = body;
         if (!UUID_RE.test(id || '')) return jsonError(res, 400, 'ID formation invalide');
         const updates = {};

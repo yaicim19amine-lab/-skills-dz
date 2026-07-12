@@ -759,6 +759,10 @@ const MiniGames = (() => {
   function renderMenu(containerId) {
     const c = document.getElementById(containerId);
     if (!c) return;
+    if (typeof PlatformSettings !== 'undefined' && !PlatformSettings.get('platform_mini_games')) {
+      c.innerHTML = '<p style="color:#8892b0;text-align:center;padding:2rem">Les mini-jeux sont temporairement désactivés.</p>';
+      return;
+    }
     checkStreak();
     c.innerHTML = `
       <div style="text-align:center;margin-bottom:32px;">
