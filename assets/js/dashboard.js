@@ -58,10 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
       sub.style.opacity = '0';
       setTimeout(() => {
         speechIdx = (speechIdx + 1) % speeches.length;
-        sub.innerHTML = speeches[speechIdx];
+        sub.textContent = speeches[speechIdx];
         sub.style.opacity = '1';
       }, 200);
-    }, 5000);
+    }, 8000);
   }
 });
 
@@ -92,6 +92,12 @@ function loadUserData() {
     setText('profileStreak', Gamification.getState().streak);
     setText('profileBadges', Gamification.getState().badges.length);
     setText('profileCourses', Gamification.getState().coursesCompleted.length);
+
+    const xpToNextEl = document.getElementById('xpToNext');
+    if (xpToNextEl) {
+      const xpNeeded = Math.max(0, lvlData.nextLevelXP - lvlData.currentXP);
+      xpToNextEl.textContent = `${xpNeeded} XP`;
+    }
 
     // Animated KPI counters
     const kpiEls = {
@@ -859,7 +865,13 @@ function initCoursFilters() {
       document.querySelectorAll('.cours-filter').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       _coursFilter = btn.dataset.filter;
-      renderCoursList(_coursData);
+      const filtered = _coursFilter === 'all' ? _coursData
+        : _coursFilter === 'present' ? _coursData.filter(c => c.attendedSessions > 0)
+        : _coursFilter === 'absent' ? _coursData.filter(c => c.attendedSessions === 0 && c.completedSessions > 0)
+        : _coursFilter === 'en-ligne' ? _coursData.filter(c => c.isOnline)
+        : _coursData;
+      renderCoursList(filtered);
+      renderCoursStats(filtered);
     });
   });
 }

@@ -4,6 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Connexion — Skills DZ</title>
+  <meta name="description" content="Connectez-vous à Skills DZ. Accédez à vos formations, suivez votre progression et gagnez des points XP."/>
   <meta name="theme-color" content="#0B1331"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -250,7 +251,7 @@
         btn.querySelector('.google-text').textContent = 'Continuer avec Google';
         btn.disabled = false;
         if (!window.GOOGLE_CLIENT_ID) {
-          alert('Google OAuth non configuré.\n\nPour activer :\n1. Allez sur console.cloud.google.com\n2. Créez un projet OAuth\n3. Ajoutez GOOGLE_CLIENT_ID dans les variables Vercel');
+          alert('Google OAuth non configuré.\n\nPour activer :\n1. Allez sur console.cloud.google.com\n2. Créez un projet OAuth\n3. Ajoutez le Client ID dans config.js');
         } else {
           alert('Erreur Google: ' + e.message);
         }
@@ -277,10 +278,17 @@
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const remember = document.getElementById('rememberMe')?.checked;
 
       if (!email || !password) {
         alert('Veuillez remplir tous les champs');
         return;
+      }
+
+      if (remember) {
+        localStorage.setItem('skillsdz_remember_email', email);
+      } else {
+        localStorage.removeItem('skillsdz_remember_email');
       }
 
       const submitBtn = this.querySelector('button[type="submit"]');
@@ -297,6 +305,13 @@
         lucide.createIcons();
       }
     });
+
+    // Restore remembered email
+    const rememberedEmail = localStorage.getItem('skillsdz_remember_email');
+    if (rememberedEmail) {
+      document.getElementById('email').value = rememberedEmail;
+      document.getElementById('rememberMe').checked = true;
+    }
 
     // Forgot password modal
     function openForgotModal(e) {

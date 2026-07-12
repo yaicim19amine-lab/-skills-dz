@@ -4,6 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Inscription — Skills DZ</title>
+  <meta name="description" content="Créez votre compte Skills DZ. Inscrivez-vous gratuitement et commencez à apprendre avec gamification et agents IA."/>
   <meta name="theme-color" content="#0B1331"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -262,7 +263,7 @@
         btn.querySelector('.google-text').textContent = "S'inscrire avec Google";
         btn.disabled = false;
         if (!window.GOOGLE_CLIENT_ID) {
-          alert('Google OAuth non configuré.\n\nPour activer :\n1. Allez sur console.cloud.google.com\n2. Créez un projet OAuth\n3. Ajoutez GOOGLE_CLIENT_ID dans les variables Vercel');
+          alert('Google OAuth non configuré.\n\nPour activer :\n1. Allez sur console.cloud.google.com\n2. Créez un projet OAuth\n3. Ajoutez le Client ID dans config.js');
         } else {
           alert('Erreur Google: ' + e.message);
         }
