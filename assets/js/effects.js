@@ -8,6 +8,8 @@
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (prefersReducedMotion) return;
 
+  const isMobile = window.innerWidth < 768;
+
   /* ── Intersection Observer: Scroll Reveal ── */
   function initScrollReveal() {
     const elements = document.querySelectorAll('.reveal');
@@ -27,6 +29,7 @@
 
   /* ── 3D Tilt on Cards ── */
   function init3DTilt() {
+    if (isMobile) return;
     const cards = document.querySelectorAll('.formation-card, .agent-card, .level-card, .point-card');
     if (!cards.length) return;
 
@@ -103,7 +106,7 @@
   /* ── Hero Floating Particles ── */
   function initParticles() {
     const container = document.getElementById('particles');
-    if (!container) return;
+    if (!container || isMobile) return;
 
     const colors = ['rgba(0,196,255,0.35)', 'rgba(30,91,255,0.25)', 'rgba(255,255,255,0.15)'];
 
@@ -123,6 +126,7 @@
 
   /* ── Hero Parallax on Mouse Move ── */
   function initParallax() {
+    if (isMobile) return;
     const hero = document.querySelector('.hero');
     const cards = document.querySelectorAll('.hero__card');
     const panda = document.querySelector('.hero-panda');

@@ -53,21 +53,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // SCROLL DEPTH TRACKING
   // ========================================
   let scrollTracked = { 25: false, 50: false, 75: false, 100: false };
+  let scrollTick = false;
   window.addEventListener('scroll', () => {
-    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = Math.round((window.scrollY / scrollHeight) * 100);
+    if (scrollTick) return;
+    scrollTick = true;
+    requestAnimationFrame(() => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = Math.round((window.scrollY / scrollHeight) * 100);
 
-    [25, 50, 75, 100].forEach(threshold => {
-      if (scrollPercent >= threshold && !scrollTracked[threshold]) {
-        scrollTracked[threshold] = true;
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'scroll_depth', {
-            percent_scrolled: threshold.toString()
-          });
+      [25, 50, 75, 100].forEach(threshold => {
+        if (scrollPercent >= threshold && !scrollTracked[threshold]) {
+          scrollTracked[threshold] = true;
+          if (typeof gtag !== 'undefined') {
+            gtag('event', 'scroll_depth', {
+              percent_scrolled: threshold.toString()
+            });
+          }
         }
-      }
+      });
+      scrollTick = false;
     });
-  });
+  }, { passive: true });
 
   // ========================================
   // LAZY LOADING IMAGES

@@ -153,7 +153,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .toggle-password {
   position: absolute; right: 14px;
   background: none; border: none; cursor: pointer;
-  color: #94a3b8; padding: 4px;
+  color: #94a3b8; padding: 10px;
+  min-width: 44px; min-height: 44px;
+  display: flex; align-items: center; justify-content: center;
 }
 .toggle-password:hover { color: #0B1331; }
 .toggle-password svg { width: 18px; height: 18px; }

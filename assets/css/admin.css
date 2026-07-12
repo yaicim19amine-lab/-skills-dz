@@ -885,6 +885,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .avatar-name, .avatar-chevron { display: none; }
   .stats-grid { grid-template-columns: 1fr; }
   .journal-grid { grid-template-columns: 1fr; }
+  .tasks-board { grid-template-columns: 1fr; }
+  .notification-panel { width: calc(100vw - 16px); right: 8px; }
+  .page-actions .btn { width: 100%; justify-content: center; }
+  .form-group input, .search-input, .filter-search input { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

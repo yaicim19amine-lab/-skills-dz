@@ -597,6 +597,7 @@ body {
    RESPONSIVE
    ======================================== */
 @media (max-width: 1024px) {
+  body { height: auto; min-height: 100vh; overflow: auto; }
   .app { grid-template-columns: 1fr; }
   .sidebar {
     position: fixed; left: -280px; top: 0; bottom: 0;
