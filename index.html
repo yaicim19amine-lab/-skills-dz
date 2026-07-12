@@ -25,6 +25,7 @@
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="assets/css/main.css"/>
+  <link rel="stylesheet" href="assets/css/effects.css"/>
 
   <!-- Facebook Pixel -->
   <script>
@@ -92,7 +93,7 @@
         <div class="hero__particles" id="particles"></div>
       </div>
       <div class="container hero__inner">
-        <div class="hero__content">
+        <div class="hero__content reveal reveal--left">
           <div class="hero__badge">
             <i data-lucide="sparkles"></i>
             <span>Nouveau : Agents IA pour apprendre</span>
@@ -100,7 +101,7 @@
           <h1>Apprendre. <span class="text-gradient">Progresser.</span> Réussir.</h1>
           <p class="hero__subtitle">Formations professionnelles à Alger avec gamification, points, niveaux et agents IA qui apprennent avec vous. Rejoignez +500 diplômés.</p>
           <div class="hero__actions">
-            <a class="btn btn--accent btn--lg" href="pages/register.html">
+            <a class="btn btn--accent btn--lg glow-pulse" href="pages/register.html">
               <i data-lucide="rocket"></i>
               Commencer maintenant
             </a>
@@ -124,7 +125,7 @@
             </div>
           </div>
         </div>
-        <div class="hero__visual">
+        <div class="hero__visual reveal reveal--right">
           <!-- Panda Mascot Hero -->
           <div class="hero-panda">
             <div class="hero-panda__glow"></div>
@@ -175,7 +176,7 @@
     <!-- Gamification Section -->
     <section class="section section--dark" id="gamification">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
           <span class="kicker">Gamification</span>
           <h2 class="section-title">Gagnez des points. Montez de niveau.</h2>
           <p class="section-subtitle">Chaque action vous rapproche du niveau supérieur. Suivez votre progression et débloquez des récompenses.</p>
@@ -274,7 +275,7 @@
     <!-- Agents IA Section -->
     <section class="section section--gradient" id="agents-ia">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
           <span class="kicker">Intelligence Artificielle</span>
           <h2 class="section-title">Des agents IA qui apprennent avec vous</h2>
           <p class="section-subtitle">Nos agents IA s'adaptent à votre niveau, vous guident et évoluent grâce à vos interactions.</p>
@@ -364,7 +365,7 @@
         </div>
 
         <!-- Comment ça marche -->
-        <div class="how-it-works">
+        <div class="how-it-works reveal">
           <h3 class="how-it-works__title">Comment ça marche ?</h3>
           <div class="how-it-works__grid">
             <div class="how-step">
@@ -395,14 +396,14 @@
     <!-- Formations Section -->
     <section class="section section--white" id="formations">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
           <span class="kicker">Formations</span>
           <h2 class="section-title">Choisissez votre parcours</h2>
           <p class="section-subtitle">Des formations pratiques avec gamification intégrée. Apprenez en jouant.</p>
         </div>
 
         <div class="formations-grid">
-          <article class="formation-card">
+          <article class="formation-card card-glow">
             <div class="formation-card__ribbon">Populaire</div>
             <div class="formation-card__header">
               <div class="formation-card__emoji">📱</div>
@@ -424,7 +425,7 @@
             <button class="btn btn--accent btn--block" onclick="openLeadModal('Marketing Digital & Meta Ads')">S'inscrire</button>
           </article>
 
-          <article class="formation-card">
+          <article class="formation-card card-glow">
             <div class="formation-card__ribbon formation-card__ribbon--full">Complet</div>
             <div class="formation-card__header">
               <div class="formation-card__emoji">💻</div>
@@ -446,7 +447,7 @@
             <button class="btn btn--ghost btn--block" disabled style="opacity:0.5;cursor:not-allowed">Complet</button>
           </article>
 
-          <article class="formation-card">
+          <article class="formation-card card-glow">
             <div class="formation-card__header">
               <div class="formation-card__emoji">🤖</div>
               <div class="formation-card__xp">+700 XP</div>
@@ -469,7 +470,7 @@
     <!-- Parrainage Section -->
     <section class="section section--dark" id="parrainage">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
           <span class="kicker kicker--light">Parrainage</span>
           <h2 class="section-title section-title--light">Parrainez, vous gagnez !</h2>
           <p class="section-subtitle section-subtitle--light">Invitez un ami et recevez des récompenses exclusives.</p>
@@ -496,7 +497,7 @@
           </div>
         </div>
 
-        <div class="parrainage-cta">
+        <div class="parrainage-cta reveal">
           <a class="btn btn--accent btn--lg" href="pages/register.html">
             <i data-lucide="share-2"></i>
             Commencer à parrainer
@@ -508,7 +509,7 @@
     <!-- FAQ Section -->
     <section class="section section--white" id="faq">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
           <span class="kicker">FAQ</span>
           <h2 class="section-title">Questions fréquentes</h2>
         </div>
@@ -586,6 +587,7 @@
   <script src="assets/js/agents.js"></script>
   <script src="assets/js/minigames.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/effects.js" defer></script>
   <script>
     // Panda mascot speech rotation
     (function() {

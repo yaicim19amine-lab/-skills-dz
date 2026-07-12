@@ -1,0 +1,229 @@
+/* ========================================
+   SKILLS DZ — Effects & 3D Animations
+   GPU-accelerated, prefers-reduced-motion safe
+   ======================================== */
+
+/* ── Scroll Reveal ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal--delay-1 { transition-delay: 0.1s; }
+.reveal--delay-2 { transition-delay: 0.2s; }
+.reveal--delay-3 { transition-delay: 0.3s; }
+.reveal--delay-4 { transition-delay: 0.4s; }
+
+.reveal--left {
+  transform: translateX(-40px);
+}
+.reveal--left.is-visible { transform: translateX(0); }
+
+.reveal--right {
+  transform: translateX(40px);
+}
+.reveal--right.is-visible { transform: translateX(0); }
+
+.reveal--scale {
+  transform: scale(0.92);
+}
+.reveal--scale.is-visible { transform: scale(1); }
+
+/* ── 3D Tilt Cards ── */
+.tilt-3d {
+  transform-style: preserve-3d;
+  perspective: 800px;
+  will-change: transform;
+}
+.tilt-3d__inner {
+  transition: transform 0.15s ease-out;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt-3d:hover .tilt-3d__inner {
+  box-shadow: 0 24px 48px rgba(30, 91, 255, 0.15);
+}
+
+/* Shine overlay on tilt */
+.tilt-3d__shine {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    circle at var(--shine-x, 50%) var(--shine-y, 50%),
+    rgba(255,255,255,0.25) 0%,
+    transparent 60%
+  );
+  z-index: 2;
+}
+.tilt-3d:hover .tilt-3d__shine { opacity: 1; }
+
+/* ── Glass Morphism Nav ── */
+.header--glass {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(28px) saturate(1.6) !important;
+  box-shadow: 0 1px 0 rgba(11, 19, 49, 0.06),
+              0 8px 32px rgba(11, 19, 49, 0.06);
+}
+
+/* ── Ripple Effect ── */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0);
+  animation: rippleExpand 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+@keyframes rippleExpand {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ── Glow Pulse ── */
+.glow-pulse {
+  position: relative;
+}
+.glow-pulse::before {
+  content: '';
+  position: absolute; inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #1E5BFF, #00C4FF, #1E5BFF);
+  background-size: 300% 300%;
+  animation: glowShift 3s ease infinite;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  filter: blur(12px);
+}
+.glow-pulse:hover::before { opacity: 1; }
+
+@keyframes glowShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ── Floating Particles ── */
+.particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 196, 255, 0.4);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: particleDrift linear infinite;
+}
+
+@keyframes particleDrift {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-600px) translateX(40px) scale(0.3); opacity: 0; }
+}
+
+/* ── Hero Parallax Depth ── */
+.parallax-layer {
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+/* ── Stat Counter Glow ── */
+.hero__stat-num {
+  text-shadow: 0 0 30px rgba(0, 196, 255, 0.3);
+}
+
+/* ── Card Hover Glow Border ── */
+.card-glow {
+  position: relative;
+  z-index: 0;
+}
+.card-glow::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, rgba(30,91,255,0.4), rgba(0,196,255,0.4)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+.card-glow:hover::after { opacity: 1; }
+
+/* ── Smooth Section Transitions ── */
+.section {
+  position: relative;
+}
+
+/* ── Button Press Effect ── */
+.btn:active {
+  transform: scale(0.97) !important;
+  transition-duration: 0.08s;
+}
+
+/* ── FAQ Smooth Open ── */
+.faq details[open] > *:not(summary) {
+  animation: faqSlide 0.3s ease;
+}
+@keyframes faqSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Loading Shimmer ── */
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Mobile nav slide ── */
+.nav--mobile-open {
+  display: flex !important;
+  flex-direction: column;
+  position: fixed;
+  top: 64px; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(20px);
+  padding: 32px 24px;
+  gap: 24px;
+  z-index: 100;
+  animation: navSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes navSlide {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Smooth Scroll Target Offset ── */
+html { scroll-padding-top: 80px; }
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transition: none; opacity: 1; transform: none; }
+  .tilt-3d__inner { transition: none; }
+  .ripple-wave { animation: none; }
+  .particle { animation: none; display: none; }
+  .glow-pulse::before { animation: none; }
+  .card-glow::after { transition: none; }
+}
