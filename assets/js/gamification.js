@@ -379,11 +379,6 @@ function earnXP(type, amount) {
   return Gamification.earnXP(type, amount);
 }
 
-function closeModal() {
-  const overlay = document.getElementById('levelUpModal');
-  if (overlay) overlay.classList.remove('open');
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   // Auto-unlock newcomer badge
   if (!Gamification.getState().badges.includes('newcomer')) {

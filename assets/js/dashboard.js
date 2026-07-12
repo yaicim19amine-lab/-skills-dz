@@ -534,6 +534,25 @@ function generateReferralCode() {
       setText('leaderboardYourXP', `+${refXP.toLocaleString()} XP`);
     }
   }).catch(() => {});
+
+  api.request('/referrals').then(data => {
+    const entries = data.leaderboard || [];
+    const list = document.querySelector('.leaderboard-list');
+    if (!list) return;
+    if (entries.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:1rem;font-size:13px">Aucun parrainage pour le moment</p>';
+      return;
+    }
+    const medals = ['🥇', '🥈', '🥉'];
+    list.innerHTML = entries.slice(0, 5).map((e, i) => `
+      <div class="leaderboard-item">
+        <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
+        <span class="leaderboard-name">${esc(e.name)}</span>
+        <span class="leaderboard-count">${e.referrals} parrainage${e.referrals > 1 ? 's' : ''}</span>
+        <span class="leaderboard-xp">+${e.xp.toLocaleString()} XP</span>
+      </div>
+    `).join('');
+  }).catch(() => {});
 }
 
 function copyReferralCode() {
@@ -706,7 +725,7 @@ function loadCours() {
       attendedSessions: Math.round(((f.progress || 0) / 100) * Math.max(1, (f.duration_weeks || 0) * (f.days_per_week || 2))),
       priceTotal: f.price_dzd || 0,
       pricePaid: 0,
-      isOnline: f.duration_weeks <= 4,
+      isOnline: false,
       status: f.status || 'active',
       nextSession: null,
     }));

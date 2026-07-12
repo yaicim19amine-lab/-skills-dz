@@ -8,6 +8,42 @@ const REFERRAL_RE = /^SKDZ-[A-Z0-9]{4,32}$/;
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
+  if (req.method === 'GET') {
+    try {
+      const supabase = getSupabaseAdmin();
+      const { data, error } = await supabase
+        .from('referrals')
+        .select('referrer_id, count:id')
+        .eq('status', 'confirmed')
+        .order('count', { ascending: false })
+        .limit(10);
+      if (error) return jsonResponse(res, 200, { leaderboard: [] });
+
+      const referrerIds = (data || []).map(r => r.referrer_id);
+      if (referrerIds.length === 0) return jsonResponse(res, 200, { leaderboard: [] });
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, xp')
+        .in('id', referrerIds);
+
+      const profileMap = {};
+      (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+      const leaderboard = (data || []).map((r, i) => {
+        const p = profileMap[r.referrer_id] || {};
+        return {
+          rank: i + 1,
+          name: `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Anonyme',
+          referrals: r.count,
+          xp: (r.count || 0) * 200,
+        };
+      });
+
+      return jsonResponse(res, 200, { leaderboard });
+    } catch { return jsonResponse(res, 200, { leaderboard: [] }); }
+  }
+
   if (req.method !== 'POST') {
     return jsonError(res, 405, 'Méthode non autorisée');
   }

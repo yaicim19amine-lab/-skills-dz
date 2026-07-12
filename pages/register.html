@@ -155,7 +155,7 @@
             <label for="formation">Formation souhaitée</label>
             <div class="input-wrapper">
               <i data-lucide="book-open"></i>
-              <select id="formation" name="formation" required>
+              <select id="formation" name="formation">
                 <option value="">Choisir une formation</option>
                 <option value="marketing-digital">Marketing Digital & Meta Ads</option>
                 <option value="dev-web">Développement Web Full Stack</option>
@@ -177,7 +177,7 @@
 
           <label class="checkbox-label">
             <input type="checkbox" name="terms" required/>
-            <span>J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a></span>
+            <span>J'accepte les <a href="#" onclick="alert('Conditions d\'utilisation : En utilisant Skills DZ, vous acceptez nos conditions de service. Contact : skillslearningdz@gmail.com');return false;">conditions d'utilisation</a> et la <a href="#" onclick="alert('Politique de confidentialité : Skills DZ protège vos données personnelles. Contact : skillslearningdz@gmail.com');return false;">politique de confidentialité</a></span>
           </label>
 
           <button type="submit" class="btn btn--accent btn--block btn--lg">
