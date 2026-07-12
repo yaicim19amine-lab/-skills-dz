@@ -160,13 +160,20 @@ const AIAgents = (() => {
     };
   }
 
-  function sendMessage(message) {
+  async function sendMessage(message) {
     if (!currentAgent) return { error: 'Aucun agent sélectionné' };
-    const response = getResponse(currentAgent, message);
     chatHistory.push({ role: 'user', content: message, time: new Date() });
+
+    let response;
+    try {
+      const result = await api.chat(currentAgent, message, chatHistory.slice(-10));
+      response = result.response;
+    } catch {
+      response = getResponse(currentAgent, message);
+    }
+
     chatHistory.push({ role: 'assistant', content: response, time: new Date(), agent: currentAgent });
 
-    // Limit chat history to last 50 messages to prevent memory leak
     if (chatHistory.length > 50) {
       chatHistory = chatHistory.slice(-50);
     }
@@ -261,7 +268,7 @@ const AIAgents = (() => {
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
   }
 
-  function addMessage(text) {
+  async function addMessage(text) {
     const container = document.getElementById('chatMessages');
     if (!container) return;
 
@@ -271,24 +278,21 @@ const AIAgents = (() => {
       <div style="background:linear-gradient(135deg,#1E5BFF,#00C4FF);border-radius:12px;border-top-right-radius:4px;padding:12px 16px;max-width:80%;font-size:13px;color:white;line-height:1.6;">${escapeHtml(text)}</div>
     `;
     container.appendChild(userDiv);
-
-    const { response, suggestions } = sendMessage(text);
-
-    setTimeout(() => {
-      const agent = getAgent(currentAgent);
-      const aiDiv = document.createElement('div');
-      aiDiv.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-      aiDiv.innerHTML = `
-        <div style="width:32px;height:32px;border-radius:8px;background:${agent.gradient};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${agent.icon}</div>
-        <div style="background:#13151e;border:1px solid #1c2035;border-radius:12px;border-top-left-radius:4px;padding:12px 16px;max-width:80%;font-size:13px;color:#e8eaf6;line-height:1.6;">${escapeHtml(response)}</div>
-      `;
-      container.appendChild(aiDiv);
-      container.scrollTop = container.scrollHeight;
-
-      if (suggestions) renderSuggestions(suggestions);
-    }, 500);
-
     container.scrollTop = container.scrollHeight;
+
+    const { response, suggestions } = await sendMessage(text);
+
+    const agent = getAgent(currentAgent);
+    const aiDiv = document.createElement('div');
+    aiDiv.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+    aiDiv.innerHTML = `
+      <div style="width:32px;height:32px;border-radius:8px;background:${agent.gradient};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${agent.icon}</div>
+      <div style="background:#13151e;border:1px solid #1c2035;border-radius:12px;border-top-left-radius:4px;padding:12px 16px;max-width:80%;font-size:13px;color:#e8eaf6;line-height:1.6;">${escapeHtml(response)}</div>
+    `;
+    container.appendChild(aiDiv);
+    container.scrollTop = container.scrollHeight;
+
+    if (suggestions) renderSuggestions(suggestions);
   }
 
   function renderSuggestions(suggestions) {
