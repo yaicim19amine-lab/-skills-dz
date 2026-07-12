@@ -313,7 +313,7 @@
       const email = document.getElementById('forgotEmail').value;
       if (!email) return;
       try {
-        await api.post('/api/auth?action=forgot-password', { email });
+        await api.post('/auth?action=forgot-password', { email });
         document.getElementById('forgotForm').style.display = 'none';
         document.getElementById('forgotSuccess').style.display = 'block';
       } catch (err) {

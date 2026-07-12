@@ -15,6 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  // Refresh user data from server (clears stale sessions)
+  if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
+    Auth.refreshUser().then(u => {
+      if (!u) { window.location.href = 'login.html'; return; }
+    }).catch(() => {});
+  }
+
   // Auto-migrate localStorage data if needed
   if (typeof Migration !== 'undefined' && !Migration.isMigrated()) {
     Migration.migrate().then(result => {
@@ -89,8 +96,8 @@ function loadUserData() {
     // Animated KPI counters
     const kpiEls = {
       coursesCompleted: Gamification.getState().coursesCompleted.length,
-      videosWatched: Gamification.getState().videosWatched || 0,
-      gamesPlayed: Gamification.getState().gamesPlayed || 0,
+      videosWatched: (Gamification.getState().videosWatched || []).length,
+      gamesPlayed: (Gamification.getState().gamesPlayed || []).length,
       badgesCount: Gamification.getState().badges.length,
     };
     Object.entries(kpiEls).forEach(([id, val]) => {
@@ -297,6 +304,7 @@ function updateCachedUserProgress(data) {
   const userLevelBadge = document.getElementById('userLevelBadge');
   if (userXp) userXp.textContent = `${data.xp} XP`;
   if (userLevelBadge && typeof data.level === 'number') userLevelBadge.textContent = `Nv. ${data.level}`;
+  if (typeof Gamification !== 'undefined') Gamification.updateDashboardUI();
 }
 
 /* ========================================
@@ -502,7 +510,6 @@ function generateReferralCode() {
     const user = JSON.parse(localStorage.getItem('skillsdz_user'));
     if (user?.referralCode) {
       codeEl.textContent = user.referralCode;
-      return;
     }
     api.get('/profile').then(result => {
       if (result?.user?.referralCode) {
@@ -511,24 +518,22 @@ function generateReferralCode() {
           user.referralCode = result.user.referralCode;
           localStorage.setItem('skillsdz_user', JSON.stringify(user));
         }
-      } else {
-        const base = (user?.firstName || 'USER').toUpperCase().slice(0, 4);
-        const hash = Math.random().toString(36).substring(2, 6).toUpperCase();
-        const code = `SKDZ-${base}${hash}`;
-        if (user) {
-          user.referralCode = code;
-          localStorage.setItem('skillsdz_user', JSON.stringify(user));
-        }
-        codeEl.textContent = code;
       }
-    }).catch(() => {
-      const base = (user?.firstName || 'USER').toUpperCase().slice(0, 4);
-      const hash = Math.random().toString(36).substring(2, 6).toUpperCase();
-      codeEl.textContent = `SKDZ-${base}${hash}`;
-    });
+    }).catch(() => {});
   } catch {
     codeEl.textContent = `SKDZ-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   }
+
+  api.getMe().then(data => {
+    if (data.user) {
+      const refCount = data.user.referralCount || 0;
+      const refXP = (data.user.referralCount || 0) * 200;
+      setText('referralCount', refCount);
+      setText('referralXP', refXP.toLocaleString());
+      setText('leaderboardYourCount', `${refCount} parrainage${refCount !== 1 ? 's' : ''}`);
+      setText('leaderboardYourXP', `+${refXP.toLocaleString()} XP`);
+    }
+  }).catch(() => {});
 }
 
 function copyReferralCode() {
@@ -553,24 +558,23 @@ function loadShop() {
   window._serverXp = null;
   if (balanceEl) balanceEl.textContent = 'Chargement...';
 
-  api.getMe().then(data => {
-    if (typeof data.user?.xp === 'number') {
-      window._serverXp = data.user.xp;
+  Promise.all([
+    api.getMe().catch(() => null),
+    api.getShopItems().catch(() => ({ items: [] })),
+  ]).then(([meData, shopData]) => {
+    if (meData?.user?.xp != null) {
+      window._serverXp = meData.user.xp;
       if (balanceEl) balanceEl.textContent = `${window._serverXp} XP`;
-      if (window._shopItems) renderShopItems(document.querySelector('.shop-filter.active')?.dataset.category || 'all');
     }
-  }).catch(() => {});
-
-  api.getShopItems().then(data => {
-    const items = data.items || [];
+    const items = shopData.items || [];
     if (items.length === 0) {
       grid.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem">Aucun article disponible.</p>';
       return;
     }
     window._shopItems = items;
     renderShopItems('all');
-  }).catch(err => {
-    grid.innerHTML = `<p style="color:var(--error);text-align:center;padding:2rem">Erreur: ${err.message}</p>`;
+  }).catch(() => {
+    grid.innerHTML = '<p style="color:var(--error);text-align:center;padding:2rem">Erreur de chargement</p>';
   });
 
   if (!window._shopFilterInit) {
@@ -644,24 +648,34 @@ function purchaseShopItem(itemId) {
    ======================================== */
 function loadLiveSessions() {
   const scheduleEl = document.getElementById('liveSchedule');
+  const embedEl = document.getElementById('liveEmbed');
   if (!scheduleEl) return;
 
   api.getLiveSessions().then(data => {
     const sessions = data.schedule || [];
+    const live = data.nextLive || sessions.find(s => s.status === 'live');
+
+    if (embedEl && live && live.youtubeUrl) {
+      const videoId = live.youtubeUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
+      if (videoId) {
+        embedEl.innerHTML = `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="border-radius:12px"></iframe>`;
+      }
+    }
+
     if (sessions.length === 0) {
       scheduleEl.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:2rem">Aucune session live prévue.</p>';
       return;
     }
     scheduleEl.innerHTML = `
-      <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">📅 Prochaines sessions</h3>
+      <h3 style="font-size:18px;font-weight:700;color:white;margin-bottom:16px;">Prochaines sessions</h3>
       ${sessions.map(s => `
         <div class="live-session-card">
-          <div class="live-session-card__status live-session-card__status--${esc(s.status)}">${s.status === 'live' ? '🔴 En direct' : s.status === 'scheduled' ? '🟢 Programmé' : '⚫ Terminé'}</div>
+          <div class="live-session-card__status live-session-card__status--${esc(s.status)}">${s.status === 'live' ? 'En direct' : s.status === 'scheduled' ? 'Programmé' : 'Terminé'}</div>
           <div class="live-session-card__info">
             <h4>${esc(s.title)}</h4>
             <p>${esc(s.speaker || '')} · ${new Date(s.date || s.scheduled_at).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à ${new Date(s.date || s.scheduled_at).getHours()}h${String(new Date(s.date || s.scheduled_at).getMinutes()).padStart(2, '0')}</p>
           </div>
-          <button class="btn btn--ghost btn--sm" ${s.youtubeUrl ? '' : 'disabled'}>Regarder</button>
+          <button class="btn btn--ghost btn--sm" ${s.session_url || s.youtubeUrl ? '' : 'disabled'} onclick="window.open('${esc(s.session_url || s.youtubeUrl || '')}','_blank')">Regarder</button>
         </div>
       `).join('')}
     `;

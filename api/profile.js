@@ -27,7 +27,8 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.userId).maybeSingle();
       if (!profile) return jsonError(res, 404, 'Profil non trouvé');
-      return jsonResponse(res, 200, { user: { id: profile.id, firstName: profile.first_name, lastName: profile.last_name, phone: profile.phone, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges } });
+      const { count: referralCount } = await supabase.from('referrals').select('id', { count: 'exact', head: true }).eq('referrer_id', user.userId);
+      return jsonResponse(res, 200, { user: { id: profile.id, firstName: profile.first_name, lastName: profile.last_name, phone: profile.phone, email: profile.email, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, totalXp: profile.total_xp, isAdmin: profile.is_admin, referralCode: profile.referral_code, referralCount: referralCount || 0 } });
     }
 
     if (req.method === 'PUT') {

@@ -211,7 +211,7 @@ async function handleGoogle(req, res) {
     await supabase.from('xp_transactions').insert({ user_id: authData.user.id, amount: 100, reason: 'Bienvenue sur Skills DZ !', source: 'bonus' });
 
     const token = signToken({ userId: authData.user.id, email });
-    jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName, lastName, xp: 100, level: 2, badges: ['newcomer'], referralCode: userReferralCode }, token });
+    jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName, lastName, xp: 100, level: 2, streak: 0, badges: ['newcomer'], isAdmin: false, referralCode: userReferralCode }, token });
   } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
 }
 

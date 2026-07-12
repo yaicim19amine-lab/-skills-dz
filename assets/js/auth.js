@@ -28,7 +28,16 @@ const Auth = (() => {
   }
 
   function isLoggedIn() {
-    return !!getUser() && !!localStorage.getItem(TOKEN_KEY);
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token || !getUser()) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        clearUser();
+        return false;
+      }
+    } catch {}
+    return true;
   }
 
   function requireAuth() {
