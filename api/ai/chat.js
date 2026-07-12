@@ -113,7 +113,7 @@ async function getAIResponse(messages) {
     try {
       return await provider.fn(messages);
     } catch (e) {
-      console.warn(`${provider.name} failed:`, e.message);
+      console.warn('AI provider failed:', provider.name);
     }
   }
   return null;

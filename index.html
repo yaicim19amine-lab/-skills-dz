@@ -29,17 +29,7 @@
   <link rel="stylesheet" href="assets/css/effects.css"/>
 
   <!-- Facebook Pixel -->
-  <script>
-    if (window.FB_PIXEL_ID) {
-      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-      document,'script','https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', window.FB_PIXEL_ID);
-      fbq('track', 'PageView');
-    }
-  </script>
+  <script src="assets/js/fb-pixel.js"></script>
   <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
 
   <!-- JSON-LD -->
@@ -589,34 +579,7 @@
   <script src="assets/js/minigames.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/effects.js" defer></script>
-  <script>
-    // Panda mascot speech rotation
-    (function() {
-      const speeches = [
-        "Apprendre, c'est fun ! 🎯",
-        "Mon niveau monte ! ⬆️",
-        "On est une équipe ! 🤝",
-        "+50 XP ! 💪",
-        "Prêt à coder ? 💻",
-        "Le savoir, c'est le pouvoir ! 🧠",
-        "N'hésite pas ! 🐼",
-        "On y va ensemble ! 🚀"
-      ];
-      let idx = 0;
-      const el = document.getElementById('heroPandaSpeech');
-      if (!el) return;
-      setInterval(() => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateX(-50%) translateY(6px)';
-        setTimeout(() => {
-          idx = (idx + 1) % speeches.length;
-          el.textContent = speeches[idx];
-          el.style.opacity = '1';
-          el.style.transform = 'translateX(-50%) translateY(0)';
-        }, 280);
-      }, 3500);
-    })();
-  </script>
+  <script src="assets/js/panda-speech.js"></script>
 
   <!-- Lead Inscription Modal -->
   <div id="leadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;" onclick="if(event.target===this)closeLeadModal()">
@@ -648,42 +611,6 @@
     </div>
   </div>
 
-  <script>
-    let _leadFormation = '';
-    function openLeadModal(formation) {
-      _leadFormation = formation || '';
-      document.getElementById('leadFormationName').textContent = 'Formation : ' + _leadFormation;
-      document.getElementById('leadModal').style.display = 'flex';
-      document.getElementById('leadForm').reset();
-      document.getElementById('leadForm').style.display = 'flex';
-      document.getElementById('leadSuccess').style.display = 'none';
-    }
-    function closeLeadModal() {
-      document.getElementById('leadModal').style.display = 'none';
-    }
-    document.getElementById('leadForm')?.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('leadName').value;
-      const email = document.getElementById('leadEmail').value;
-      const phone = document.getElementById('leadPhone').value;
-      if (!name || !email || !phone) return;
-      const btn = this.querySelector('button[type="submit"]');
-      btn.textContent = 'Envoi en cours...';
-      btn.disabled = true;
-      fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, formation: _leadFormation })
-      }).then(r => r.json()).then(data => {
-        document.getElementById('leadForm').style.display = 'none';
-        document.getElementById('leadSuccess').style.display = 'block';
-        if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: _leadFormation });
-      }).catch(() => {
-        btn.textContent = 'Envoyer ma demande';
-        btn.disabled = false;
-        alert('Erreur. Réessayez ou contactez-nous directement.');
-      });
-    });
-  </script>
+  <script src="assets/js/lead-modal.js"></script>
 </body>
 </html>

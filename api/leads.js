@@ -52,7 +52,7 @@ export default async function handler(req, res) {
     if (error) {
       if (error.message.includes('relation "leads" does not exist')) {
         await supabase.from('admin_tasks').insert({
-          title: `Lead: ${cleanName} (${cleanFormation || 'Non spécifié'})`,
+          title: `Lead: ${cleanName} (${(cleanFormation || 'Non specifie').replace(/[<>"'&]/g, '')})`,
           description: `Nom: ${cleanName}\nEmail: ${cleanEmail}\nTél: ${cleanPhone}\nFormation: ${cleanFormation || 'Non spécifié'}`,
           status: 'todo',
           priority: 'high',

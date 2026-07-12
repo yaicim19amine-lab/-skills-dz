@@ -11,14 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   api.getAdminData().then(() => {
     initAdminPage();
-  }).catch(err => {
-    if (err.message && err.message.includes('403')) {
-      alert('Accès réservé aux administrateurs.');
-      window.location.href = 'dashboard.html';
-    } else {
-      alert('Erreur de connexion. Veuillez vous reconnecter.');
-      window.location.href = 'login.html';
-    }
+  }).catch(() => {
+    alert('Accès réservé aux administrateurs.');
+    window.location.href = 'login.html';
   });
 });
 
