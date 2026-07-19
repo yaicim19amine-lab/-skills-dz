@@ -156,6 +156,11 @@ function loadUserData() {
       setText('profileStreak', srv.streak || Gamification.getState().streak);
       setText('profileBadges', (srv.badges || []).length);
 
+      const sidebarXp = document.getElementById('userXp');
+      const sidebarLevel = document.getElementById('userLevelBadge');
+      if (sidebarXp) sidebarXp.textContent = `${srv.xp || lvlData.currentXP} XP`;
+      if (sidebarLevel) sidebarLevel.textContent = `Nv. ${srv.level || lvlData.level}`;
+
       // Avatar from server
       const srvAvatar = srv.avatarUrl || '';
       const av = document.getElementById('userAvatar');
