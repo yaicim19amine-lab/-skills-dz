@@ -5,6 +5,26 @@ function initFacebookLogin() {
   FB.init({ appId: window.FB_APP_ID, cookie: true, xfbml: false, version: 'v19.0' });
 }
 
+function loadFacebookSdk() {
+  if (!window.FB_APP_ID || document.getElementById('facebook-jssdk')) return;
+
+  window.fbAsyncInit = initFacebookLogin;
+
+  var script = document.createElement('script');
+  script.id = 'facebook-jssdk';
+  script.async = true;
+  script.defer = true;
+  script.crossOrigin = 'anonymous';
+  script.src = 'https://connect.facebook.net/fr_FR/sdk.js';
+  document.head.appendChild(script);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadFacebookSdk);
+} else {
+  loadFacebookSdk();
+}
+
 function handleFacebookLogin() {
   if (typeof FB === 'undefined') return;
 
