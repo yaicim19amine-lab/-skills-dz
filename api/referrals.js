@@ -1,5 +1,5 @@
 import { handleOptions, jsonError, jsonResponse } from './_lib/cors.js';
-import { getSupabaseForUser } from './_lib/supabase.js';
+import { getSupabaseForUser, getSupabaseAdmin } from './_lib/supabase.js';
 import { getUserFromRequest } from './_lib/auth.js';
 import { rateLimit } from './_lib/rateLimit.js';
 
@@ -10,8 +10,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const token = req.headers.authorization?.split(' ')[1];
-      const supabase = getSupabaseForUser(token);
+      const supabase = getSupabaseAdmin();
       const { data, error } = await supabase
         .from('referrals')
         .select('referrer_id, count:id')
