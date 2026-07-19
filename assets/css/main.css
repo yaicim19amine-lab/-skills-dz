@@ -738,6 +738,8 @@ h1, h2, h3, h4, h5, h6 {
   .hero__actions .btn { width: 100%; justify-content: center; }
   .levels-showcase { grid-template-columns: 1fr; }
   .points-grid { grid-template-columns: 1fr; }
+  .socials { flex-wrap: wrap; }
+  .footer__links a { line-height: 1.45; }
   .whatsapp-float { width: 52px; height: 52px; bottom: 18px; right: 18px; }
   .agent-card { padding: 24px; }
   .formation-card { padding: 24px; }
