@@ -34,10 +34,10 @@
 
       <nav class="sidebar-nav">
         <ul class="nav-list">
-          <li><a href="#" class="nav-item active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a></li>
+          <li><a href="#" class="nav-item active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Tableau de bord</span></a></li>
           <li><a href="#" class="nav-item" data-page="users"><i data-lucide="users"></i><span>Utilisateurs</span></a></li>
           <li><a href="#" class="nav-item" data-page="formations"><i data-lucide="book-open"></i><span>Formations</span></a></li>
-          <li><a href="#" class="nav-item" data-page="live"><i data-lucide="radio"></i><span>Sessions Live</span></a></li>
+          <li><a href="#" class="nav-item" data-page="live"><i data-lucide="radio"></i><span>Sessions live</span></a></li>
           <li><a href="#" class="nav-item" data-page="finance"><i data-lucide="wallet"></i><span>Finances</span></a></li>
           <li><a href="#" class="nav-item" data-page="tasks"><i data-lucide="list-checks"></i><span>Tâches</span></a></li>
           <li><a href="#" class="nav-item" data-page="journal"><i data-lucide="lightbulb"></i><span>Journal d'idées</span></a></li>
@@ -89,7 +89,7 @@
         <!-- ═══ DASHBOARD ═══ -->
         <section class="admin-page active" id="page-admin-dashboard">
           <div class="page-header">
-            <h2 class="page-title">Dashboard</h2>
+            <h2 class="page-title">Tableau de bord</h2>
             <p class="page-subtitle">Vue d'ensemble de la plateforme</p>
           </div>
 
@@ -150,7 +150,7 @@
                 <h3 class="card-title">Dernières activités</h3>
               </div>
               <ul class="activity-feed" id="activityFeed">
-                <li class="activity-item"><div class="activity-dot activity-dot--blue"></div><div class="activity-body"><p>Chargement...</p></div></li>
+                <li class="activity-item"><div class="activity-dot activity-dot--blue"></div><div class="activity-body"><p>Chargement des dernières activités...</p></div></li>
               </ul>
             </div>
           </div>
@@ -161,8 +161,8 @@
           <div class="page-header">
             <h2 class="page-title">Utilisateurs</h2>
             <div class="page-actions">
-              <button class="btn btn--primary" id="addUserBtn"><i data-lucide="user-plus"></i> Ajouter</button>
-              <button class="btn btn--outline" id="exportUsersBtn"><i data-lucide="download"></i> Exporter</button>
+              <button class="btn btn--primary" id="addUserBtn"><i data-lucide="user-plus"></i> Ajouter un utilisateur</button>
+              <button class="btn btn--outline" id="exportUsersBtn"><i data-lucide="download"></i> Exporter la liste</button>
             </div>
           </div>
 
@@ -199,7 +199,7 @@
                 </tr>
               </thead>
               <tbody id="usersTableBody">
-                <tr><td colspan="6" style="text-align:center;color:#8892b0;padding:2rem">Chargement...</td></tr>
+                <tr><td colspan="6" style="text-align:center;color:#8892b0;padding:2rem">Chargement des utilisateurs...</td></tr>
               </tbody>
             </table>
           </div>
@@ -215,21 +215,21 @@
           </div>
 
           <div class="formations-grid" id="adminFormationsGrid">
-            <p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">Chargement...</p>
+            <p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">Chargement des formations...</p>
           </div>
         </section>
 
         <!-- ═══ LIVE SESSIONS ═══ -->
         <section class="admin-page" id="page-admin-live">
           <div class="page-header">
-            <h2 class="page-title">Sessions Live</h2>
+            <h2 class="page-title">Sessions live</h2>
             <div class="page-actions">
               <button class="btn btn--primary" id="addSessionBtn"><i data-lucide="plus-circle"></i> Nouvelle session</button>
             </div>
           </div>
 
           <div class="live-sessions" id="adminLiveList">
-            <p style="color:#8892b0;text-align:center;padding:2rem">Chargement...</p>
+            <p style="color:#8892b0;text-align:center;padding:2rem">Chargement des sessions live...</p>
           </div>
         </section>
 
@@ -284,7 +284,7 @@
                   </tr>
                 </thead>
                 <tbody id="financeTableBody">
-                  <tr><td colspan="7" style="text-align:center;color:#8892b0;padding:2rem">Chargement...</td></tr>
+                  <tr><td colspan="7" style="text-align:center;color:#8892b0;padding:2rem">Chargement des transactions...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -294,13 +294,13 @@
         <!-- ═══ TASKS ═══ -->
         <section class="admin-page" id="page-admin-tasks">
           <div class="page-header">
-            <h2 class="page-title">Tâches gestion</h2>
+            <h2 class="page-title">Gestion des tâches</h2>
             <div class="page-actions">
               <button class="btn btn--primary" id="addTaskBtn"><i data-lucide="plus-circle"></i> Nouvelle tâche</button>
             </div>
           </div>
           <div class="tasks-board" id="adminTasksBoard">
-            <p style="color:#8892b0;text-align:center;padding:2rem">Chargement...</p>
+            <p style="color:#8892b0;text-align:center;padding:2rem">Chargement des tâches...</p>
           </div>
         </section>
 
@@ -308,9 +308,9 @@
         <section class="admin-page" id="page-admin-journal">
           <div class="page-header">
             <h2 class="page-title">Journal d'idées</h2>
-            <p class="page-subtitle">Insights et analyses par domaine — mise à jour chaque heure</p>
+            <p class="page-subtitle">Insights et analyses par domaine, mis à jour chaque heure.</p>
             <div class="page-actions">
-              <button class="btn btn--primary" id="addIdeaBtn"><i data-lucide="plus-circle"></i> Nouvelle idée</button>
+              <button class="btn btn--primary" id="addIdeaBtn"><i data-lucide="plus-circle"></i> Ajouter une idée</button>
             </div>
           </div>
 
@@ -328,7 +328,7 @@
           </div>
 
           <div class="journal-grid" id="journalGrid">
-            <p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">Chargement des insights...</p>
+            <p style="color:#8892b0;text-align:center;padding:2rem;grid-column:1/-1">Chargement des analyses...</p>
           </div>
         </section>
 
@@ -336,7 +336,7 @@
         <section class="admin-page" id="page-admin-audit">
           <div class="page-header">
             <h2 class="page-title">Journal d'audit</h2>
-            <p class="page-subtitle">Historique des actions sensibles réalisées par les administrateurs</p>
+            <p class="page-subtitle">Historique des actions sensibles réalisées par les administrateurs.</p>
           </div>
           <div class="card">
             <div class="table-wrapper">
@@ -351,7 +351,7 @@
                   </tr>
                 </thead>
                 <tbody id="auditTableBody">
-                  <tr><td colspan="5" style="text-align:center;color:#8892b0;padding:2rem">Chargement...</td></tr>
+                  <tr><td colspan="5" style="text-align:center;color:#8892b0;padding:2rem">Chargement du journal d'audit...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -382,7 +382,7 @@
                   <label for="adminPassword">Nouveau mot de passe</label>
                   <input type="password" id="adminPassword" placeholder="••••••••" class="form-input">
                 </div>
-                <button type="submit" class="btn btn--primary">Sauvegarder</button>
+                <button type="submit" class="btn btn--primary">Enregistrer</button>
               </form>
             </div>
 
@@ -418,7 +418,7 @@
               </div>
               <div class="settings-options">
                 <label class="toggle-row">
-                  <span>Mode sombre (par défaut)</span>
+                  <span>Mode sombre</span>
                   <div class="toggle active" data-key="appearance_dark_mode" role="switch" aria-checked="true" tabindex="0"></div>
                 </label>
                 <label class="toggle-row">
@@ -426,7 +426,7 @@
                   <div class="toggle" data-key="appearance_reduced_animations" role="switch" aria-checked="false" tabindex="0"></div>
                 </label>
                 <label class="toggle-row">
-                  <span>Compact mode</span>
+                  <span>Mode compact</span>
                   <div class="toggle" data-key="appearance_compact_mode" role="switch" aria-checked="false" tabindex="0"></div>
                 </label>
               </div>

@@ -122,8 +122,8 @@ function initEventListeners() {
       let u; try { u = JSON.parse(localStorage.getItem('skillsdz_user')); } catch { u = null; }
       if (u) { u.firstName = name; u.name = name; localStorage.setItem('skillsdz_user', JSON.stringify(u)); }
       loadAdminProfile(u);
-      showToast('Profil mis à jour', 'success');
-    }).catch(err => showToast('Erreur: ' + err.message, 'error'));
+      showToast('Profil administrateur mis à jour', 'success');
+    }).catch(err => showToast('Impossible de mettre à jour le profil', 'error'));
   });
 
   document.querySelectorAll('.toggle').forEach(toggle => {
@@ -219,7 +219,7 @@ function renderDashboard() {
   const feed = document.getElementById('activityFeed');
   if (!feed) return;
   const recent = users.slice(0, 6);
-  if (recent.length === 0) { feed.innerHTML = '<p style="color:#8892b0;text-align:center;padding:1rem">Aucune activité</p>'; return; }
+  if (recent.length === 0) { feed.innerHTML = '<p style="color:#8892b0;text-align:center;padding:1rem">Aucune activité récente</p>'; return; }
   feed.innerHTML = recent.map(u => {
     const name = esc(`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email);
     const date = new Date(u.created_at).toLocaleDateString('fr-FR');
@@ -286,7 +286,7 @@ function viewUser(userId) {
   let badges = [];
   try { badges = u.badges ? (Array.isArray(u.badges) ? u.badges : JSON.parse(u.badges || '[]')) : []; } catch { badges = []; }
 
-  openModal('Profil Utilisateur', `
+  openModal('Profil utilisateur', `
     <div style="text-align:center;margin-bottom:16px">
       <div class="avatar-sm" style="background:#1E5BFF;width:56px;height:56px;font-size:22px;margin:0 auto 8px">${esc(initials)}</div>
       <h4 style="color:white;font-size:16px">${name}</h4>
@@ -299,7 +299,7 @@ function viewUser(userId) {
     <div style="margin-bottom:16px"><span style="color:#8892b0;font-size:12px">Badges: </span>${badges.length > 0 ? badges.map(b => `<span class="badge badge--blue" style="margin:2px">${esc(b)}</span>`).join('') : '<span style="color:#555;font-size:12px">Aucun</span>'}</div>
     <div style="font-size:12px;color:#8892b0">
       <p>Inscrit le: ${created}</p>
-      <p>Admin: ${u.is_admin ? '<span style="color:#1E5BFF">Oui</span>' : 'Non'}</p>
+      <p>Administrateur : ${u.is_admin ? '<span style="color:#1E5BFF">Oui</span>' : 'Non'}</p>
     </div>
   `);
 }
