@@ -33,7 +33,12 @@ document.addEventListener('DOMContentLoaded', function() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: name, email: email, phone: phone, formation: _leadFormation })
-    }).then(function(r) { return r.json(); }).then(function() {
+    }).then(function(r) {
+      return r.json().then(function(data) { return { ok: r.ok, data: data }; });
+    }).then(function(result) {
+      if (!result.ok || !result.data || result.data.success !== true) {
+        throw new Error((result.data && result.data.error) || 'Erreur');
+      }
       form.style.display = 'none';
       document.getElementById('leadSuccess').style.display = 'block';
       if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: _leadFormation });

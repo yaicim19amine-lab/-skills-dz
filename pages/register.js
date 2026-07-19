@@ -2,24 +2,28 @@
 document.addEventListener('DOMContentLoaded', function() {
   lucide.createIcons();
 
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   if (Auth.isLoggedIn()) { window.location.href = 'dashboard.html'; }
 
   // Panda speech
   var speeches = ["Bienvenue !", "Rejoins-nous !", "100 XP offerts !", "C'est gratuit !", "On t'attend !"];
   var speechIdx = 0;
-  setInterval(function() {
-    var bubble = document.querySelector('.panda-speech');
-    if (bubble) {
-      bubble.style.opacity = '0';
-      bubble.style.transform = 'translateY(6px)';
-      setTimeout(function() {
-        speechIdx = (speechIdx + 1) % speeches.length;
-        bubble.textContent = speeches[speechIdx];
-        bubble.style.opacity = '1';
-        bubble.style.transform = 'translateY(0)';
-      }, 250);
-    }
-  }, 3500);
+  if (!reduceMotion) {
+    setInterval(function() {
+      var bubble = document.querySelector('.panda-speech');
+      if (bubble) {
+        bubble.style.opacity = '0';
+        bubble.style.transform = 'translateY(6px)';
+        setTimeout(function() {
+          speechIdx = (speechIdx + 1) % speeches.length;
+          bubble.textContent = speeches[speechIdx];
+          bubble.style.opacity = '1';
+          bubble.style.transform = 'translateY(0)';
+        }, 250);
+      }
+    }, 3500);
+  }
 
   // Toggle password
   window.togglePassword = function(btn) {

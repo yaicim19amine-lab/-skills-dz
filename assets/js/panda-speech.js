@@ -1,5 +1,7 @@
 /* Panda mascot speech rotation — externalized for CSP */
 (function() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
   var speeches = [
     "Apprendre, c'est fun !",
     "Mon niveau monte !",

@@ -29,6 +29,23 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   outline-offset: 4px;
 }
 
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: 8px;
+  transform: translateY(-140%);
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #0B1331;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Poppins', sans-serif;

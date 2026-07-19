@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Skills DZ — Apprendre. Progresser. Réussir.</title>
   <meta name="description" content="Skills DZ, centre de formation professionnelle à Alger. Formations en marketing digital, développement web, IA. Gamification, agents IA, points et niveaux."/>
+  <meta name="robots" content="index, follow"/>
   <link href="https://skills-dz.vercel.app/" rel="canonical"/>
   <meta name="theme-color" content="#0B1331"/>
   <meta name="facebook-domain-verification" content="54i5fqzku92ujt9nb31ekel027pizm" />
@@ -15,7 +16,15 @@
   <meta content="Formations professionnelles avec gamification et agents IA. Apprenez, gagnez des points, montez de niveau." property="og:description"/>
   <meta content="https://skills-dz.vercel.app/" property="og:url"/>
   <meta content="website" property="og:type"/>
+  <meta content="Skills DZ" property="og:site_name"/>
   <meta content="https://skills-dz.vercel.app/assets/img/logo.jpeg" property="og:image"/>
+  <meta content="Logo Skills DZ" property="og:image:alt"/>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Skills DZ — Apprendre. Progresser. Réussir."/>
+  <meta name="twitter:description" content="Centre de formation professionnelle à Alger avec gamification, agents IA et parcours certifiants."/>
+  <meta name="twitter:image" content="https://skills-dz.vercel.app/assets/img/logo.jpeg"/>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -56,6 +65,7 @@
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Aller au contenu principal</a>
   <!-- Header -->
   <header class="header" id="header">
     <div class="container header__inner">
@@ -73,7 +83,7 @@
       <div class="head-actions">
         <a class="btn btn--ghost" href="pages/login.html">Connexion</a>
         <a class="btn btn--accent" href="pages/register.html">Inscription</a>
-        <button class="hamburger" id="hamburger" aria-label="Menu">
+        <button class="hamburger" id="hamburger" aria-label="Menu" aria-controls="nav" aria-expanded="false">
           <i data-lucide="menu"></i>
         </button>
       </div>
@@ -563,7 +573,7 @@
         <ul>
           <li><a href="tel:+213656471547"><i data-lucide="phone"></i> 06 56 47 15 47</a></li>
           <li><a href="mailto:skillslearningdz@gmail.com"><i data-lucide="mail"></i> skillslearningdz@gmail.com</a></li>
-          <li><a href="#"><i data-lucide="map-pin"></i> Alger, Algérie</a></li>
+          <li><a href="https://www.google.com/maps/search/?api=1&query=Skills%20DZ%20Alger%20Alg%C3%A9rie" target="_blank" rel="noopener noreferrer"><i data-lucide="map-pin"></i> Alger, Algérie</a></li>
         </ul>
       </div>
     </div>

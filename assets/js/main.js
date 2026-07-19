@@ -59,6 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollTick = true;
     requestAnimationFrame(() => {
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight <= 0) {
+        scrollTick = false;
+        return;
+      }
       const scrollPercent = Math.round((window.scrollY / scrollHeight) * 100);
 
       [25, 50, 75, 100].forEach(threshold => {
