@@ -60,7 +60,7 @@
 
       <header class="admin-header" role="banner">
         <div class="header-left">
-          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
+          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="adminSidebar">
             <i data-lucide="menu"></i>
           </button>
           <div class="header-greeting">
@@ -77,10 +77,9 @@
             <i data-lucide="bell"></i>
             <span class="notification-badge" id="notifBadge">0</span>
           </button>
-          <div class="header-avatar" id="adminAvatar" role="button" tabindex="0" aria-label="Menu administrateur">
+          <div class="header-avatar" id="adminAvatar" aria-label="Profil administrateur">
             <div class="avatar-circle">A</div>
             <span class="avatar-name">Admin</span>
-            <i data-lucide="chevron-down" class="avatar-chevron"></i>
           </div>
         </div>
       </header>

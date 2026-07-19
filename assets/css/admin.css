@@ -121,9 +121,9 @@ body {
 
 .header-avatar {
   display: flex; align-items: center; gap: 8px;
-  cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s;
+  cursor: default; padding: 4px 8px; border-radius: 8px;
 }
-.header-avatar:hover { background: rgba(255,255,255,0.05); }
+.header-avatar:hover { background: transparent; }
 .avatar-circle {
   width: 32px; height: 32px; border-radius: 50%;
   background: linear-gradient(135deg, #1E5BFF, #00C4FF);
@@ -131,7 +131,7 @@ body {
   color: white; font-size: 13px; font-weight: 700;
 }
 .avatar-name { color: #e8eaf6; font-size: 13px; font-weight: 500; }
-.avatar-chevron { color: #555; width: 14px; height: 14px; }
+
 
 /* CONTENT */
 .admin-content {
