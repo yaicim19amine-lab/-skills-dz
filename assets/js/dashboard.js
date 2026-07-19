@@ -273,15 +273,18 @@ function initMobileMenu() {
   const overlay = document.getElementById('sidebarOverlay');
 
   if (btn) btn.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('open');
+    const isOpen = sidebar.classList.toggle('open');
+    overlay.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   });
   if (overlay) overlay.addEventListener('click', closeMobileMenu);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileMenu(); });
 }
 
 function closeMobileMenu() {
   document.getElementById('sidebar')?.classList.remove('open');
   document.getElementById('sidebarOverlay')?.classList.remove('open');
+  document.getElementById('mobileMenuBtn')?.setAttribute('aria-expanded', 'false');
 }
 
 /* ========================================
