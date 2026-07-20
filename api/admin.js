@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 
     // ─── GET: Dashboard data ───
     if (req.method === 'GET') {
-      const { data: users } = await supabase.from('profiles').select('id, email, first_name, last_name, xp, level, badges, role, is_banned, created_at').order('created_at', { ascending: false });
+      const { data: users } = await supabase.from('profiles').select('id, full_name, role, created_at').order('created_at', { ascending: false });
       const { data: formations } = await supabase.from('formations').select('*').order('created_at', { ascending: false });
       const { data: payments } = await supabase.from('payments').select('*').order('created_at', { ascending: false });
       const { data: tasks } = await supabase.from('admin_tasks').select('*').order('created_at', { ascending: false }).limit(100);

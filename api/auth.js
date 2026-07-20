@@ -79,7 +79,7 @@ export default async function handler(req, res) {
 
 async function handleSignup(req, res) {
   try {
-    const { email, password, firstName, lastName, phone, referralCode } = req.body;
+    const { email, password, firstName } = req.body;
     if (!email || !password) return jsonError(res, 400, 'Email et mot de passe requis');
     if (!validateEmail(email)) return jsonError(res, 400, 'Format email invalide');
     const pwdError = validatePassword(password);
@@ -93,11 +93,7 @@ async function handleSignup(req, res) {
     }
 
     const cleanFirstName = sanitizeText(firstName || email.split('@')[0], 100);
-    const cleanLastName = sanitizeText(lastName || '', 100);
-    const cleanPhone = sanitizeText(phone || '', 20);
-    const cleanReferralCode = sanitizeText(referralCode || '', 40).toUpperCase();
     if (!cleanFirstName) return jsonError(res, 400, 'Prénom invalide');
-    if (cleanPhone && !/^[\d\s+\-()]{8,20}$/.test(cleanPhone)) return jsonError(res, 400, 'Format téléphone invalide');
 
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email, password, email_confirm: true,
@@ -109,18 +105,9 @@ async function handleSignup(req, res) {
     }
 
     const userId = authData.user.id;
-    const userReferralCode = await generateReferralCode(supabase, cleanFirstName);
-
-    let referredBy = null;
-    if (cleanReferralCode) {
-      const { data: referrer } = await supabase.from('profiles').select('id').eq('referral_code', cleanReferralCode).maybeSingle();
-      if (referrer) referredBy = referrer.id;
-    }
 
     const { error: profileError } = await supabase.from('profiles').insert({
-      id: userId, email, first_name: cleanFirstName, last_name: cleanLastName,
-      phone: cleanPhone, xp: 100, level: 2, streak: 0, badges: ['newcomer'], total_xp: 100,
-      referral_code: userReferralCode, referred_by: referredBy,
+      id: userId, full_name: cleanFirstName, role: 'assistant',
     });
     if (profileError) {
       await supabase.auth.admin.deleteUser(userId).catch(() => {});
@@ -128,15 +115,8 @@ async function handleSignup(req, res) {
       return jsonError(res, 500, 'Erreur lors de la création du profil');
     }
 
-    await supabase.from('xp_transactions').insert({ user_id: userId, amount: 100, reason: 'Bienvenue sur Skills DZ !', source: 'bonus' });
-
-    if (referredBy) {
-      await supabase.from('referrals').insert({ referrer_id: referredBy, referred_id: userId, status: 'confirmed', reward_xp: 200 });
-      await supabase.rpc('award_xp', { p_user_id: referredBy, p_amount: 200, p_reason: 'Parrainage', p_source: 'referral' });
-    }
-
     const token = signToken({ userId, email });
-    jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, lastName: cleanLastName, xp: 100, level: 2, badges: ['newcomer'], referralCode: userReferralCode }, token });
+    jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 0, level: 1, badges: [] }, token });
   } catch (err) { console.error('Signup error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
 
@@ -150,13 +130,11 @@ async function handleLogin(req, res) {
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) return jsonError(res, 401, 'Email ou mot de passe incorrect');
 
-    const { data: profile } = await supabase.from('profiles').select('id, email, first_name, last_name, xp, level, streak, badges, referral_code, is_banned').eq('id', authData.user.id).maybeSingle();
+    const { data: profile } = await supabase.from('profiles').select('id, full_name, role').eq('id', authData.user.id).maybeSingle();
     if (!profile) return jsonError(res, 404, 'Profil non trouvé');
 
-    if (profile.is_banned) return jsonError(res, 403, 'Compte suspendu. Contactez le support.');
-
     const token = signToken({ userId: authData.user.id, email });
-    jsonResponse(res, 200, { user: { id: authData.user.id, email: profile.email, firstName: profile.first_name, lastName: profile.last_name, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, referralCode: profile.referral_code }, token });
+    jsonResponse(res, 200, { user: { id: authData.user.id, email, firstName: profile.full_name || email.split('@')[0], xp: 0, level: 1, badges: [] }, token });
   } catch (err) { console.error('[auth] login error:', err.message); jsonError(res, 500, 'Erreur serveur'); }
 }
 
@@ -291,9 +269,9 @@ async function handleMe(req, res) {
   if (!user) return jsonError(res, 401, 'Non autorisé');
 
   try {
-    const { data: profile } = await getSupabaseAdmin().from('profiles').select('id, email, first_name, last_name, phone, avatar_url, xp, level, streak, badges, total_xp, referral_code, created_at').eq('id', user.userId).maybeSingle();
+    const { data: profile } = await getSupabaseAdmin().from('profiles').select('id, full_name, role, created_at').eq('id', user.userId).maybeSingle();
     if (!profile) return jsonError(res, 404, 'Profil non trouvé');
 
-    jsonResponse(res, 200, { user: { id: profile.id, email: profile.email, firstName: profile.first_name, lastName: profile.last_name, phone: profile.phone, avatarUrl: profile.avatar_url, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, totalXp: profile.total_xp, referralCode: profile.referral_code, createdAt: profile.created_at } });
+    jsonResponse(res, 200, { user: { id: profile.id, email: user.email, firstName: profile.full_name || user.email?.split('@')[0], role: profile.role, createdAt: profile.created_at } });
   } catch (err) { console.error('Me error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
