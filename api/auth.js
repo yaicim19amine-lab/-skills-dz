@@ -38,11 +38,15 @@ function generateSecurePassword() {
   return `${randomBytes(18).toString('base64url')}A1!`;
 }
 
-function parseBodyStream(req) {
+function parseBody(req) {
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return Promise.resolve(req.body);
+  }
   return new Promise((resolve) => {
-    let raw = '';
-    req.on('data', chunk => { raw += chunk.toString(); });
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
     req.on('end', () => {
+      const raw = Buffer.concat(chunks).toString();
       try { resolve(raw ? JSON.parse(raw) : {}); }
       catch { resolve({}); }
     });
@@ -61,7 +65,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    if (req.method === 'POST') req.body = await parseBodyStream(req);
+    if (req.method === 'POST') req.body = await parseBody(req);
 
     const url = new URL(req.url, `https://${req.headers.host}`);
     const action = url.searchParams.get('action');
