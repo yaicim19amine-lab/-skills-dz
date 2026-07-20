@@ -61,11 +61,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    if (req.method === 'POST') {
-      if (!req.body || Object.keys(req.body).length === 0) {
-        req.body = await parseBodyStream(req);
-      }
-    }
+    if (req.method === 'POST') req.body = await parseBodyStream(req);
 
     const url = new URL(req.url, `https://${req.headers.host}`);
     const action = url.searchParams.get('action');
