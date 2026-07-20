@@ -45,8 +45,8 @@ async function requireAdmin(req) {
   const user = getUserFromRequest(req);
   if (!user) return null;
   const supabase = getSupabaseAdmin();
-  const { data } = await supabase.from('profiles').select('is_admin').eq('id', user.userId).single();
-  return data?.is_admin ? user : null;
+  const { data } = await supabase.from('profiles').select('role').eq('id', user.userId).single();
+  return data?.role === 'admin' ? user : null;
 }
 
 export default async function handler(req, res) {
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET' && url.searchParams.get('action') === 'publicSettings') {
     try {
       const supabase = getSupabaseAdmin();
-      const { data } = await supabase.from('profiles').select('settings').eq('is_admin', true).limit(1).maybeSingle();
+      const { data } = await supabase.from('profiles').select('settings').eq('role', 'admin').limit(1).maybeSingle();
       return jsonResponse(res, 200, { settings: data?.settings || {} });
     } catch { return jsonResponse(res, 200, { settings: {} }); }
   }
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 
     // ─── GET: Dashboard data ───
     if (req.method === 'GET') {
-      const { data: users } = await supabase.from('profiles').select('id, email, first_name, last_name, xp, level, badges, is_admin, is_banned, created_at').order('created_at', { ascending: false });
+      const { data: users } = await supabase.from('profiles').select('id, email, first_name, last_name, xp, level, badges, role, is_banned, created_at').order('created_at', { ascending: false });
       const { data: formations } = await supabase.from('formations').select('*').order('created_at', { ascending: false });
       const { data: payments } = await supabase.from('payments').select('*').order('created_at', { ascending: false });
       const { data: tasks } = await supabase.from('admin_tasks').select('*').order('created_at', { ascending: false }).limit(100);
@@ -208,9 +208,9 @@ export default async function handler(req, res) {
 
       if (body.action === 'setAdmin') {
         if (!UUID_RE.test(body.userId || '')) return jsonError(res, 400, 'ID utilisateur invalide');
-        const { error } = await supabase.from('profiles').update({ is_admin: !!body.isAdmin }).eq('id', body.userId);
+        const { error } = await supabase.from('profiles').update({ role: body.isAdmin ? 'admin' : 'assistant' }).eq('id', body.userId);
         if (error) return jsonError(res, 500, error.message);
-        await audit(supabase, user.userId, 'setAdmin', 'profile', body.userId, { is_admin: !!body.isAdmin });
+        await audit(supabase, user.userId, 'setAdmin', 'profile', body.userId, { role: body.isAdmin ? 'admin' : 'assistant' });
         return jsonResponse(res, 200, { success: true, message: body.isAdmin ? 'Admin ajouté' : 'Admin retiré' });
       }
 

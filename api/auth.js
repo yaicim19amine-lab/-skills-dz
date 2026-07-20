@@ -38,6 +38,18 @@ function generateSecurePassword() {
   return `${randomBytes(18).toString('base64url')}A1!`;
 }
 
+function parseBodyStream(req) {
+  return new Promise((resolve) => {
+    let raw = '';
+    req.on('data', chunk => { raw += chunk.toString(); });
+    req.on('end', () => {
+      try { resolve(raw ? JSON.parse(raw) : {}); }
+      catch { resolve({}); }
+    });
+    req.on('error', () => resolve({}));
+  });
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
@@ -48,17 +60,25 @@ export default async function handler(req, res) {
     return jsonError(res, 429, `Trop de tentatives. Réessayez dans ${rl.retryAfter}s`);
   }
 
-  const url = new URL(req.url, `https://${req.headers.host}`);
-  const action = url.searchParams.get('action');
+  try {
+    if (req.method === 'POST') {
+      if (!req.body || Object.keys(req.body).length === 0) {
+        req.body = await parseBodyStream(req);
+      }
+    }
 
-  if (req.method === 'POST' && action === 'signup') return handleSignup(req, res);
-  if (req.method === 'POST' && action === 'login') return handleLogin(req, res);
-  if (req.method === 'POST' && action === 'google') return handleGoogle(req, res);
-  if (req.method === 'POST' && action === 'facebook') return handleFacebook(req, res);
-  if (req.method === 'POST' && action === 'forgot-password') return handleForgotPassword(req, res);
-  if (req.method === 'GET' && action === 'me') return handleMe(req, res);
+    const url = new URL(req.url, `https://${req.headers.host}`);
+    const action = url.searchParams.get('action');
 
-  return jsonError(res, 405, 'Route non trouvée');
+    if (req.method === 'POST' && action === 'signup') return handleSignup(req, res);
+    if (req.method === 'POST' && action === 'login') return handleLogin(req, res);
+    if (req.method === 'POST' && action === 'google') return handleGoogle(req, res);
+    if (req.method === 'POST' && action === 'facebook') return handleFacebook(req, res);
+    if (req.method === 'POST' && action === 'forgot-password') return handleForgotPassword(req, res);
+    if (req.method === 'GET' && action === 'me') return handleMe(req, res);
+
+    return jsonError(res, 405, 'Route non trouvée');
+  } catch (err) { console.error('[auth] handler error:', err); jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleSignup(req, res) {
@@ -70,7 +90,7 @@ async function handleSignup(req, res) {
     if (pwdError) return jsonError(res, 400, pwdError);
 
     const supabase = getSupabaseAdmin();
-    const { data: adminProfile } = await supabase.from('profiles').select('settings').eq('is_admin', true).limit(1).maybeSingle();
+    const { data: adminProfile } = await supabase.from('profiles').select('settings').eq('role', 'admin').limit(1).maybeSingle();
     const settings = adminProfile?.settings || {};
     if (settings.platform_registration_open === false) {
       return jsonError(res, 403, 'Les inscriptions sont temporairement fermées');
@@ -121,7 +141,7 @@ async function handleSignup(req, res) {
 
     const token = signToken({ userId, email });
     jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, lastName: cleanLastName, xp: 100, level: 2, badges: ['newcomer'], referralCode: userReferralCode }, token });
-  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
+  } catch (err) { console.error('Signup error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleLogin(req, res) {
@@ -141,7 +161,7 @@ async function handleLogin(req, res) {
 
     const token = signToken({ userId: authData.user.id, email });
     jsonResponse(res, 200, { user: { id: authData.user.id, email: profile.email, firstName: profile.first_name, lastName: profile.last_name, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, referralCode: profile.referral_code }, token });
-  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
+  } catch (err) { console.error('[auth] login error:', err.message); jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleForgotPassword(req, res) {
@@ -161,7 +181,7 @@ async function handleForgotPassword(req, res) {
 
     // Always return success to prevent email enumeration
     jsonResponse(res, 200, { success: true, message: 'Si cet email existe, un lien de réinitialisation a été envoyé' });
-  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
+  } catch (err) { console.error('ForgotPassword error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleGoogle(req, res) {
@@ -216,7 +236,7 @@ async function handleGoogle(req, res) {
 
     const token = signToken({ userId: authData.user.id, email });
     jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName, lastName, xp: 100, level: 2, streak: 0, badges: ['newcomer'], isAdmin: false, referralCode: userReferralCode }, token });
-  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
+  } catch (err) { console.error('Google error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleFacebook(req, res) {
@@ -267,7 +287,7 @@ async function handleFacebook(req, res) {
 
     const token = signToken({ userId: authData.user.id, email });
     jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName: cleanFirstName, lastName: cleanLastName, xp: 100, level: 2, streak: 0, badges: ['newcomer'], isAdmin: false, referralCode: userReferralCode }, token });
-  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
+  } catch (err) { console.error('Facebook error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
 
 async function handleMe(req, res) {
@@ -279,5 +299,5 @@ async function handleMe(req, res) {
     if (!profile) return jsonError(res, 404, 'Profil non trouvé');
 
     jsonResponse(res, 200, { user: { id: profile.id, email: profile.email, firstName: profile.first_name, lastName: profile.last_name, phone: profile.phone, avatarUrl: profile.avatar_url, xp: profile.xp, level: profile.level, streak: profile.streak, badges: profile.badges, totalXp: profile.total_xp, referralCode: profile.referral_code, createdAt: profile.created_at } });
-  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
+  } catch (err) { console.error('Me error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
