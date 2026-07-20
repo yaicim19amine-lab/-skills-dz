@@ -90,11 +90,6 @@ async function handleSignup(req, res) {
     if (pwdError) return jsonError(res, 400, pwdError);
 
     const supabase = getSupabaseAdmin();
-    const { data: adminProfile } = await supabase.from('profiles').select('settings').eq('role', 'admin').limit(1).maybeSingle();
-    const settings = adminProfile?.settings || {};
-    if (settings.platform_registration_open === false) {
-      return jsonError(res, 403, 'Les inscriptions sont temporairement fermées');
-    }
 
     const cleanFirstName = sanitizeText(firstName || email.split('@')[0], 100);
     if (!cleanFirstName) return jsonError(res, 400, 'Prénom invalide');
@@ -115,8 +110,8 @@ async function handleSignup(req, res) {
     });
     if (profileError) {
       await supabase.auth.admin.deleteUser(userId).catch(() => {});
-      console.error('Profile error:', profileError.message);
-      return jsonError(res, 500, 'Erreur lors de la création du profil');
+      console.error('Profile insert error:', profileError.message, profileError.details, profileError.hint);
+      return jsonError(res, 500, 'Erreur profil: ' + profileError.message);
     }
 
     const token = signToken({ userId, email });
