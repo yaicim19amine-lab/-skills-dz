@@ -106,13 +106,15 @@ async function handleSignup(req, res) {
     const userId = authData.user.id;
 
     const { error: profileError } = await supabase.from('profiles').insert({
-      id: userId, full_name: cleanFirstName, role: 'assistant',
+      id: userId, role: 'assistant',
     });
     if (profileError) {
       await supabase.auth.admin.deleteUser(userId).catch(() => {});
       console.error('Profile insert error:', profileError.message, profileError.details, profileError.hint);
       return jsonError(res, 500, 'Erreur profil: ' + profileError.message);
     }
+
+    await supabase.from('profiles').update({ full_name: cleanFirstName }).eq('id', userId);
 
     const token = signToken({ userId, email });
     jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 0, level: 1, badges: [] }, token });
