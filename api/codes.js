@@ -48,8 +48,8 @@ export default async function handler(req, res) {
     if (!user) return jsonError(res, 401, 'Non autorisé');
 
     const supabase = getSupabaseAdmin();
-    const { data: profile } = await supabase.from('profiles').select('id, role').eq('id', user.userId).maybeSingle();
-    const isAdmin = profile?.role === 'admin';
+    const { data: profile } = await supabase.from('profiles').select('id, is_admin').eq('id', user.userId).maybeSingle();
+    const isAdmin = !!profile?.is_admin;
 
     const url = new URL(req.url, `https://${req.headers.host}`);
     const action = url.searchParams.get('action') || req.body?.action;

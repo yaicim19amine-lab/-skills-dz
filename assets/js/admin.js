@@ -11,9 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   api.getAdminData().then(() => {
     initAdminPage();
-  }).catch((err) => {
-    const isExpired = err.message?.includes('401') || err.message?.includes('Non autorisé');
-    alert(isExpired ? 'Session expirée. Veuillez vous reconnecter.' : 'Accès réservé aux administrateurs.');
+  }).catch(() => {
+    alert('Accès réservé aux administrateurs.');
     window.location.href = 'login.html';
   });
 });
@@ -203,7 +202,6 @@ function loadAdminData() {
     renderTasks();
     renderAuditLogs();
     updateNotifBadge();
-    loadCodes();
   });
 }
 
@@ -266,10 +264,10 @@ function renderUsers() {
       <td>${esc(u.email)}</td>
       <td><span class="badge badge--${levelColor}">${levelName} (${u.level || 1})</span></td>
       <td>${(u.xp || 0).toLocaleString()}</td>
-      <td>${u.role === 'admin' ? '<span class="badge badge--blue">Admin</span>' : isBanned ? '<span class="badge badge--red">Banni</span>' : '<span class="badge badge--green">Actif</span>'}</td>
+      <td>${u.is_admin ? '<span class="badge badge--blue">Admin</span>' : isBanned ? '<span class="badge badge--red">Banni</span>' : '<span class="badge badge--green">Actif</span>'}</td>
       <td><div class="action-btns">
         <button class="icon-btn" title="Voir" data-action="view-user" data-user-id="${esc(u.id)}"><i data-lucide="eye"></i></button>
-        ${isMe ? '' : u.role === 'admin'
+        ${isMe ? '' : u.is_admin
           ? `<button class="icon-btn" title="Retirer admin" data-action="toggle-admin" data-user-id="${esc(u.id)}" data-admin="false"><i data-lucide="shield-off"></i></button>`
           : `<button class="icon-btn" title="Rendre admin" data-action="toggle-admin" data-user-id="${esc(u.id)}" data-admin="true"><i data-lucide="shield-plus"></i></button>
              <button class="icon-btn ${isBanned ? 'icon-btn--success' : 'icon-btn--danger'}" title="${isBanned ? 'Débannir' : 'Bannir'}" data-action="toggle-ban" data-user-id="${esc(u.id)}" data-ban-action="${isBanned ? 'unban' : 'ban'}"><i data-lucide="${isBanned ? 'check-circle' : 'ban'}"></i></button>`}
@@ -301,7 +299,7 @@ function viewUser(userId) {
     <div style="margin-bottom:16px"><span style="color:#8892b0;font-size:12px">Badges: </span>${badges.length > 0 ? badges.map(b => `<span class="badge badge--blue" style="margin:2px">${esc(b)}</span>`).join('') : '<span style="color:#555;font-size:12px">Aucun</span>'}</div>
     <div style="font-size:12px;color:#8892b0">
       <p>Inscrit le: ${created}</p>
-      <p>Administrateur : ${u.role === 'admin' ? '<span style="color:#1E5BFF">Oui</span>' : 'Non'}</p>
+      <p>Administrateur : ${u.is_admin ? '<span style="color:#1E5BFF">Oui</span>' : 'Non'}</p>
     </div>
   `);
 }
@@ -761,7 +759,7 @@ function exportUsersCSV() {
   const headers = ['Nom', 'Email', 'Niveau', 'XP', 'Admin', 'Inscrit le'];
   const rows = adminData.users.map(u => [
     `${u.first_name || ''} ${u.last_name || ''}`.trim(),
-    u.email, u.level || 1, u.xp || 0, u.role === 'admin' ? 'Oui' : 'Non',
+    u.email, u.level || 1, u.xp || 0, u.is_admin ? 'Oui' : 'Non',
     new Date(u.created_at).toLocaleDateString('fr-FR')
   ]);
   downloadCSV('utilisateurs', headers, rows);
@@ -1035,172 +1033,3 @@ function deleteJournalIdea(id) {
   localStorage.setItem('skillsdz_journal_ideas', JSON.stringify(_journalCustomIdeas));
   renderJournal(); showToast('Idée supprimée', 'info');
 }
-
-/* ========================================
-   CODES D'ACCÈS
-   ======================================== */
-
-let _codesData = [];
-
-function loadCodes() {
-  api.get('/codes?action=list').then(result => {
-    _codesData = result.codes || [];
-    renderCodes();
-  }).catch(() => { _codesData = []; renderCodes(); });
-}
-
-function renderCodes() {
-  const filterFormation = document.getElementById('codesFilterFormation')?.value || '';
-  const filterStatus = document.getElementById('codesFilterStatus')?.value || '';
-  const now = new Date();
-
-  let filtered = _codesData.filter(c => {
-    if (filterFormation && c.formation_slug !== filterFormation) return false;
-    if (filterStatus === 'used' && !c.is_used) return false;
-    if (filterStatus === 'unused' && c.is_used) return false;
-    if (filterStatus === 'expired' && (!c.expires_at || new Date(c.expires_at) > now)) return false;
-    return true;
-  });
-
-  const total = _codesData.length;
-  const used = _codesData.filter(c => c.is_used).length;
-  const available = _codesData.filter(c => !c.is_used && (!c.expires_at || new Date(c.expires_at) > now)).length;
-
-  setText('totalCodes', total);
-  setText('usedCodes', used);
-  setText('availableCodes', available);
-
-  const tbody = document.getElementById('codesTableBody');
-  if (!tbody) return;
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8892b0;padding:2rem">Aucun code trouvé</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(c => {
-    const isExpired = c.expires_at && new Date(c.expires_at) < now;
-    let statusHtml;
-    if (c.is_used) statusHtml = '<span style="color:#00c853;font-weight:600">✓ Utilisé</span>';
-    else if (isExpired) statusHtml = '<span style="color:#f44336;font-weight:600">Expiré</span>';
-    else statusHtml = '<span style="color:#ff9800;font-weight:600">Disponible</span>';
-
-    return `<tr>
-      <td><code style="background:#f0f4ff;padding:4px 8px;border-radius:4px;font-weight:600;color:#1E5BFF">${esc(c.code)}</code></td>
-      <td>${esc(c.formation_name)}</td>
-      <td>${esc(c.student_email || '—')}</td>
-      <td>${statusHtml}</td>
-      <td>${c.expires_at ? new Date(c.expires_at).toLocaleDateString('fr-FR') : '—'}</td>
-      <td>${new Date(c.created_at).toLocaleDateString('fr-FR')}</td>
-      <td>
-        <button class="btn btn--ghost btn--sm" onclick="copyCode('${esc(c.code)}')" title="Copier"><i data-lucide="copy"></i></button>
-        <button class="btn btn--ghost btn--sm" style="color:#f44336" onclick="deleteCode('${c.id}')" title="Supprimer"><i data-lucide="trash-2"></i></button>
-      </td>
-    </tr>`;
-  }).join('');
-
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-function copyCode(code) {
-  navigator.clipboard.writeText(code).then(() => showToast('Code copié !', 'success'));
-}
-
-function deleteCode(id) {
-  if (!confirm('Supprimer ce code ?')) return;
-  api.post('/codes?action=revoke', { code_id: id }).then(() => {
-    showToast('Code supprimé', 'info');
-    loadCodes();
-  }).catch(err => showToast('Erreur: ' + err.message, 'error'));
-}
-
-function openGenerateCodesModal() {
-  const formations = {
-    'gestion-stock': 'Gestion de stock',
-    'dev-web': 'Développement Web Full Stack',
-    'ia': 'Intelligence Artificielle',
-    'ui-ux': 'UI/UX Design',
-    'referent-digital': 'Référent Digital',
-    'declarant-douane': 'Déclarant en douane',
-    'tourisme-pack': 'Pack Tourisme & Hôtellerie',
-    'hse': 'Formation HSE',
-    'paramedical-pack': 'Pack Paramédical',
-  };
-
-  const options = Object.entries(formations).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
-
-  openModal('Générer des codes d\'accès', `
-    <form id="generateCodesForm" style="display:flex;flex-direction:column;gap:16px">
-      <div class="form-group">
-        <label style="font-weight:600;margin-bottom:6px;display:block">Formation *</label>
-        <select id="codeFormation" required style="width:100%;padding:10px;border:2px solid #e8ecf1;border-radius:8px;font-size:14px">${options}</select>
-      </div>
-      <div class="form-group">
-        <label style="font-weight:600;margin-bottom:6px;display:block">Nombre de codes</label>
-        <input type="number" id="codeQuantity" value="1" min="1" max="50" style="width:100%;padding:10px;border:2px solid #e8ecf1;border-radius:8px;font-size:14px"/>
-      </div>
-      <div class="form-group">
-        <label style="font-weight:600;margin-bottom:6px;display:block">Expiration (jours, vide = pas d'expiration)</label>
-        <input type="number" id="codeExpiry" placeholder="30" min="1" style="width:100%;padding:10px;border:2px solid #e8ecf1;border-radius:8px;font-size:14px"/>
-      </div>
-      <div class="form-group">
-        <label style="font-weight:600;margin-bottom:6px;display:block">Email étudiant (optionnel, pour assigner)</label>
-        <input type="email" id="codeStudentEmail" placeholder="email@exemple.com" style="width:100%;padding:10px;border:2px solid #e8ecf1;border-radius:8px;font-size:14px"/>
-      </div>
-      <button type="submit" class="btn btn--primary btn--block" style="padding:12px;font-size:15px;font-weight:600">Générer</button>
-    </form>
-  `);
-
-  document.getElementById('generateCodesForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    btn.textContent = 'Génération...';
-    btn.disabled = true;
-    try {
-      const result = await api.post('/codes?action=generate', {
-        formation_slug: document.getElementById('codeFormation').value,
-        quantity: parseInt(document.getElementById('codeQuantity').value) || 1,
-        expires_days: document.getElementById('codeExpiry').value || null,
-        student_email: document.getElementById('codeStudentEmail').value || null,
-      });
-      const codesList = result.codes.map(c => `<code style="background:#f0f4ff;padding:4px 8px;border-radius:4px;font-weight:600;color:#1E5BFF;display:inline-block;margin:2px">${c.code}</code>`).join('<br>');
-      closeModal();
-      openModal(`${result.count} code(s) généré(s)`, `
-        <div style="text-align:center">
-          <p style="margin-bottom:16px;color:#8892b0">Codes pour <strong>${result.codes[0]?.formation_name || ''}</strong></p>
-          <div style="background:#f8f9fc;padding:16px;border-radius:8px;margin-bottom:16px">${codesList}</div>
-          <button class="btn btn--primary" onclick="copyAllCodes(${JSON.stringify(result.codes.map(c => c.code)).replace(/"/g, '&quot;')})">📋 Copier tous les codes</button>
-        </div>
-      `);
-      loadCodes();
-    } catch (err) {
-      showToast('Erreur: ' + err.message, 'error');
-      btn.textContent = 'Générer';
-      btn.disabled = false;
-    }
-  });
-}
-
-function copyAllCodes(codes) {
-  navigator.clipboard.writeText(codes.join('\n')).then(() => showToast('Codes copiés !', 'success'));
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('generateCodeBtn')?.addEventListener('click', openGenerateCodesModal);
-  document.getElementById('codesFilterFormation')?.addEventListener('change', renderCodes);
-  document.getElementById('codesFilterStatus')?.addEventListener('change', renderCodes);
-
-  const filterSelect = document.getElementById('codesFilterFormation');
-  if (filterSelect) {
-    const formations = {
-      'gestion-stock': 'Gestion de stock', 'dev-web': 'Développement Web', 'ia': 'Intelligence Artificielle',
-      'ui-ux': 'UI/UX Design', 'referent-digital': 'Référent Digital', 'declarant-douane': 'Déclarant en douane',
-      'tourisme-pack': 'Pack Tourisme & Hôtellerie', 'hse': 'Formation HSE', 'paramedical-pack': 'Pack Paramédical',
-    };
-    Object.entries(formations).forEach(([k, v]) => {
-      const opt = document.createElement('option');
-      opt.value = k; opt.textContent = v;
-      filterSelect.appendChild(opt);
-    });
-  }
-});
