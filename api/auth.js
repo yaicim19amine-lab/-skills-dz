@@ -39,7 +39,7 @@ function generateSecurePassword() {
 }
 
 function parseBody(req) {
-  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+  if (req.body && typeof req.body === 'object') {
     return Promise.resolve(req.body);
   }
   return new Promise((resolve) => {
