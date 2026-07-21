@@ -116,7 +116,7 @@ async function handleSignup(req, res) {
 
     const token = signToken({ userId, email });
     jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 100, level: 2, badges: ['newcomer'] }, token });
-  } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
+  } catch (err) { console.error('[auth] signup error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur: ' + err.message); }
 }
 
 async function handleLogin(req, res) {
