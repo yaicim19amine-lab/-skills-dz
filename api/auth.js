@@ -39,7 +39,7 @@ function generateSecurePassword() {
 }
 
 function parseBody(req) {
-  if (req.body && typeof req.body === 'object') {
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
     return Promise.resolve(req.body);
   }
   return new Promise((resolve) => {
@@ -63,10 +63,6 @@ export default async function handler(req, res) {
     res.setHeader('Retry-After', rl.retryAfter);
     return jsonError(res, 429, `Trop de tentatives. Réessayez dans ${rl.retryAfter}s`);
   }
-
-  try {
-    if (req.method === 'POST') req.body = await parseBody(req);
-  } catch {}
 
   const url = new URL(req.url, `https://${req.headers.host}`);
   const action = url.searchParams.get('action');
@@ -105,6 +101,7 @@ async function handleSignup(req, res) {
 
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email, password, email_confirm: true,
+      user_metadata: { full_name: cleanFirstName, last_name: cleanLastName },
     });
     if (authError) {
       if (authError.message.includes('already registered')) return jsonError(res, 409, 'Email déjà utilisé');
@@ -114,16 +111,18 @@ async function handleSignup(req, res) {
 
     const userId = authData.user.id;
 
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: userId, email, first_name: cleanFirstName, last_name: cleanLastName,
-      phone: cleanPhone, xp: 100, level: 2, streak: 0, badges: ['newcomer'], total_xp: 100,
+    const { error: profileError } = await supabase.rpc('create_user_profile', {
+      p_id: userId, p_email: email, p_first_name: cleanFirstName, p_last_name: cleanLastName || '', p_phone: cleanPhone || '',
     });
     if (profileError) {
       await supabase.auth.admin.deleteUser(userId).catch(() => {});
       console.error('Profile error:', profileError.message);
+      return jsonError(res, 500, 'Erreur lors de la création du profil');
     }
 
     const token = signToken({ userId, email });
+    jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 100, level: 2, badges: ['newcomer'] }, token });
+  } catch (err) { console.error('[auth] signup error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur: ' + err.message); }
     jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 100, level: 2, badges: ['newcomer'] }, token });
   } catch (err) { console.error('[auth] signup error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur: ' + err.message); }
 }
