@@ -96,6 +96,7 @@ async function handleSignup(req, res) {
 
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email, password, email_confirm: true,
+      user_metadata: { full_name: cleanFirstName },
     });
     if (authError) {
       if (authError.message.includes('already registered')) return jsonError(res, 409, 'Email déjà utilisé');
@@ -104,15 +105,6 @@ async function handleSignup(req, res) {
     }
 
     const userId = authData.user.id;
-
-    const { error: profileError } = await supabase.rpc('create_profile', {
-      p_id: userId, p_full_name: cleanFirstName, p_role: 'assistant',
-    });
-    if (profileError) {
-      await supabase.auth.admin.deleteUser(userId).catch(() => {});
-      console.error('Profile insert error:', profileError.message, profileError.details, profileError.hint);
-      return jsonError(res, 500, 'Erreur profil: ' + profileError.message);
-    }
 
     const token = signToken({ userId, email });
     jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 0, level: 1, badges: [] }, token });
@@ -129,11 +121,11 @@ async function handleLogin(req, res) {
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) return jsonError(res, 401, 'Email ou mot de passe incorrect');
 
-    const { data: profile, error: profileErr } = await supabase.rpc('get_profile', { p_id: authData.user.id }).maybeSingle();
-    if (profileErr || !profile) return jsonError(res, 404, 'Profil non trouvé');
+    const { data: profile } = await supabase.from('profiles').select('id, role, created_at').eq('id', authData.user.id).maybeSingle();
+    if (!profile) return jsonError(res, 404, 'Profil non trouvé');
 
     const token = signToken({ userId: authData.user.id, email });
-    jsonResponse(res, 200, { user: { id: authData.user.id, email, firstName: profile.full_name || email.split('@')[0], role: profile.role, xp: 0, level: 1, badges: [] }, token });
+    jsonResponse(res, 200, { user: { id: authData.user.id, email, firstName: email.split('@')[0], role: profile.role, xp: 0, level: 1, badges: [] }, token });
   } catch (err) { console.error('[auth] login error:', err.message); jsonError(res, 500, 'Erreur serveur'); }
 }
 
@@ -196,17 +188,8 @@ async function handleGoogle(req, res) {
 
     const randomPassword = generateSecurePassword();
 
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({ email, password: randomPassword, email_confirm: true });
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({ email, password: randomPassword, email_confirm: true, user_metadata: { full_name: firstName } });
     if (authError) { console.error('Google signup error:', authError.message); return jsonError(res, 500, 'Erreur création compte'); }
-
-    const { error: profileError } = await supabase.rpc('create_profile', {
-      p_id: authData.user.id, p_full_name: firstName, p_role: 'assistant',
-    });
-    if (profileError) {
-      await supabase.auth.admin.deleteUser(authData.user.id).catch(() => {});
-      console.error('Google profile error:', profileError.message);
-      return jsonError(res, 500, 'Erreur profil');
-    }
 
     const token = signToken({ userId: authData.user.id, email });
     jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName, role: 'assistant' }, token });
@@ -247,16 +230,8 @@ async function handleFacebook(req, res) {
     const randomPassword = generateSecurePassword();
     const cleanFirstName = sanitizeText(fbFirstName || fbEmail.split('@')[0], 100);
 
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({ email: fbEmail, password: randomPassword, email_confirm: true });
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({ email: fbEmail, password: randomPassword, email_confirm: true, user_metadata: { full_name: cleanFirstName } });
     if (authError) return jsonError(res, 500, 'Erreur création compte');
-
-    const { error: profileError } = await supabase.rpc('create_profile', {
-      p_id: authData.user.id, p_full_name: cleanFirstName, p_role: 'assistant',
-    });
-    if (profileError) {
-      await supabase.auth.admin.deleteUser(authData.user.id).catch(() => {});
-      return jsonError(res, 500, 'Erreur profil');
-    }
 
     const token = signToken({ userId: authData.user.id, email: fbEmail });
     jsonResponse(res, 201, { user: { id: authData.user.id, email: fbEmail, firstName: cleanFirstName, role: 'assistant' }, token });
@@ -268,9 +243,9 @@ async function handleMe(req, res) {
   if (!user) return jsonError(res, 401, 'Non autorisé');
 
   try {
-    const { data: profile } = await getSupabaseAdmin().rpc('get_profile', { p_id: user.userId }).maybeSingle();
+    const { data: profile } = await getSupabaseAdmin().from('profiles').select('id, role, created_at').eq('id', user.userId).maybeSingle();
     if (!profile) return jsonError(res, 404, 'Profil non trouvé');
 
-    jsonResponse(res, 200, { user: { id: profile.id, email: user.email, firstName: profile.full_name || user.email?.split('@')[0], role: profile.role, createdAt: profile.created_at } });
+    jsonResponse(res, 200, { user: { id: profile.id, email: user.email, firstName: user.email?.split('@')[0], role: profile.role, createdAt: profile.created_at } });
   } catch (err) { console.error('Me error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }

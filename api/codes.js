@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     if (!user) return jsonError(res, 401, 'Non autorisé');
 
     const supabase = getSupabaseAdmin();
-    const { data: profile } = await supabase.rpc('get_profile', { p_id: user.userId }).maybeSingle();
+    const { data: profile } = await supabase.from('profiles').select('id, role').eq('id', user.userId).maybeSingle();
     const isAdmin = profile?.role === 'admin';
 
     const url = new URL(req.url, `https://${req.headers.host}`);

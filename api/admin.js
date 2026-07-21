@@ -45,7 +45,7 @@ async function requireAdmin(req) {
   const user = getUserFromRequest(req);
   if (!user) return null;
   const supabase = getSupabaseAdmin();
-  const { data } = await supabase.rpc('get_profile', { p_id: user.userId }).maybeSingle();
+  const { data } = await supabase.from('profiles').select('id, role').eq('id', user.userId).maybeSingle();
   return data?.role === 'admin' ? user : null;
 }
 
@@ -68,7 +68,7 @@ export default async function handler(req, res) {
 
     // ─── GET: Dashboard data ───
     if (req.method === 'GET') {
-      const { data: users } = await supabase.rpc('get_all_profiles').catch(() => ({ data: [] }));
+      const { data: users } = await supabase.from('profiles').select('id, role, created_at').order('created_at', { ascending: false }).catch(() => ({ data: [] }));
       const { data: formations } = await supabase.from('formations').select('*').order('created_at', { ascending: false }).catch(() => ({ data: [] }));
       const { data: payments } = await supabase.from('payments').select('*').order('created_at', { ascending: false }).catch(() => ({ data: [] }));
       const { data: tasks } = await supabase.from('admin_tasks').select('*').order('created_at', { ascending: false }).limit(100).catch(() => ({ data: [] }));
