@@ -113,34 +113,9 @@ async function handleSignup(req, res) {
     }
 
     const userId = authData.user.id;
-    const userReferralCode = await generateReferralCode(supabase, cleanFirstName);
-
-    let referredBy = null;
-    if (cleanReferralCode) {
-      const { data: referrer } = await supabase.from('profiles').select('id').eq('referral_code', cleanReferralCode).maybeSingle();
-      if (referrer) referredBy = referrer.id;
-    }
-
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: userId, email, first_name: cleanFirstName, last_name: cleanLastName,
-      phone: cleanPhone, xp: 100, level: 2, streak: 0, badges: ['newcomer'], total_xp: 100,
-      referral_code: userReferralCode, referred_by: referredBy,
-    });
-    if (profileError) {
-      await supabase.auth.admin.deleteUser(userId).catch(() => {});
-      console.error('Profile error:', profileError.message);
-      return jsonError(res, 500, 'Erreur lors de la création du profil');
-    }
-
-    await supabase.from('xp_transactions').insert({ user_id: userId, amount: 100, reason: 'Bienvenue sur Skills DZ !', source: 'bonus' });
-
-    if (referredBy) {
-      await supabase.from('referrals').insert({ referrer_id: referredBy, referred_id: userId, status: 'confirmed', reward_xp: 200 });
-      await supabase.rpc('award_xp', { p_user_id: referredBy, p_amount: 200, p_reason: 'Parrainage', p_source: 'referral' });
-    }
 
     const token = signToken({ userId, email });
-    jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, lastName: cleanLastName, xp: 100, level: 2, badges: ['newcomer'], referralCode: userReferralCode }, token });
+    jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 100, level: 2, badges: ['newcomer'] }, token });
   } catch (err) { jsonError(res, 500, 'Erreur serveur'); }
 }
 
