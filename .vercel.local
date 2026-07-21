@@ -1,0 +1,2 @@
+test: db reset --force
+	SKIP_DB_STARTUP: true
