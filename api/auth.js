@@ -48,9 +48,9 @@ function parseBody(req) {
     req.on('end', () => {
       const raw = Buffer.concat(chunks).toString();
       try { resolve(raw ? JSON.parse(raw) : {}); }
-      catch { resolve({}); }
+      catch (e) { console.error('[auth] JSON parse error:', e.message, 'raw:', raw?.slice(0, 200)); resolve({}); }
     });
-    req.on('error', () => resolve({}));
+    req.on('error', (e) => { console.error('[auth] stream error:', e.message); resolve({}); });
   });
 }
 
@@ -113,6 +113,15 @@ async function handleSignup(req, res) {
     }
 
     const userId = authData.user.id;
+
+    const { error: profileError } = await supabase.from('profiles').insert({
+      id: userId, email, first_name: cleanFirstName, last_name: cleanLastName,
+      phone: cleanPhone, xp: 100, level: 2, streak: 0, badges: ['newcomer'], total_xp: 100,
+    });
+    if (profileError) {
+      await supabase.auth.admin.deleteUser(userId).catch(() => {});
+      console.error('Profile error:', profileError.message);
+    }
 
     const token = signToken({ userId, email });
     jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 100, level: 2, badges: ['newcomer'] }, token });
