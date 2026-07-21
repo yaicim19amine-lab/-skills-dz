@@ -105,16 +105,14 @@ async function handleSignup(req, res) {
 
     const userId = authData.user.id;
 
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: userId, role: 'assistant',
+    const { error: profileError } = await supabase.rpc('create_profile', {
+      p_id: userId, p_full_name: cleanFirstName, p_role: 'assistant',
     });
     if (profileError) {
       await supabase.auth.admin.deleteUser(userId).catch(() => {});
       console.error('Profile insert error:', profileError.message, profileError.details, profileError.hint);
       return jsonError(res, 500, 'Erreur profil: ' + profileError.message);
     }
-
-    await supabase.from('profiles').update({ full_name: cleanFirstName }).eq('id', userId);
 
     const token = signToken({ userId, email });
     jsonResponse(res, 201, { user: { id: userId, email, firstName: cleanFirstName, xp: 0, level: 1, badges: [] }, token });
@@ -131,11 +129,11 @@ async function handleLogin(req, res) {
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) return jsonError(res, 401, 'Email ou mot de passe incorrect');
 
-    const { data: profile } = await supabase.from('profiles').select('id, full_name, role').eq('id', authData.user.id).maybeSingle();
-    if (!profile) return jsonError(res, 404, 'Profil non trouvé');
+    const { data: profile, error: profileErr } = await supabase.rpc('get_profile', { p_id: authData.user.id }).maybeSingle();
+    if (profileErr || !profile) return jsonError(res, 404, 'Profil non trouvé');
 
     const token = signToken({ userId: authData.user.id, email });
-    jsonResponse(res, 200, { user: { id: authData.user.id, email, firstName: profile.full_name || email.split('@')[0], xp: 0, level: 1, badges: [] }, token });
+    jsonResponse(res, 200, { user: { id: authData.user.id, email, firstName: profile.full_name || email.split('@')[0], role: profile.role, xp: 0, level: 1, badges: [] }, token });
   } catch (err) { console.error('[auth] login error:', err.message); jsonError(res, 500, 'Erreur serveur'); }
 }
 
@@ -185,10 +183,15 @@ async function handleGoogle(req, res) {
 
     const supabase = getSupabaseAdmin();
 
-    const { data: existing } = await supabase.from('profiles').select('id, email, first_name, last_name, xp, level, streak, badges, referral_code').eq('email', email).maybeSingle();
-    if (existing) {
-      const token = signToken({ userId: existing.id, email });
-      return jsonResponse(res, 200, { user: { id: existing.id, email: existing.email, firstName: existing.first_name, lastName: existing.last_name, xp: existing.xp, level: existing.level, streak: existing.streak, badges: existing.badges, referralCode: existing.referral_code }, token });
+    const { data: existing } = await supabase.rpc('get_profile', { p_id: '00000000-0000-0000-0000-000000000000' }).maybeSingle();
+    const { data: authUsers } = await supabase.auth.admin.listUsers();
+    const matchedUser = authUsers?.users?.find(u => u.email === email);
+    if (matchedUser) {
+      const { data: existingProfile } = await supabase.rpc('get_profile', { p_id: matchedUser.id }).maybeSingle();
+      if (existingProfile) {
+        const token = signToken({ userId: existingProfile.id, email });
+        return jsonResponse(res, 200, { user: { id: existingProfile.id, email, firstName: existingProfile.full_name || firstName, role: existingProfile.role }, token });
+      }
     }
 
     const randomPassword = generateSecurePassword();
@@ -196,10 +199,8 @@ async function handleGoogle(req, res) {
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({ email, password: randomPassword, email_confirm: true });
     if (authError) { console.error('Google signup error:', authError.message); return jsonError(res, 500, 'Erreur création compte'); }
 
-    const userReferralCode = await generateReferralCode(supabase, firstName);
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: authData.user.id, email, first_name: firstName, last_name: lastName, avatar_url: avatar,
-      xp: 100, level: 2, streak: 0, badges: ['newcomer'], total_xp: 100, referral_code: userReferralCode,
+    const { error: profileError } = await supabase.rpc('create_profile', {
+      p_id: authData.user.id, p_full_name: firstName, p_role: 'assistant',
     });
     if (profileError) {
       await supabase.auth.admin.deleteUser(authData.user.id).catch(() => {});
@@ -207,10 +208,8 @@ async function handleGoogle(req, res) {
       return jsonError(res, 500, 'Erreur profil');
     }
 
-    await supabase.from('xp_transactions').insert({ user_id: authData.user.id, amount: 100, reason: 'Bienvenue sur Skills DZ !', source: 'bonus' });
-
     const token = signToken({ userId: authData.user.id, email });
-    jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName, lastName, xp: 100, level: 2, streak: 0, badges: ['newcomer'], isAdmin: false, referralCode: userReferralCode }, token });
+    jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName, role: 'assistant' }, token });
   } catch (err) { console.error('Google error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
 
@@ -235,33 +234,32 @@ async function handleFacebook(req, res) {
 
     const supabase = getSupabaseAdmin();
 
-    const { data: existing } = await supabase.from('profiles').select('id, email, first_name, last_name, xp, level, streak, badges, referral_code').eq('email', fbEmail).maybeSingle();
-    if (existing) {
-      const token = signToken({ userId: existing.id, email: fbEmail });
-      return jsonResponse(res, 200, { user: { id: existing.id, email: existing.email, firstName: existing.first_name, lastName: existing.last_name, xp: existing.xp, level: existing.level, streak: existing.streak, badges: existing.badges, referralCode: existing.referral_code }, token });
+    const { data: authUsers } = await supabase.auth.admin.listUsers();
+    const matchedUser = authUsers?.users?.find(u => u.email === fbEmail);
+    if (matchedUser) {
+      const { data: existingProfile } = await supabase.rpc('get_profile', { p_id: matchedUser.id }).maybeSingle();
+      if (existingProfile) {
+        const token = signToken({ userId: existingProfile.id, email: fbEmail });
+        return jsonResponse(res, 200, { user: { id: existingProfile.id, email: fbEmail, firstName: existingProfile.full_name || fbFirstName, role: existingProfile.role }, token });
+      }
     }
 
     const randomPassword = generateSecurePassword();
-    const cleanFirstName = sanitizeText(firstName || email.split('@')[0], 100);
-    const cleanLastName = sanitizeText(lastName || '', 100);
+    const cleanFirstName = sanitizeText(fbFirstName || fbEmail.split('@')[0], 100);
 
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({ email, password: randomPassword, email_confirm: true });
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({ email: fbEmail, password: randomPassword, email_confirm: true });
     if (authError) return jsonError(res, 500, 'Erreur création compte');
 
-    const userReferralCode = await generateReferralCode(supabase, cleanFirstName);
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: authData.user.id, email, first_name: cleanFirstName, last_name: cleanLastName,
-      xp: 100, level: 2, streak: 0, badges: ['newcomer'], total_xp: 100, referral_code: userReferralCode,
+    const { error: profileError } = await supabase.rpc('create_profile', {
+      p_id: authData.user.id, p_full_name: cleanFirstName, p_role: 'assistant',
     });
     if (profileError) {
       await supabase.auth.admin.deleteUser(authData.user.id).catch(() => {});
       return jsonError(res, 500, 'Erreur profil');
     }
 
-    await supabase.from('xp_transactions').insert({ user_id: authData.user.id, amount: 100, reason: 'Bienvenue sur Skills DZ !', source: 'bonus' });
-
-    const token = signToken({ userId: authData.user.id, email });
-    jsonResponse(res, 201, { user: { id: authData.user.id, email, firstName: cleanFirstName, lastName: cleanLastName, xp: 100, level: 2, streak: 0, badges: ['newcomer'], isAdmin: false, referralCode: userReferralCode }, token });
+    const token = signToken({ userId: authData.user.id, email: fbEmail });
+    jsonResponse(res, 201, { user: { id: authData.user.id, email: fbEmail, firstName: cleanFirstName, role: 'assistant' }, token });
   } catch (err) { console.error('Facebook error:', err.message, err.stack); jsonError(res, 500, 'Erreur serveur'); }
 }
 
@@ -270,7 +268,7 @@ async function handleMe(req, res) {
   if (!user) return jsonError(res, 401, 'Non autorisé');
 
   try {
-    const { data: profile } = await getSupabaseAdmin().from('profiles').select('id, full_name, role, created_at').eq('id', user.userId).maybeSingle();
+    const { data: profile } = await getSupabaseAdmin().rpc('get_profile', { p_id: user.userId }).maybeSingle();
     if (!profile) return jsonError(res, 404, 'Profil non trouvé');
 
     jsonResponse(res, 200, { user: { id: profile.id, email: user.email, firstName: profile.full_name || user.email?.split('@')[0], role: profile.role, createdAt: profile.created_at } });
