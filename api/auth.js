@@ -38,6 +38,22 @@ function generateSecurePassword() {
   return `${randomBytes(18).toString('base64url')}A1!`;
 }
 
+function parseBody(req) {
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return Promise.resolve(req.body);
+  }
+  return new Promise((resolve) => {
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    req.on('end', () => {
+      const raw = Buffer.concat(chunks).toString();
+      try { resolve(raw ? JSON.parse(raw) : {}); }
+      catch { resolve({}); }
+    });
+    req.on('error', () => resolve({}));
+  });
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
@@ -47,6 +63,10 @@ export default async function handler(req, res) {
     res.setHeader('Retry-After', rl.retryAfter);
     return jsonError(res, 429, `Trop de tentatives. Réessayez dans ${rl.retryAfter}s`);
   }
+
+  try {
+    if (req.method === 'POST') req.body = await parseBody(req);
+  } catch {}
 
   const url = new URL(req.url, `https://${req.headers.host}`);
   const action = url.searchParams.get('action');
